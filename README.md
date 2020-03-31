@@ -1,2 +1,2 @@
 # bpd-ms-payment-instrument
-Il componente Payment Instrument si occupa della gestione dell’entità Payment Instrument e della sua persistenza con il Database.
+The Payment Instrument component deals with the management of the Payment Instrument entity and its persistence with the Database.
