@@ -1,5 +1,6 @@
 package it.gov.pagopa.bpd.payment_instrument.model.entity;
 
+import it.gov.pagopa.bpd.common.model.entity.BaseEntity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -31,8 +32,9 @@ public class PaymentInstrument extends BaseEntity {
     @Column(name = "status_c")
     private Status status;
 
-    @PreUpdate
+    @Override
     protected void onUpdate() {
+        super.onUpdate();
         activationDate = ZonedDateTime.now();
     }
 

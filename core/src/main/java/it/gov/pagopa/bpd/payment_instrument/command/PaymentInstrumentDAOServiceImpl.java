@@ -39,13 +39,7 @@ class PaymentInstrumentDAOServiceImpl implements PaymentInstrumentDAOService {
             throw new RuntimeException("Numero massimo di strumenti da censire raggiunto");
         }
         pi.setFiscalCode(hpan);       //TODO recuperare cf dall'hpan
-        if (pi.getInsertUser() == null) {     //>TODO verificare se ok
-            pi.setInsertUser(pi.getFiscalCode());
-            pi.setInsertDate(ZonedDateTime.now());
-        } else {
-            pi.setUpdateUser(pi.getFiscalCode());
-            pi.setUpdateDate(ZonedDateTime.now());
-        }
+
         return paymentInstrumentDAO.save(pi);
     }
 
