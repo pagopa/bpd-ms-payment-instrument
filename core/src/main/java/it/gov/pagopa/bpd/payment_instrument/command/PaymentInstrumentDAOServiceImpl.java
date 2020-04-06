@@ -51,4 +51,10 @@ class PaymentInstrumentDAOServiceImpl implements PaymentInstrumentDAOService {
         paymentInstrument.get().setEnabled(false);
         update(hpan, paymentInstrument.get());
     }
+
+    @Override
+    public boolean checkActive(String hpan, ZonedDateTime accountingDate) {
+        Object o = paymentInstrumentDAO.checkActive(hpan, accountingDate);
+        return true;
+    }
 }
