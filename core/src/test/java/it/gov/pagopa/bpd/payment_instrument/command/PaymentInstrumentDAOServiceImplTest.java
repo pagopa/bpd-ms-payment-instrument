@@ -1,74 +1,59 @@
 package it.gov.pagopa.bpd.payment_instrument.command;
 
-import eu.sia.meda.BaseTest;
 import it.gov.pagopa.bpd.payment_instrument.PaymentInstrumentDAO;
 import it.gov.pagopa.bpd.payment_instrument.PaymentInstrumentHistoryDAO;
-import it.gov.pagopa.bpd.payment_instrument.command.config.PaymentInstrumentConfig;
 import it.gov.pagopa.bpd.payment_instrument.model.entity.PaymentInstrument;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.BDDMockito;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.stubbing.Answer;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Example;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-//@EnableConfigurationProperties(value = PaymentInstrumentConfig.class)
-//@ContextConfiguration(classes = PaymentInstrumentDAOServiceImpl.class)
-//@Import(value = PaymentInstrumentConfig.class)
-@TestPropertySource(properties = "numMaxPaymentInstr:5")
-public class PaymentInstrumentDAOServiceImplTest extends BaseTest {
+@RunWith(SpringRunner.class)
+@ContextConfiguration(classes = PaymentInstrumentDAOServiceImpl.class)
+@TestPropertySource(properties = "numMaxPaymentInstr=5")
+public class PaymentInstrumentDAOServiceImplTest {
 
+    @MockBean
     private PaymentInstrumentDAO paymentInstrumentDAOMock;
+    @MockBean
     private PaymentInstrumentHistoryDAO paymentInstrumentHistoryDAOMock;
+    @Autowired
     private PaymentInstrumentDAOService paymentInstrumentDAOService;
 
-    @Value(value = "${numMaxPaymentInstr}")
-    private long numMaxPaymentInstr;
-
-
-    public PaymentInstrumentDAOServiceImplTest() {
-        this.paymentInstrumentHistoryDAOMock = Mockito.mock(PaymentInstrumentHistoryDAO.class);
-        this.paymentInstrumentDAOMock = Mockito.mock(PaymentInstrumentDAO.class);
-        this.paymentInstrumentDAOService = new PaymentInstrumentDAOServiceImpl
-                (paymentInstrumentDAOMock, paymentInstrumentHistoryDAOMock);
-        ReflectionTestUtils.setField(paymentInstrumentDAOService,"numMaxPaymentInstr",5);
-    }
 
     @Before
-    public void initTest(){
+    public void initTest() {
         Mockito.reset(paymentInstrumentDAOMock, paymentInstrumentHistoryDAOMock);
 
         BDDMockito.when(paymentInstrumentDAOMock.findById(Mockito.any())).thenAnswer((Answer<Optional<PaymentInstrument>>)
-                invocation -> { PaymentInstrument paymentInstrument = new PaymentInstrument();
-                return Optional.of(paymentInstrument);});
+                invocation -> {
+                    PaymentInstrument paymentInstrument = new PaymentInstrument();
+                    return Optional.of(paymentInstrument);
+                });
 
         PaymentInstrument paymentInstrument = new PaymentInstrument();
 
         BDDMockito.when(paymentInstrumentDAOMock.count(Mockito.eq((Example.of(paymentInstrument)))))
-                .thenAnswer((Answer<Long>) invocation -> { return 4l; });
+                .thenAnswer((Answer<Long>) invocation -> 4L);
         BDDMockito.when(paymentInstrumentDAOMock.save(Mockito.eq(paymentInstrument))).thenAnswer((Answer<PaymentInstrument>)
-                invocation -> { return paymentInstrument; });
+                invocation -> paymentInstrument);
 
         BDDMockito.when(paymentInstrumentHistoryDAOMock.checkActive(Mockito.eq("test"), Mockito.any()))
-                .thenAnswer((Answer<List<PaymentInstrument>>) invocation -> { return new ArrayList<PaymentInstrument>(); });
+                .thenAnswer((Answer<List<PaymentInstrument>>) invocation -> new ArrayList<>());
 
     }
 
@@ -82,7 +67,7 @@ public class PaymentInstrumentDAOServiceImplTest extends BaseTest {
 
     @Test
     public void update() {
-        PaymentInstrument paymentInstrument =  new PaymentInstrument();
+        PaymentInstrument paymentInstrument = new PaymentInstrument();
         paymentInstrumentDAOService.update("test", paymentInstrument);
 
         Assert.assertNotNull(paymentInstrument);
