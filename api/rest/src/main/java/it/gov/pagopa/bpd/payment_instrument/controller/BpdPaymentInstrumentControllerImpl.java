@@ -1,6 +1,7 @@
 package it.gov.pagopa.bpd.payment_instrument.controller;
 
 import eu.sia.meda.core.controller.StatelessController;
+import it.gov.pagopa.bpd.payment_instrument.PaymentInstrumentHistoryDAO;
 import it.gov.pagopa.bpd.payment_instrument.assembler.PaymentInstrumentResourceAssembler;
 import it.gov.pagopa.bpd.payment_instrument.command.PaymentInstrumentDAOService;
 import it.gov.pagopa.bpd.payment_instrument.factory.ModelFactory;
@@ -34,7 +35,7 @@ class BpdPaymentInstrumentControllerImpl extends StatelessController implements 
 
     @Override
     public PaymentInstrumentResource find(String hpan) {
-        System.out.println("Start find by hpan");
+       log.debug("Start find by hpan");
         System.out.println("hpan = [" + hpan + "]");
 
         final Optional<PaymentInstrument> entity = paymentInstrumentDAOService.find(hpan);
@@ -64,6 +65,7 @@ class BpdPaymentInstrumentControllerImpl extends StatelessController implements 
 
     @Override
     public boolean checkActive(String hpan, ZonedDateTime accountingDate) {
+        System.out.println("Start checkout");
         return paymentInstrumentDAOService.checkActive(hpan, accountingDate);
     }
 }
