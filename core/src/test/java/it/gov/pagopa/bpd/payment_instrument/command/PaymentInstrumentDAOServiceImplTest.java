@@ -39,6 +39,12 @@ public class PaymentInstrumentDAOServiceImplTest {
     public void initTest() {
         Mockito.reset(paymentInstrumentDAOMock, paymentInstrumentHistoryDAOMock);
 
+        BDDMockito.when(paymentInstrumentDAOMock.findById(Mockito.eq("prova"))).thenAnswer((Answer<PaymentInstrument>)
+                invocation -> {
+                    PaymentInstrument pi = new PaymentInstrument();
+                    return pi;
+                });
+
         BDDMockito.when(paymentInstrumentDAOMock.findById(Mockito.any())).thenAnswer((Answer<Optional<PaymentInstrument>>)
                 invocation -> {
                     PaymentInstrument paymentInstrument = new PaymentInstrument();
@@ -54,7 +60,6 @@ public class PaymentInstrumentDAOServiceImplTest {
 
         BDDMockito.when(paymentInstrumentHistoryDAOMock.checkActive(Mockito.eq("test"), Mockito.any()))
                 .thenAnswer((Answer<List<PaymentInstrument>>) invocation -> new ArrayList<>());
-
     }
 
 
@@ -69,15 +74,18 @@ public class PaymentInstrumentDAOServiceImplTest {
     public void update() {
         PaymentInstrument paymentInstrument = new PaymentInstrument();
         paymentInstrumentDAOService.update("test", paymentInstrument);
-
         Assert.assertNotNull(paymentInstrument);
-
+        BDDMockito.verify(paymentInstrumentDAOMock).count(Mockito.eq(Example.of(paymentInstrument)));
+        paymentInstrument.setHpan("test");
+        BDDMockito.verify(paymentInstrumentDAOMock).save(Mockito.eq(paymentInstrument));
     }
 
     @Test
-    public void delete() { //TODO SISTEMARE LOGICA
-        Optional<PaymentInstrument> paymentInstrument = paymentInstrumentDAOService.find("test");
-        Assert.assertNotNull(paymentInstrument.orElse(null));
+    public void delete() {
+        paymentInstrumentDAOService.delete("prova");
+        BDDMockito.verify(paymentInstrumentDAOMock).findById(Mockito.eq("prova"));
+        BDDMockito.verify(paymentInstrumentDAOMock).count(Mockito.any(Example.class));
+        BDDMockito.verify(paymentInstrumentDAOMock).save(Mockito.any(PaymentInstrument.class));
     }
 
     @Test
