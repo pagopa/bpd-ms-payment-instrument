@@ -14,15 +14,15 @@ import java.time.ZonedDateTime;
  * Controller to expose MicroService
  */
 @Api(tags = "Bonus Pagamenti Digitali payment-instrument Controller")
-@RequestMapping("payment-instrument")
+@RequestMapping("/bpd/payment-instruments")
 public interface BpdPaymentInstrumentController {
 
 
-    @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_UTF8_VALUE, consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseStatus(HttpStatus.OK)
     PaymentInstrumentResource find(@PathVariable("id") String hpan);
 
-    @PutMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @PutMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_UTF8_VALUE, consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseStatus(HttpStatus.OK)
     PaymentInstrumentResource update(@PathVariable("id") String hpan, @RequestBody PaymentInstrumentDTO paymentInstrument);
 

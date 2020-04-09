@@ -6,6 +6,8 @@ import it.gov.pagopa.bpd.payment_instrument.assembler.PaymentInstrumentResourceA
 import it.gov.pagopa.bpd.payment_instrument.command.PaymentInstrumentDAOService;
 import it.gov.pagopa.bpd.payment_instrument.factory.PaymentInstrumentFactory;
 import it.gov.pagopa.bpd.payment_instrument.model.entity.PaymentInstrument;
+import it.gov.pagopa.bpd.payment_instrument.model.resource.PaymentInstrumentResource;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.BDDMockito;
@@ -15,8 +17,10 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
@@ -25,7 +29,7 @@ import java.util.Optional;
 
 //@WebMvcTest(BpdPaymentInstrumentControllerImpl.class)
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = {BpdPaymentInstrumentControllerImpl.class, BpdPaymentInstrumentController.class})
+@SpringBootTest(classes = {BpdPaymentInstrumentControllerImpl.class})
 //@ContextConfiguration(classes = BpdPaymentInstrumentControllerImpl.class)
 @AutoConfigureMockMvc(secure = false)
 //@WebMvcTest(secure = false)
@@ -58,24 +62,24 @@ public class BpdPaymentInstrumentControllerImplTest {
     }
 
 
-    @Test
+    //    @Test
     public void find() throws Exception {
-//        MvcResult result = (MvcResult) mvc.perform(MockMvcRequestBuilders
-//                .get("/payment-instrument/hpan")
-//                .accept(MediaType.APPLICATION_JSON))
-//                .andExpect(MockMvcResultMatchers.status().is2xxSuccessful())
-//                .andReturn();
-//        PaymentInstrumentResource pageResult = objectMapper.readValue(result.getResponse().getContentAsString(),
-//        PaymentInstrumentResource.class);
-//        Assert.assertNotNull(pageResult);
-//        BDDMockito.verify(paymentInstrumentDAOServiceMock).find(Mockito.eq("hpan"));
-//        BDDMockito.verify(paymentInstrumentResourceAssemblerMock).toResource(Mockito.any(PaymentInstrument.class));
+        MvcResult result = (MvcResult) mvc.perform(MockMvcRequestBuilders
+                .get("/bpd/payment-instruments/hpan")
+                .accept(MediaType.APPLICATION_JSON_UTF8_VALUE))
+                .andExpect(MockMvcResultMatchers.status().is2xxSuccessful())
+                .andReturn();
+        PaymentInstrumentResource pageResult = objectMapper.readValue(result.getResponse().getContentAsString(),
+                PaymentInstrumentResource.class);
+        Assert.assertNotNull(pageResult);
+        BDDMockito.verify(paymentInstrumentDAOServiceMock).find(Mockito.eq("hpan"));
+        BDDMockito.verify(paymentInstrumentResourceAssemblerMock).toResource(Mockito.any(PaymentInstrument.class));
     }
 
-    @Test
+    //    @Test
     public void update() throws Exception {
 //        PaymentInstrumentDTO paymentInstrument = new PaymentInstrumentDTO();
-//        MvcResult result = (MvcResult) mvc.perform(MockMvcRequestBuilders.post("/payment-instrument/hpan")
+//        MvcResult result = (MvcResult) mvc.perform(MockMvcRequestBuilders.put("/bpd/payment-instruments/hpan")
 //            .contentType(MediaType.APPLICATION_JSON_UTF8).content(objectMapper.writeValueAsString(paymentInstrument)))
 //            .andExpect(MockMvcResultMatchers.status().is2xxSuccessful()).andReturn();
 //        PaymentInstrumentResource pageResult = objectMapper.readValue(result.getResponse().getContentAsString(),
@@ -88,17 +92,17 @@ public class BpdPaymentInstrumentControllerImplTest {
 
     @Test
     public void delete() throws Exception {
-        mvc.perform(MockMvcRequestBuilders.delete("/payment-instrument/hpan"))
+        mvc.perform(MockMvcRequestBuilders.delete("/bpd/payment-instruments/hpan"))
                 .andExpect(MockMvcResultMatchers.status().is2xxSuccessful());
         BDDMockito.verify(paymentInstrumentDAOServiceMock).delete(Mockito.any());
     }
 
-    @Test
+    //    @Test
     public void checkActive() throws Exception {
-//        ZonedDateTime date = ZonedDateTime.now();
-//        DateTimeFormatter inBuiltFormatter1 = DateTimeFormatter.ISO_DATE_TIME;
-//        MvcResult result = (MvcResult) mvc.perform(MockMvcRequestBuilders.get("/payment-instrument/hpan/history")
-//                .param("accountingDate",date.format(inBuiltFormatter1)))
+//        ZonedDateTime date = ZonedDateTime.now(ZoneOffset.UTC);
+//        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ISO_DATE_TIME;
+//        MvcResult result = mvc.perform(MockMvcRequestBuilders.get("/bpd/payment-instruments/hpan/history")
+//                .param("accountingDate",date.format(dateTimeFormatter)))
 //                .andExpect(MockMvcResultMatchers.status().is2xxSuccessful()).andReturn();
 //        Assert.assertTrue(Mockito.any());
 //        BDDMockito.verify(paymentInstrumentDAOServiceMock).checkActive(Mockito.eq("tets"), Mockito.any());
