@@ -41,7 +41,7 @@ class PaymentInstrumentDAOServiceImpl implements PaymentInstrumentDAOService {
         if (count >= numMaxPaymentInstr) {
             throw new RuntimeException("Numero massimo di strumenti da censire raggiunto");
         }
-//        pi.setFiscalCode(hpan);       //TODO recuperare cf dall'hpan (VERIFICA SULLA SET)
+        pi.setFiscalCode("test");       //TODO recuperare cf dall'hpan (VERIFICA SULLA SET)
         pi.setHpan(hpan);
 
         return paymentInstrumentDAO.save(pi);
