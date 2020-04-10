@@ -1,6 +1,5 @@
 package it.gov.pagopa.bpd.payment_instrument.model.entity;
 
-import it.gov.pagopa.bpd.common.model.entity.BaseEntity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -15,8 +14,8 @@ import java.time.ZonedDateTime;
 @Entity
 @Data
 @NoArgsConstructor
-@EqualsAndHashCode(of = {"hpan"}, callSuper = false)
-@Table(name = "bpd_payment_instrument_history", schema = "bpd_test")
+@EqualsAndHashCode(of = {"id"}, callSuper = false)
+@Table(name = "bpd_payment_instrument_history")
 public class PaymentInstrumentHistory implements Serializable {
 
     @Id

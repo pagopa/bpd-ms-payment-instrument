@@ -12,7 +12,7 @@ import java.time.ZonedDateTime;
 @Data
 @NoArgsConstructor
 @EqualsAndHashCode(of = {"hpan"}, callSuper = false)
-@Table(name = "bpd_payment_instrument", schema = "bpd_test")     //TODO verificare lo schema(senza non và)
+@Table(name = "bpd_payment_instrument")
 public class PaymentInstrument extends BaseEntity {
 
     @Id
