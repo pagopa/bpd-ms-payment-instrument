@@ -1,7 +1,6 @@
 package it.gov.pagopa.bpd.payment_instrument.controller;
 
 import eu.sia.meda.core.controller.StatelessController;
-import it.gov.pagopa.bpd.payment_instrument.PaymentInstrumentHistoryDAO;
 import it.gov.pagopa.bpd.payment_instrument.assembler.PaymentInstrumentResourceAssembler;
 import it.gov.pagopa.bpd.payment_instrument.command.PaymentInstrumentDAOService;
 import it.gov.pagopa.bpd.payment_instrument.factory.ModelFactory;
@@ -12,7 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.time.ZonedDateTime;
+import java.time.OffsetDateTime;
 import java.util.Optional;
 
 @RestController
@@ -35,8 +34,8 @@ class BpdPaymentInstrumentControllerImpl extends StatelessController implements 
 
     @Override
     public PaymentInstrumentResource find(String hpan) {
-       log.debug("Start find by hpan");
-        System.out.println("hpan = [" + hpan + "]");
+        log.debug("Start find by hpan");
+        log.debug("hpan = [" + hpan + "]");
 
         final Optional<PaymentInstrument> entity = paymentInstrumentDAOService.find(hpan);
 
@@ -45,27 +44,33 @@ class BpdPaymentInstrumentControllerImpl extends StatelessController implements 
 
     @Override
     public PaymentInstrumentResource update(String hpan, PaymentInstrumentDTO paymentInstrument) {
-        System.out.println("Start update");
+        log.debug("Start update");
 
         final PaymentInstrument entity = paymentInstrumentFactory.createModel(paymentInstrument);
         entity.setHpan(hpan);
         entity.setStatus(PaymentInstrument.Status.ACTIVE);
+
         PaymentInstrument paymentInstrumentEntity = paymentInstrumentDAOService.update(hpan, entity);
         return paymentInstrumentResourceAssembler.toResource(paymentInstrumentEntity);
     }
 
     @Override
     public void delete(String hpan) {
-        System.out.println("Start delete");
-        System.out.println("fiscalCode = [" + hpan + "]");
+        log.debug("Start delete");
+        log.debug("fiscalCode = [" + hpan + "]");
 
         paymentInstrumentDAOService.delete(hpan);
 
     }
 
     @Override
-    public boolean checkActive(String hpan, ZonedDateTime accountingDate) {
-        System.out.println("Start checkout");
-        return paymentInstrumentDAOService.checkActive(hpan, accountingDate);
+    public boolean checkActive(String hpan, String accountingDate) {
+        log.debug("Start checkout");
+        return paymentInstrumentDAOService.checkActive(hpan, OffsetDateTime.now());
     }
+//    @Override
+//    public boolean checkActive(String hpan, OffsetDateTime accountingDate) {
+//        log.debug("Start checkout");
+//        return paymentInstrumentDAOService.checkActive(hpan, accountingDate);
+//    }
 }

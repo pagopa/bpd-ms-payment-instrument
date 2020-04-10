@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;
 
-import java.time.ZonedDateTime;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -49,13 +49,13 @@ class PaymentInstrumentDAOServiceImpl extends BaseService implements PaymentInst
     public void delete(String hpan) {
         Optional<PaymentInstrument> paymentInstrument = paymentInstrumentDAO.findById(hpan); //TODO: add isPresent() check
         paymentInstrument.get().setStatus(PaymentInstrument.Status.INACTIVE);
-        paymentInstrument.get().setCancellationDate(ZonedDateTime.now());
+        paymentInstrument.get().setCancellationDate(OffsetDateTime.now());
         paymentInstrument.get().setEnabled(false);
         update(hpan, paymentInstrument.get());
     }
 
     @Override
-    public boolean checkActive(String hpan, ZonedDateTime accountingDate) {
+    public boolean checkActive(String hpan, OffsetDateTime accountingDate) {
         List<PaymentInstrumentHistory> paymentInstrumentHistoryList =
                 paymentInstrumentHistoryDAO.checkActive(hpan, accountingDate);
         return !paymentInstrumentHistoryList.isEmpty();

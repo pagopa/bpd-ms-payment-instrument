@@ -2,7 +2,7 @@ package it.gov.pagopa.bpd.payment_instrument.command;
 
 import it.gov.pagopa.bpd.payment_instrument.model.entity.PaymentInstrument;
 
-import java.time.ZonedDateTime;
+import java.time.OffsetDateTime;
 import java.util.Optional;
 
 public interface PaymentInstrumentDAOService {
@@ -13,5 +13,5 @@ public interface PaymentInstrumentDAOService {
 
     void delete(String hpan);
 
-    boolean checkActive(String hpan, ZonedDateTime accountingDate);
+    boolean checkActive(String hpan, OffsetDateTime accountingDate);
 }

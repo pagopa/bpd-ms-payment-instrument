@@ -12,6 +12,7 @@ public class PaymentInstrumentFactory implements ModelFactory<PaymentInstrumentD
         final PaymentInstrument result = new PaymentInstrument();
 
         result.setActivationDate(dto.getActivationDate());
+//         result.setActivationDate(ZonedDateTime.from(dto.getActivationDate()));
 
         return result;
     }

@@ -6,7 +6,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import java.time.ZonedDateTime;
+import java.time.OffsetDateTime;
 
 @Entity
 @Data
@@ -23,10 +23,10 @@ public class PaymentInstrument extends BaseEntity {
     private String fiscalCode;
 
     @Column(name = "enrollment_t")
-    private ZonedDateTime activationDate;
+    private OffsetDateTime activationDate;
 
     @Column(name = "cancellation_t")
-    private ZonedDateTime cancellationDate;
+    private OffsetDateTime cancellationDate;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status_c")
@@ -35,7 +35,7 @@ public class PaymentInstrument extends BaseEntity {
     @Override
     protected void onUpdate() {
         super.onUpdate();
-        activationDate = ZonedDateTime.now();
+        activationDate = OffsetDateTime.now();
     }
 
     public enum Status {

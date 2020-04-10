@@ -9,7 +9,7 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import java.io.Serializable;
-import java.time.ZonedDateTime;
+import java.time.OffsetDateTime;
 
 @Entity
 @Data
@@ -26,8 +26,8 @@ public class PaymentInstrumentHistory implements Serializable {
     private String hpan;
 
     @Column(name = "activation_t")
-    private ZonedDateTime activationDate;
+    private OffsetDateTime activationDate;
 
     @Column(name = "deactivation_t")
-    private ZonedDateTime deactivationDate;
+    private OffsetDateTime deactivationDate;
 }

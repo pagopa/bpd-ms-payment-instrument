@@ -17,7 +17,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.time.ZonedDateTime;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -90,6 +90,6 @@ public class PaymentInstrumentDAOServiceImplTest {
 
     @Test
     public void checkActive() {
-        Assert.assertFalse(paymentInstrumentDAOService.checkActive("test", ZonedDateTime.now()));
+        Assert.assertFalse(paymentInstrumentDAOService.checkActive("test", OffsetDateTime.now()));
     }
 }

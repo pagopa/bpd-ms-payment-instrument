@@ -2,11 +2,11 @@ package it.gov.pagopa.bpd.payment_instrument.model.dto;
 
 import lombok.Data;
 
-import java.time.ZonedDateTime;
+import java.time.OffsetDateTime;
 
 @Data
 public class PaymentInstrumentDTO {
 
-    private ZonedDateTime activationDate;
+    private OffsetDateTime activationDate;
 
 }
