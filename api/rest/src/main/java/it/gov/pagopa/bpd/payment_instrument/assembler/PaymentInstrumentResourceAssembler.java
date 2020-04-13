@@ -1,7 +1,7 @@
 package it.gov.pagopa.bpd.payment_instrument.assembler;
 
+import it.gov.pagopa.bpd.payment_instrument.model.PaymentInstrumentResource;
 import it.gov.pagopa.bpd.payment_instrument.model.entity.PaymentInstrument;
-import it.gov.pagopa.bpd.payment_instrument.model.resource.PaymentInstrumentResource;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 

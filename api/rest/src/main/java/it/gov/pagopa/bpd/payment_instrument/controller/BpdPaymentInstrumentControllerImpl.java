@@ -2,12 +2,11 @@ package it.gov.pagopa.bpd.payment_instrument.controller;
 
 import eu.sia.meda.core.controller.StatelessController;
 import it.gov.pagopa.bpd.payment_instrument.assembler.PaymentInstrumentResourceAssembler;
-import it.gov.pagopa.bpd.payment_instrument.command.PaymentInstrumentDAOService;
 import it.gov.pagopa.bpd.payment_instrument.factory.ModelFactory;
-import it.gov.pagopa.bpd.payment_instrument.model.dto.PaymentInstrumentDTO;
+import it.gov.pagopa.bpd.payment_instrument.model.PaymentInstrumentDTO;
+import it.gov.pagopa.bpd.payment_instrument.model.PaymentInstrumentResource;
 import it.gov.pagopa.bpd.payment_instrument.model.entity.PaymentInstrument;
-import it.gov.pagopa.bpd.payment_instrument.model.resource.PaymentInstrumentResource;
-import lombok.extern.slf4j.Slf4j;
+import it.gov.pagopa.bpd.payment_instrument.service.PaymentInstrumentDAOService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -15,7 +14,6 @@ import java.time.OffsetDateTime;
 import java.util.Optional;
 
 @RestController
-@Slf4j
 class BpdPaymentInstrumentControllerImpl extends StatelessController implements BpdPaymentInstrumentController {
 
     private final PaymentInstrumentDAOService paymentInstrumentDAOService;
@@ -34,8 +32,8 @@ class BpdPaymentInstrumentControllerImpl extends StatelessController implements 
 
     @Override
     public PaymentInstrumentResource find(String hpan) {
-        log.debug("Start find by hpan");
-        log.debug("hpan = [" + hpan + "]");
+        logger.debug("Start find by hpan");
+        logger.debug("hpan = [" + hpan + "]");
 
         final Optional<PaymentInstrument> entity = paymentInstrumentDAOService.find(hpan);
 
@@ -44,7 +42,7 @@ class BpdPaymentInstrumentControllerImpl extends StatelessController implements 
 
     @Override
     public PaymentInstrumentResource update(String hpan, PaymentInstrumentDTO paymentInstrument) {
-        log.debug("Start update");
+        logger.debug("Start update");
 
         final PaymentInstrument entity = paymentInstrumentFactory.createModel(paymentInstrument);
         entity.setHpan(hpan);
@@ -56,21 +54,16 @@ class BpdPaymentInstrumentControllerImpl extends StatelessController implements 
 
     @Override
     public void delete(String hpan) {
-        log.debug("Start delete");
-        log.debug("fiscalCode = [" + hpan + "]");
+        logger.debug("Start delete");
+        logger.debug("fiscalCode = [" + hpan + "]");
 
         paymentInstrumentDAOService.delete(hpan);
 
     }
 
     @Override
-    public boolean checkActive(String hpan, String accountingDate) {
-        log.debug("Start checkout");
-        return paymentInstrumentDAOService.checkActive(hpan, OffsetDateTime.now());
+    public boolean checkActive(String hpan, OffsetDateTime accountingDate) {
+        logger.debug("Start checkout");
+        return paymentInstrumentDAOService.checkActive(hpan, accountingDate);
     }
-//    @Override
-//    public boolean checkActive(String hpan, OffsetDateTime accountingDate) {
-//        log.debug("Start checkout");
-//        return paymentInstrumentDAOService.checkActive(hpan, accountingDate);
-//    }
 }

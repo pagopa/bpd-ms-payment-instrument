@@ -1,7 +1,8 @@
 package it.gov.pagopa.bpd.payment_instrument.factory;
 
-import it.gov.pagopa.bpd.payment_instrument.model.dto.PaymentInstrumentDTO;
+import it.gov.pagopa.bpd.payment_instrument.model.PaymentInstrumentDTO;
 import it.gov.pagopa.bpd.payment_instrument.model.entity.PaymentInstrument;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -11,8 +12,7 @@ public class PaymentInstrumentFactory implements ModelFactory<PaymentInstrumentD
     public PaymentInstrument createModel(PaymentInstrumentDTO dto) {
         final PaymentInstrument result = new PaymentInstrument();
 
-        result.setActivationDate(dto.getActivationDate());
-//         result.setActivationDate(ZonedDateTime.from(dto.getActivationDate()));
+        BeanUtils.copyProperties(dto, result);
 
         return result;
     }

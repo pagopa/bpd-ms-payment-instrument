@@ -1,4 +1,4 @@
-package it.gov.pagopa.bpd.payment_instrument.command;
+package it.gov.pagopa.bpd.payment_instrument.service;
 
 import it.gov.pagopa.bpd.payment_instrument.PaymentInstrumentDAO;
 import it.gov.pagopa.bpd.payment_instrument.PaymentInstrumentHistoryDAO;

@@ -1,4 +1,4 @@
-package it.gov.pagopa.bpd.payment_instrument.command.config;
+package it.gov.pagopa.bpd.payment_instrument.service.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;

@@ -1,11 +1,14 @@
 package it.gov.pagopa.bpd.payment_instrument.controller;
 
 import io.swagger.annotations.Api;
-import it.gov.pagopa.bpd.payment_instrument.model.dto.PaymentInstrumentDTO;
-import it.gov.pagopa.bpd.payment_instrument.model.resource.PaymentInstrumentResource;
+import it.gov.pagopa.bpd.payment_instrument.model.PaymentInstrumentDTO;
+import it.gov.pagopa.bpd.payment_instrument.model.PaymentInstrumentResource;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.OffsetDateTime;
 
 /**
  * Controller to expose MicroService
@@ -29,8 +32,7 @@ public interface BpdPaymentInstrumentController {
 
     @GetMapping(value = "/{id}/history", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseStatus(HttpStatus.OK)
-    boolean checkActive(@PathVariable("id") String hpan, @RequestParam String accountingDate);
-//    boolean checkActive(@PathVariable("id") String hpan, @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime accountingDate);
+    boolean checkActive(@PathVariable("id") String hpan, @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime accountingDate);
 
 
 }

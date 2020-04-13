@@ -1,4 +1,4 @@
-package it.gov.pagopa.bpd.payment_instrument.command;
+package it.gov.pagopa.bpd.payment_instrument.service;
 
 import eu.sia.meda.service.BaseService;
 import it.gov.pagopa.bpd.payment_instrument.PaymentInstrumentDAO;
@@ -39,7 +39,6 @@ class PaymentInstrumentDAOServiceImpl extends BaseService implements PaymentInst
         if (count >= numMaxPaymentInstr) {
             throw new RuntimeException("Numero massimo di strumenti da censire raggiunto");
         }
-        pi.setFiscalCode("test");       //TODO recuperare cf dall'hpan (VERIFICA SULLA SET)
         pi.setHpan(hpan);
 
         return paymentInstrumentDAO.save(pi);

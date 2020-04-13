@@ -1,4 +1,4 @@
-package it.gov.pagopa.bpd.payment_instrument.model.resource;
+package it.gov.pagopa.bpd.payment_instrument.model;
 
 import it.gov.pagopa.bpd.payment_instrument.model.entity.PaymentInstrument;
 import lombok.Data;
