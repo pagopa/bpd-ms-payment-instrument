@@ -2,7 +2,6 @@ package it.gov.pagopa.bpd.payment_instrument.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.sia.meda.config.ArchConfiguration;
-import eu.sia.meda.core.resource.BaseResource;
 import it.gov.pagopa.bpd.payment_instrument.assembler.PaymentInstrumentResourceAssembler;
 import it.gov.pagopa.bpd.payment_instrument.factory.PaymentInstrumentFactory;
 import it.gov.pagopa.bpd.payment_instrument.model.PaymentInstrumentDTO;
@@ -37,7 +36,7 @@ import java.util.Optional;
 @SpringBootTest(classes = {BpdPaymentInstrumentControllerImpl.class})
 @AutoConfigureMockMvc(secure = false)
 @EnableWebMvc
-public class BpdPaymentInstrumentControllerImplTest extends BaseResource {
+public class BpdPaymentInstrumentControllerImplTest {
 
     public static final OffsetDateTime CURRENT_DATE_TIME = OffsetDateTime.now(ZoneOffset.UTC);
 
