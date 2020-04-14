@@ -33,18 +33,14 @@ import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
-//@WebMvcTest(BpdPaymentInstrumentControllerImpl.class)
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = {BpdPaymentInstrumentControllerImpl.class})
-//@ContextConfiguration(classes = BpdPaymentInstrumentControllerImpl.class)
 @AutoConfigureMockMvc(secure = false)
-//@WebMvcTest(secure = false)
 @EnableWebMvc
 public class BpdPaymentInstrumentControllerImplTest extends BaseResource {
 
     public static final OffsetDateTime CURRENT_DATE_TIME = OffsetDateTime.now(ZoneOffset.UTC);
 
-    protected Class resourceClazz;
 
     @Autowired
     protected MockMvc mvc;
@@ -69,7 +65,7 @@ public class BpdPaymentInstrumentControllerImplTest extends BaseResource {
 
         BDDMockito.doReturn(true).when(paymentInstrumentDAOServiceMock).checkActive(Mockito.eq("hpan"), Mockito.any());
 
-        BDDMockito.doNothing().when(paymentInstrumentDAOServiceMock).delete(Mockito.eq("test"));
+        BDDMockito.doNothing().when(paymentInstrumentDAOServiceMock).delete(Mockito.eq("hpan"));
     }
 
     @Test

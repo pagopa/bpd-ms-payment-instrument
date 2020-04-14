@@ -46,11 +46,15 @@ class PaymentInstrumentDAOServiceImpl extends BaseService implements PaymentInst
 
     @Override
     public void delete(String hpan) {
-        Optional<PaymentInstrument> paymentInstrument = paymentInstrumentDAO.findById(hpan); //TODO: add isPresent() check
-        paymentInstrument.get().setStatus(PaymentInstrument.Status.INACTIVE);
-        paymentInstrument.get().setCancellationDate(OffsetDateTime.now());
-        paymentInstrument.get().setEnabled(false);
-        update(hpan, paymentInstrument.get());
+        Optional<PaymentInstrument> paymentInstrument = paymentInstrumentDAO.findById(hpan);
+        if (paymentInstrument.isPresent()) {
+            paymentInstrument.get().setStatus(PaymentInstrument.Status.INACTIVE);
+            paymentInstrument.get().setCancellationDate(OffsetDateTime.now());
+            paymentInstrument.get().setEnabled(false);
+            update(hpan, paymentInstrument.get());
+        } else {
+            throw new RuntimeException("Metodo di pagamento non esistente");
+        }
     }
 
     @Override
