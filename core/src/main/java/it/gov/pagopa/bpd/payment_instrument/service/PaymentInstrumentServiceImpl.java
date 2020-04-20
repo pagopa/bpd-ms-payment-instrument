@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;
 
+import javax.persistence.EntityNotFoundException;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -52,8 +53,9 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
             paymentInstrument.get().setCancellationDate(OffsetDateTime.now());
             paymentInstrument.get().setEnabled(false);
             update(hpan, paymentInstrument.get());
-        } else {
-            throw new RuntimeException("Metodo di pagamento non esistente");
+
+        } else {//TODO: if idempotent, remove me
+            throw new EntityNotFoundException(String.format("%s with ID %s not found", PaymentInstrument.class.getSimpleName(), hpan));
         }
     }
 
