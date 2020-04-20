@@ -7,7 +7,7 @@ import it.gov.pagopa.bpd.payment_instrument.factory.PaymentInstrumentFactory;
 import it.gov.pagopa.bpd.payment_instrument.model.PaymentInstrumentDTO;
 import it.gov.pagopa.bpd.payment_instrument.model.PaymentInstrumentResource;
 import it.gov.pagopa.bpd.payment_instrument.model.entity.PaymentInstrument;
-import it.gov.pagopa.bpd.payment_instrument.service.PaymentInstrumentDAOService;
+import it.gov.pagopa.bpd.payment_instrument.service.PaymentInstrumentService;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -45,7 +45,7 @@ public class BpdPaymentInstrumentControllerImplTest {
     protected MockMvc mvc;
     protected ObjectMapper objectMapper = new ArchConfiguration().objectMapper();
     @MockBean
-    private PaymentInstrumentDAOService paymentInstrumentDAOServiceMock;
+    private PaymentInstrumentService paymentInstrumentServiceMock;
     @SpyBean
     private PaymentInstrumentResourceAssembler paymentInstrumentResourceAssemblerMock;
     @SpyBean
@@ -58,13 +58,13 @@ public class BpdPaymentInstrumentControllerImplTest {
         paymentInstrument.setActivationDate(CURRENT_DATE_TIME);
         paymentInstrument.setStatus(PaymentInstrument.Status.ACTIVE);
 
-        BDDMockito.doReturn(Optional.of(paymentInstrument)).when(paymentInstrumentDAOServiceMock).find(Mockito.eq("hpan"));
+        BDDMockito.doReturn(Optional.of(paymentInstrument)).when(paymentInstrumentServiceMock).find(Mockito.eq("hpan"));
 
-        BDDMockito.doReturn(new PaymentInstrument()).when(paymentInstrumentDAOServiceMock).update(Mockito.eq("hpan"), Mockito.eq(paymentInstrument));
+        BDDMockito.doReturn(new PaymentInstrument()).when(paymentInstrumentServiceMock).update(Mockito.eq("hpan"), Mockito.eq(paymentInstrument));
 
-        BDDMockito.doReturn(true).when(paymentInstrumentDAOServiceMock).checkActive(Mockito.eq("hpan"), Mockito.any());
+        BDDMockito.doReturn(true).when(paymentInstrumentServiceMock).checkActive(Mockito.eq("hpan"), Mockito.any());
 
-        BDDMockito.doNothing().when(paymentInstrumentDAOServiceMock).delete(Mockito.eq("hpan"));
+        BDDMockito.doNothing().when(paymentInstrumentServiceMock).delete(Mockito.eq("hpan"));
     }
 
     @Test
@@ -78,7 +78,7 @@ public class BpdPaymentInstrumentControllerImplTest {
         PaymentInstrumentResource pageResult = objectMapper.readValue(result.getResponse().getContentAsString(),
                 PaymentInstrumentResource.class);
         Assert.assertNotNull(pageResult);
-        BDDMockito.verify(paymentInstrumentDAOServiceMock).find(Mockito.eq("hpan"));
+        BDDMockito.verify(paymentInstrumentServiceMock).find(Mockito.eq("hpan"));
         BDDMockito.verify(paymentInstrumentResourceAssemblerMock).toResource(Mockito.any(PaymentInstrument.class));
     }
 
@@ -95,7 +95,7 @@ public class BpdPaymentInstrumentControllerImplTest {
         PaymentInstrumentResource pageResult = objectMapper.readValue(result.getResponse().getContentAsString(),
                 PaymentInstrumentResource.class);
         Assert.assertNotNull(pageResult);
-        BDDMockito.verify(paymentInstrumentDAOServiceMock).update(Mockito.eq("hpan"), Mockito.any());
+        BDDMockito.verify(paymentInstrumentServiceMock).update(Mockito.eq("hpan"), Mockito.any());
         BDDMockito.verify(paymentInstrumentFactoryMock).createModel(Mockito.eq(paymentInstrument));
         BDDMockito.verify(paymentInstrumentResourceAssemblerMock).toResource(Mockito.any(PaymentInstrument.class));
     }
@@ -104,7 +104,7 @@ public class BpdPaymentInstrumentControllerImplTest {
     public void delete() throws Exception {
         mvc.perform(MockMvcRequestBuilders.delete("/bpd/payment-instruments/hpan"))
                 .andExpect(MockMvcResultMatchers.status().is2xxSuccessful());
-        BDDMockito.verify(paymentInstrumentDAOServiceMock).delete(Mockito.any());
+        BDDMockito.verify(paymentInstrumentServiceMock).delete(Mockito.any());
     }
 
     @Test
@@ -115,6 +115,6 @@ public class BpdPaymentInstrumentControllerImplTest {
                 .param("accountingDate", date.format(dateTimeFormatter)))
                 .andExpect(MockMvcResultMatchers.status().is2xxSuccessful()).andReturn();
         Assert.assertNotNull(result);
-        BDDMockito.verify(paymentInstrumentDAOServiceMock).checkActive(Mockito.eq("hpan"), Mockito.any());
+        BDDMockito.verify(paymentInstrumentServiceMock).checkActive(Mockito.eq("hpan"), Mockito.any());
     }
 }

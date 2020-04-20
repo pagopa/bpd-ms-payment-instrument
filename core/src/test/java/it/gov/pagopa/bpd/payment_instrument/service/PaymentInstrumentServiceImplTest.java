@@ -24,9 +24,9 @@ import java.util.List;
 import java.util.Optional;
 
 @RunWith(SpringRunner.class)
-@ContextConfiguration(classes = PaymentInstrumentDAOServiceImpl.class)
+@ContextConfiguration(classes = PaymentInstrumentServiceImpl.class)
 @TestPropertySource(properties = "numMaxPaymentInstr=5")
-public class PaymentInstrumentDAOServiceImplTest {
+public class PaymentInstrumentServiceImplTest {
 
     private static final String HASH_PAN = "hashPan";
 
@@ -35,7 +35,7 @@ public class PaymentInstrumentDAOServiceImplTest {
     @MockBean
     private PaymentInstrumentHistoryDAO paymentInstrumentHistoryDAOMock;
     @Autowired
-    private PaymentInstrumentDAOService paymentInstrumentDAOService;
+    private PaymentInstrumentService paymentInstrumentService;
 
 
     @Before
@@ -68,7 +68,7 @@ public class PaymentInstrumentDAOServiceImplTest {
 
     @Test
     public void find() {
-        Optional<PaymentInstrument> paymentInstrument = paymentInstrumentDAOService.find(HASH_PAN);
+        Optional<PaymentInstrument> paymentInstrument = paymentInstrumentService.find(HASH_PAN);
 
         Assert.assertNotNull(paymentInstrument.orElse(null));
         BDDMockito.verify(paymentInstrumentDAOMock).findById(Mockito.eq(HASH_PAN));
@@ -77,7 +77,7 @@ public class PaymentInstrumentDAOServiceImplTest {
     @Test
     public void update() {
         PaymentInstrument paymentInstrument = new PaymentInstrument();
-        paymentInstrumentDAOService.update(HASH_PAN, paymentInstrument);
+        paymentInstrumentService.update(HASH_PAN, paymentInstrument);
 
         Assert.assertNotNull(paymentInstrument);
         BDDMockito.verify(paymentInstrumentDAOMock).count(Mockito.eq(Example.of(paymentInstrument)));
@@ -87,7 +87,7 @@ public class PaymentInstrumentDAOServiceImplTest {
 
     @Test
     public void deleteOK() {
-        paymentInstrumentDAOService.delete(HASH_PAN);
+        paymentInstrumentService.delete(HASH_PAN);
 
         BDDMockito.verify(paymentInstrumentDAOMock).findById(Mockito.eq(HASH_PAN));
         BDDMockito.verify(paymentInstrumentDAOMock).count(Mockito.any(Example.class));
@@ -97,7 +97,7 @@ public class PaymentInstrumentDAOServiceImplTest {
     @Test(expected = NeverWantedButInvoked.class)
     public void deleteKO() {
         try {
-            paymentInstrumentDAOService.delete("invalid-test");
+            paymentInstrumentService.delete("invalid-test");
         } finally {
             BDDMockito.verify(paymentInstrumentDAOMock, Mockito.never()).save(Mockito.any(PaymentInstrument.class));
         }
@@ -105,6 +105,6 @@ public class PaymentInstrumentDAOServiceImplTest {
 
     @Test
     public void checkActive() {
-        Assert.assertFalse(paymentInstrumentDAOService.checkActive(HASH_PAN, OffsetDateTime.now()));
+        Assert.assertFalse(paymentInstrumentService.checkActive(HASH_PAN, OffsetDateTime.now()));
     }
 }

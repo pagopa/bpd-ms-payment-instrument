@@ -5,7 +5,7 @@ import it.gov.pagopa.bpd.payment_instrument.model.entity.PaymentInstrument;
 import java.time.OffsetDateTime;
 import java.util.Optional;
 
-public interface PaymentInstrumentDAOService {
+public interface PaymentInstrumentService {
 
     Optional<PaymentInstrument> find(String fiscalCode);
 

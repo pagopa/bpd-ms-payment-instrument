@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-class PaymentInstrumentDAOServiceImpl extends BaseService implements PaymentInstrumentDAOService {
+class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrumentService {
 
     private final PaymentInstrumentDAO paymentInstrumentDAO;
     private final PaymentInstrumentHistoryDAO paymentInstrumentHistoryDAO;
@@ -23,7 +23,7 @@ class PaymentInstrumentDAOServiceImpl extends BaseService implements PaymentInst
     private int numMaxPaymentInstr;
 
     @Autowired
-    public PaymentInstrumentDAOServiceImpl(PaymentInstrumentDAO paymentInstrumentDAO, PaymentInstrumentHistoryDAO paymentInstrumentHistoryDAO) {
+    public PaymentInstrumentServiceImpl(PaymentInstrumentDAO paymentInstrumentDAO, PaymentInstrumentHistoryDAO paymentInstrumentHistoryDAO) {
         this.paymentInstrumentDAO = paymentInstrumentDAO;
         this.paymentInstrumentHistoryDAO = paymentInstrumentHistoryDAO;
     }
