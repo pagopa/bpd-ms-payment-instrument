@@ -7,10 +7,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.BDDMockito;
 import org.mockito.Mockito;
-import org.mockito.exceptions.verification.NeverWantedButInvoked;
-import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Example;
@@ -18,17 +15,23 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import javax.persistence.EntityNotFoundException;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = PaymentInstrumentServiceImpl.class)
 @TestPropertySource(properties = "numMaxPaymentInstr=5")
 public class PaymentInstrumentServiceImplTest {
 
-    private static final String HASH_PAN = "hashPan";
+    private static final String EXISTING_HASH_PAN = "existing-hpan";
+    private static final String NOT_EXISTING_HASH_PAN = "not-existing-hpan";
 
     @MockBean
     private PaymentInstrumentDAO paymentInstrumentDAOMock;
@@ -42,69 +45,127 @@ public class PaymentInstrumentServiceImplTest {
     public void initTest() {
         Mockito.reset(paymentInstrumentDAOMock, paymentInstrumentHistoryDAOMock);
 
-        BDDMockito.when(paymentInstrumentDAOMock.findById(Mockito.eq(HASH_PAN))).thenAnswer((Answer<PaymentInstrument>)
-                invocation -> {
+        when(paymentInstrumentDAOMock.getOne(anyString()))
+                .thenAnswer(invocation -> {
+                    String hashPan = invocation.getArgument(0, String.class);
+                    if (!EXISTING_HASH_PAN.equals(hashPan)) {
+                        throw new EntityNotFoundException();
+
+                    }
                     PaymentInstrument pi = new PaymentInstrument();
+                    pi.setHpan(hashPan);
                     return pi;
                 });
 
-        BDDMockito.when(paymentInstrumentDAOMock.findById(Mockito.any())).thenAnswer((Answer<Optional<PaymentInstrument>>)
-                invocation -> {
-                    PaymentInstrument paymentInstrument = new PaymentInstrument();
-                    return Optional.of(paymentInstrument);
+        when(paymentInstrumentDAOMock.findById(anyString()))
+                .thenAnswer(invocation -> {
+                    String hashPan = invocation.getArgument(0, String.class);
+                    Optional<PaymentInstrument> result = Optional.empty();
+                    if (EXISTING_HASH_PAN.equals(hashPan)) {
+                        PaymentInstrument pi = new PaymentInstrument();
+                        pi.setHpan(hashPan);
+                        result = Optional.of(pi);
+                    }
+                    return result;
                 });
 
-        PaymentInstrument paymentInstrument = new PaymentInstrument();
 
-        BDDMockito.when(paymentInstrumentDAOMock.count(Mockito.eq((Example.of(paymentInstrument)))))
-                .thenAnswer((Answer<Long>) invocation -> 4L);
-        BDDMockito.when(paymentInstrumentDAOMock.save(Mockito.eq(paymentInstrument))).thenAnswer((Answer<PaymentInstrument>)
-                invocation -> paymentInstrument);
+        when(paymentInstrumentDAOMock.count(any(Example.class)))
+                .thenAnswer(invocation -> 4L);
 
-        BDDMockito.when(paymentInstrumentHistoryDAOMock.checkActive(Mockito.eq(HASH_PAN), Mockito.any()))
-                .thenAnswer((Answer<List<PaymentInstrument>>) invocation -> new ArrayList<>());
+        when(paymentInstrumentDAOMock.save(any(PaymentInstrument.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0, PaymentInstrument.class));
+
+        when(paymentInstrumentHistoryDAOMock.checkActive(eq(EXISTING_HASH_PAN), any()))
+                .thenAnswer(invocation -> new ArrayList<>());
     }
 
 
     @Test
-    public void find() {
-        Optional<PaymentInstrument> paymentInstrument = paymentInstrumentService.find(HASH_PAN);
+    public void find_OK() {
+        final String hashPan = EXISTING_HASH_PAN;
 
-        Assert.assertNotNull(paymentInstrument.orElse(null));
-        BDDMockito.verify(paymentInstrumentDAOMock).findById(Mockito.eq(HASH_PAN));
+        PaymentInstrument result = paymentInstrumentService.find(hashPan);
+
+        assertNotNull(result);
+        verify(paymentInstrumentDAOMock, only()).getOne(eq(hashPan));
+        verify(paymentInstrumentDAOMock, times(1)).getOne(eq(hashPan));
     }
+
+
+    @Test(expected = EntityNotFoundException.class)
+    public void find_KO() {
+        final String hashPan = NOT_EXISTING_HASH_PAN;
+
+        paymentInstrumentService.find(hashPan);
+
+        verify(paymentInstrumentDAOMock, only()).getOne(eq(hashPan));
+        verify(paymentInstrumentDAOMock, times(1)).getOne(eq(hashPan));
+    }
+
 
     @Test
-    public void update() {
+    public void createOrUpdate_createOK() {
+        final String hashPan = NOT_EXISTING_HASH_PAN;
         PaymentInstrument paymentInstrument = new PaymentInstrument();
-        paymentInstrumentService.update(HASH_PAN, paymentInstrument);
 
-        Assert.assertNotNull(paymentInstrument);
-        BDDMockito.verify(paymentInstrumentDAOMock).count(Mockito.eq(Example.of(paymentInstrument)));
-        paymentInstrument.setHpan(HASH_PAN);
-        BDDMockito.verify(paymentInstrumentDAOMock).save(Mockito.eq(paymentInstrument));
+        PaymentInstrument result = paymentInstrumentService.createOrUpdate(hashPan, paymentInstrument);
+
+        assertNotNull(paymentInstrument);
+        assertEquals(hashPan, result.getHpan());
+        verify(paymentInstrumentDAOMock, times(1)).findById(eq(hashPan));
+        verify(paymentInstrumentDAOMock, times(1)).count(eq(Example.of(paymentInstrument)));
+        paymentInstrument.setHpan(hashPan);
+        verify(paymentInstrumentDAOMock, times(1)).save(eq(paymentInstrument));
+        verifyNoMoreInteractions(paymentInstrumentDAOMock);
     }
+
+
+    @Test
+    public void createOrUpdate_updateOK() {
+        final String hashPan = EXISTING_HASH_PAN;
+        PaymentInstrument paymentInstrument = new PaymentInstrument();
+
+        PaymentInstrument result = paymentInstrumentService.createOrUpdate(hashPan, paymentInstrument);
+
+        assertNotNull(paymentInstrument);
+        assertEquals(hashPan, result.getHpan());
+        verify(paymentInstrumentDAOMock, times(1)).findById(eq(hashPan));
+        paymentInstrument.setHpan(hashPan);
+        verify(paymentInstrumentDAOMock, times(1)).save(eq(paymentInstrument));
+        verifyNoMoreInteractions(paymentInstrumentDAOMock);
+    }
+
 
     @Test
     public void deleteOK() {
-        paymentInstrumentService.delete(HASH_PAN);
+        final String hashPan = EXISTING_HASH_PAN;
 
-        BDDMockito.verify(paymentInstrumentDAOMock).findById(Mockito.eq(HASH_PAN));
-        BDDMockito.verify(paymentInstrumentDAOMock).count(Mockito.any(Example.class));
-        BDDMockito.verify(paymentInstrumentDAOMock).save(Mockito.any(PaymentInstrument.class));
+        paymentInstrumentService.delete(hashPan);
+
+        verify(paymentInstrumentDAOMock, times(1)).getOne(eq(hashPan));
+        verify(paymentInstrumentDAOMock, times(1)).save(any(PaymentInstrument.class));
+        verifyNoMoreInteractions(paymentInstrumentDAOMock);
     }
 
-    @Test(expected = NeverWantedButInvoked.class)
+
+    @Test(expected = EntityNotFoundException.class)
     public void deleteKO() {
+        final String hashPan = NOT_EXISTING_HASH_PAN;
+
         try {
-            paymentInstrumentService.delete("invalid-test");
+            paymentInstrumentService.delete(hashPan);
+
         } finally {
-            BDDMockito.verify(paymentInstrumentDAOMock, Mockito.never()).save(Mockito.any(PaymentInstrument.class));
+            verify(paymentInstrumentDAOMock, only()).getOne(eq(hashPan));
+            verify(paymentInstrumentDAOMock, times(1)).getOne(eq(hashPan));
         }
     }
 
+
     @Test
     public void checkActive() {
-        Assert.assertFalse(paymentInstrumentService.checkActive(HASH_PAN, OffsetDateTime.now()));
+        Assert.assertFalse(paymentInstrumentService.checkActive(EXISTING_HASH_PAN, OffsetDateTime.now()));
     }
+
 }

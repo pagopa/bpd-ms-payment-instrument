@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.OffsetDateTime;
-import java.util.Optional;
 
 @RestController
 class BpdPaymentInstrumentControllerImpl extends StatelessController implements BpdPaymentInstrumentController {
@@ -30,40 +29,46 @@ class BpdPaymentInstrumentControllerImpl extends StatelessController implements 
         this.paymentInstrumentFactory = paymentInstrumentFactory;
     }
 
+
     @Override
     public PaymentInstrumentResource find(String hpan) {
-        logger.debug("Start find by hpan");
+        logger.debug("BpdPaymentInstrumentControllerImpl.find");
         logger.debug("hpan = [" + hpan + "]");
 
-        final Optional<PaymentInstrument> entity = paymentInstrumentService.find(hpan);
+        final PaymentInstrument entity = paymentInstrumentService.find(hpan);
 
-        return paymentInstrumentResourceAssembler.toResource(entity.get());
+        return paymentInstrumentResourceAssembler.toResource(entity);
     }
+
 
     @Override
     public PaymentInstrumentResource update(String hpan, PaymentInstrumentDTO paymentInstrument) {
-        logger.debug("Start update");
+        logger.debug("BpdPaymentInstrumentControllerImpl.createOrUpdate");
+        logger.debug("hpan = [" + hpan + "], paymentInstrument = [" + paymentInstrument + "]");
 
         final PaymentInstrument entity = paymentInstrumentFactory.createModel(paymentInstrument);
-        entity.setHpan(hpan);
-        entity.setStatus(PaymentInstrument.Status.ACTIVE);
 
-        PaymentInstrument paymentInstrumentEntity = paymentInstrumentService.update(hpan, entity);
+        PaymentInstrument paymentInstrumentEntity = paymentInstrumentService.createOrUpdate(hpan, entity);
+
         return paymentInstrumentResourceAssembler.toResource(paymentInstrumentEntity);
     }
 
+
     @Override
     public void delete(String hpan) {
-        logger.debug("Start delete");
-        logger.debug("fiscalCode = [" + hpan + "]");
+        logger.debug("BpdPaymentInstrumentControllerImpl.delete");
+        logger.debug("hpan = [" + hpan + "]");
 
         paymentInstrumentService.delete(hpan);
-
     }
+
 
     @Override
     public boolean checkActive(String hpan, OffsetDateTime accountingDate) {
-        logger.debug("Start checkout");
+        logger.debug("BpdPaymentInstrumentControllerImpl.checkActive");
+        logger.debug("hpan = [" + hpan + "], accountingDate = [" + accountingDate + "]");
+
         return paymentInstrumentService.checkActive(hpan, accountingDate);
     }
+
 }

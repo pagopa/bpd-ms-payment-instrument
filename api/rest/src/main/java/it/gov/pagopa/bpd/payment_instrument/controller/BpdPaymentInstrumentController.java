@@ -22,19 +22,21 @@ public interface BpdPaymentInstrumentController {
 
     @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseStatus(HttpStatus.OK)
-    PaymentInstrumentResource find(@PathVariable("id") @Valid @NotBlank String hpan);
+    PaymentInstrumentResource find(@PathVariable("id") @NotBlank String hpan);
 
     @PutMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseStatus(HttpStatus.OK)
-    PaymentInstrumentResource update(@PathVariable("id") @Valid @NotBlank String hpan, @RequestBody @Valid @NotBlank PaymentInstrumentDTO paymentInstrument);
+    PaymentInstrumentResource update(@PathVariable("id") @NotBlank String hpan,
+                                     @RequestBody @Valid PaymentInstrumentDTO paymentInstrument);
 
     @DeleteMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    void delete(@PathVariable("id") @Valid @NotBlank String hpan);
+    void delete(@PathVariable("id") @NotBlank String hpan);
 
-    @GetMapping(value = "/{id}/history", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @GetMapping(value = "/{id}/history/active", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseStatus(HttpStatus.OK)
-    boolean checkActive(@PathVariable("id") @Valid @NotBlank String hpan, @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) @Valid @NotBlank OffsetDateTime accountingDate);
+    boolean checkActive(@PathVariable("id") @NotBlank String hpan,
+                        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime accountingDate);
 
 
 }

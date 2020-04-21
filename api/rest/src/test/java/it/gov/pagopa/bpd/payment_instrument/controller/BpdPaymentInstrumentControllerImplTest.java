@@ -8,11 +8,8 @@ import it.gov.pagopa.bpd.payment_instrument.model.PaymentInstrumentDTO;
 import it.gov.pagopa.bpd.payment_instrument.model.PaymentInstrumentResource;
 import it.gov.pagopa.bpd.payment_instrument.model.entity.PaymentInstrument;
 import it.gov.pagopa.bpd.payment_instrument.service.PaymentInstrumentService;
-import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.BDDMockito;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -30,7 +27,11 @@ import javax.annotation.PostConstruct;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
-import java.util.Optional;
+
+import static org.junit.Assert.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = {BpdPaymentInstrumentControllerImpl.class})
@@ -54,17 +55,21 @@ public class BpdPaymentInstrumentControllerImplTest {
     @PostConstruct
     public void configureTest() {
         PaymentInstrument paymentInstrument = new PaymentInstrument();
-        paymentInstrument.setHpan("hpan");
         paymentInstrument.setActivationDate(CURRENT_DATE_TIME);
         paymentInstrument.setStatus(PaymentInstrument.Status.ACTIVE);
+        paymentInstrument.setFiscalCode("fiscalCode");
 
-        BDDMockito.doReturn(Optional.of(paymentInstrument)).when(paymentInstrumentServiceMock).find(Mockito.eq("hpan"));
+        doReturn(paymentInstrument)
+                .when(paymentInstrumentServiceMock).find(eq("hpan"));
 
-        BDDMockito.doReturn(new PaymentInstrument()).when(paymentInstrumentServiceMock).update(Mockito.eq("hpan"), Mockito.eq(paymentInstrument));
+        doReturn(new PaymentInstrument())
+                .when(paymentInstrumentServiceMock).createOrUpdate(eq("hpan"), eq(paymentInstrument));
 
-        BDDMockito.doReturn(true).when(paymentInstrumentServiceMock).checkActive(Mockito.eq("hpan"), Mockito.any());
+        doReturn(true)
+                .when(paymentInstrumentServiceMock).checkActive(eq("hpan"), any());
 
-        BDDMockito.doNothing().when(paymentInstrumentServiceMock).delete(Mockito.eq("hpan"));
+        doNothing()
+                .when(paymentInstrumentServiceMock).delete(eq("hpan"));
     }
 
     @Test
@@ -77,14 +82,15 @@ public class BpdPaymentInstrumentControllerImplTest {
                 .andReturn();
         PaymentInstrumentResource pageResult = objectMapper.readValue(result.getResponse().getContentAsString(),
                 PaymentInstrumentResource.class);
-        Assert.assertNotNull(pageResult);
-        BDDMockito.verify(paymentInstrumentServiceMock).find(Mockito.eq("hpan"));
-        BDDMockito.verify(paymentInstrumentResourceAssemblerMock).toResource(Mockito.any(PaymentInstrument.class));
+        assertNotNull(pageResult);
+        verify(paymentInstrumentServiceMock).find(eq("hpan"));
+        verify(paymentInstrumentResourceAssemblerMock).toResource(any(PaymentInstrument.class));
     }
 
     @Test
     public void update() throws Exception {
         PaymentInstrumentDTO paymentInstrument = new PaymentInstrumentDTO();
+        paymentInstrument.setFiscalCode("fiscalCode");
         paymentInstrument.setActivationDate(CURRENT_DATE_TIME);
         MvcResult result = (MvcResult) mvc.perform(MockMvcRequestBuilders.put("/bpd/payment-instruments/hpan")
                 .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)
@@ -94,27 +100,27 @@ public class BpdPaymentInstrumentControllerImplTest {
                 .andReturn();
         PaymentInstrumentResource pageResult = objectMapper.readValue(result.getResponse().getContentAsString(),
                 PaymentInstrumentResource.class);
-        Assert.assertNotNull(pageResult);
-        BDDMockito.verify(paymentInstrumentServiceMock).update(Mockito.eq("hpan"), Mockito.any());
-        BDDMockito.verify(paymentInstrumentFactoryMock).createModel(Mockito.eq(paymentInstrument));
-        BDDMockito.verify(paymentInstrumentResourceAssemblerMock).toResource(Mockito.any(PaymentInstrument.class));
+        assertNotNull(pageResult);
+        verify(paymentInstrumentServiceMock).createOrUpdate(eq("hpan"), any());
+        verify(paymentInstrumentFactoryMock).createModel(eq(paymentInstrument));
+        verify(paymentInstrumentResourceAssemblerMock).toResource(any(PaymentInstrument.class));
     }
 
     @Test
     public void delete() throws Exception {
         mvc.perform(MockMvcRequestBuilders.delete("/bpd/payment-instruments/hpan"))
                 .andExpect(MockMvcResultMatchers.status().is2xxSuccessful());
-        BDDMockito.verify(paymentInstrumentServiceMock).delete(Mockito.any());
+        verify(paymentInstrumentServiceMock).delete(any());
     }
 
     @Test
     public void checkActive() throws Exception {
         OffsetDateTime date = OffsetDateTime.from(CURRENT_DATE_TIME);
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
-        MvcResult result = mvc.perform(MockMvcRequestBuilders.get("/bpd/payment-instruments/hpan/history")
+        MvcResult result = mvc.perform(MockMvcRequestBuilders.get("/bpd/payment-instruments/hpan/history/active")
                 .param("accountingDate", date.format(dateTimeFormatter)))
                 .andExpect(MockMvcResultMatchers.status().is2xxSuccessful()).andReturn();
-        Assert.assertNotNull(result);
-        BDDMockito.verify(paymentInstrumentServiceMock).checkActive(Mockito.eq("hpan"), Mockito.any());
+        assertNotNull(result);
+        verify(paymentInstrumentServiceMock).checkActive(eq("hpan"), any());
     }
 }
