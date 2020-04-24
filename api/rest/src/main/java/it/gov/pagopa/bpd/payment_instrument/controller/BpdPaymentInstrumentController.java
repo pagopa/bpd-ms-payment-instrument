@@ -9,6 +9,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
 import java.time.OffsetDateTime;
 
 /**
@@ -21,19 +22,21 @@ public interface BpdPaymentInstrumentController {
 
     @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseStatus(HttpStatus.OK)
-    PaymentInstrumentResource find(@PathVariable("id") String hpan);
+    PaymentInstrumentResource find(@PathVariable("id") @NotBlank String hpan);
 
     @PutMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseStatus(HttpStatus.OK)
-    PaymentInstrumentResource update(@PathVariable("id") String hpan, @RequestBody @Valid PaymentInstrumentDTO paymentInstrument);
+    PaymentInstrumentResource update(@PathVariable("id") @NotBlank String hpan,
+                                     @RequestBody @Valid PaymentInstrumentDTO paymentInstrument);
 
     @DeleteMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    void delete(@PathVariable("id") String hpan);
+    void delete(@PathVariable("id") @NotBlank String hpan);
 
-    @GetMapping(value = "/{id}/history", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @GetMapping(value = "/{id}/history/active", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseStatus(HttpStatus.OK)
-    boolean checkActive(@PathVariable("id") String hpan, @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime accountingDate);
+    boolean checkActive(@PathVariable("id") @NotBlank String hpan,
+                        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime accountingDate);
 
 
 }

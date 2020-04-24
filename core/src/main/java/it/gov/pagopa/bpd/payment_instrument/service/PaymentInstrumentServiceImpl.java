@@ -15,52 +15,60 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-class PaymentInstrumentDAOServiceImpl extends BaseService implements PaymentInstrumentDAOService {
+class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrumentService {
 
     private final PaymentInstrumentDAO paymentInstrumentDAO;
     private final PaymentInstrumentHistoryDAO paymentInstrumentHistoryDAO;
+
     @Value(value = "${numMaxPaymentInstr}")
     private int numMaxPaymentInstr;
 
+
     @Autowired
-    public PaymentInstrumentDAOServiceImpl(PaymentInstrumentDAO paymentInstrumentDAO, PaymentInstrumentHistoryDAO paymentInstrumentHistoryDAO) {
+    public PaymentInstrumentServiceImpl(PaymentInstrumentDAO paymentInstrumentDAO, PaymentInstrumentHistoryDAO paymentInstrumentHistoryDAO) {
         this.paymentInstrumentDAO = paymentInstrumentDAO;
         this.paymentInstrumentHistoryDAO = paymentInstrumentHistoryDAO;
     }
 
-    @Override
-    public Optional<PaymentInstrument> find(String hpan) {
-        return paymentInstrumentDAO.findById(hpan);
-    }
 
     @Override
-    public PaymentInstrument update(String hpan, PaymentInstrument pi) {
-        final long count = paymentInstrumentDAO.count(Example.of(pi));
-        if (count >= numMaxPaymentInstr) {
-            throw new RuntimeException("Numero massimo di strumenti da censire raggiunto");
+    public PaymentInstrument find(String hpan) {
+        return paymentInstrumentDAO.getOne(hpan);
+    }
+
+
+    @Override
+    public PaymentInstrument createOrUpdate(String hpan, PaymentInstrument pi) {
+        final Optional<PaymentInstrument> found = paymentInstrumentDAO.findById(hpan);
+        if (!found.isPresent()) {
+            final long count = paymentInstrumentDAO.count(Example.of(pi));
+            if (count >= numMaxPaymentInstr) {
+                throw new IllegalStateException("Numero massimo di strumenti da censire raggiunto");
+            }
         }
         pi.setHpan(hpan);
 
         return paymentInstrumentDAO.save(pi);
     }
 
+
     @Override
     public void delete(String hpan) {
-        Optional<PaymentInstrument> paymentInstrument = paymentInstrumentDAO.findById(hpan);
-        if (paymentInstrument.isPresent()) {
-            paymentInstrument.get().setStatus(PaymentInstrument.Status.INACTIVE);
-            paymentInstrument.get().setCancellationDate(OffsetDateTime.now());
-            paymentInstrument.get().setEnabled(false);
-            update(hpan, paymentInstrument.get());
-        } else {
-            throw new RuntimeException("Metodo di pagamento non esistente");
-        }
+        PaymentInstrument paymentInstrument = paymentInstrumentDAO.getOne(hpan);
+        paymentInstrument.setStatus(PaymentInstrument.Status.INACTIVE);
+        paymentInstrument.setCancellationDate(OffsetDateTime.now());
+        paymentInstrument.setEnabled(false);
+        //TODO: set update user with logged fiscal code
+        paymentInstrumentDAO.save(paymentInstrument);
     }
+
 
     @Override
     public boolean checkActive(String hpan, OffsetDateTime accountingDate) {
         List<PaymentInstrumentHistory> paymentInstrumentHistoryList =
                 paymentInstrumentHistoryDAO.checkActive(hpan, accountingDate);
+
         return !paymentInstrumentHistoryList.isEmpty();
     }
+
 }
