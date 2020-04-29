@@ -2,6 +2,7 @@ package it.gov.pagopa.bpd.payment_instrument.service;
 
 import it.gov.pagopa.bpd.payment_instrument.PaymentInstrumentDAO;
 import it.gov.pagopa.bpd.payment_instrument.PaymentInstrumentHistoryDAO;
+import it.gov.pagopa.bpd.payment_instrument.exception.PaymentInstrumentNotFoundException;
 import it.gov.pagopa.bpd.payment_instrument.model.entity.PaymentInstrument;
 import org.junit.Assert;
 import org.junit.Before;
@@ -88,19 +89,19 @@ public class PaymentInstrumentServiceImplTest {
         PaymentInstrument result = paymentInstrumentService.find(hashPan);
 
         assertNotNull(result);
-        verify(paymentInstrumentDAOMock, only()).getOne(eq(hashPan));
-        verify(paymentInstrumentDAOMock, times(1)).getOne(eq(hashPan));
+        verify(paymentInstrumentDAOMock, only()).findById(eq(hashPan));
+        verify(paymentInstrumentDAOMock, times(1)).findById(eq(hashPan));
     }
 
 
-    @Test(expected = EntityNotFoundException.class)
+    @Test(expected = PaymentInstrumentNotFoundException.class)
     public void find_KO() {
         final String hashPan = NOT_EXISTING_HASH_PAN;
 
         paymentInstrumentService.find(hashPan);
 
-        verify(paymentInstrumentDAOMock, only()).getOne(eq(hashPan));
-        verify(paymentInstrumentDAOMock, times(1)).getOne(eq(hashPan));
+        verify(paymentInstrumentDAOMock, only()).findById(eq(hashPan));
+        verify(paymentInstrumentDAOMock, times(1)).findById(eq(hashPan));
     }
 
 
@@ -143,13 +144,13 @@ public class PaymentInstrumentServiceImplTest {
 
         paymentInstrumentService.delete(hashPan);
 
-        verify(paymentInstrumentDAOMock, times(1)).getOne(eq(hashPan));
+        verify(paymentInstrumentDAOMock, times(1)).findById(eq(hashPan));
         verify(paymentInstrumentDAOMock, times(1)).save(any(PaymentInstrument.class));
         verifyNoMoreInteractions(paymentInstrumentDAOMock);
     }
 
 
-    @Test(expected = EntityNotFoundException.class)
+    @Test(expected = PaymentInstrumentNotFoundException.class)
     public void deleteKO() {
         final String hashPan = NOT_EXISTING_HASH_PAN;
 
@@ -157,8 +158,8 @@ public class PaymentInstrumentServiceImplTest {
             paymentInstrumentService.delete(hashPan);
 
         } finally {
-            verify(paymentInstrumentDAOMock, only()).getOne(eq(hashPan));
-            verify(paymentInstrumentDAOMock, times(1)).getOne(eq(hashPan));
+            verify(paymentInstrumentDAOMock, only()).findById(eq(hashPan));
+            verify(paymentInstrumentDAOMock, times(1)).findById(eq(hashPan));
         }
     }
 

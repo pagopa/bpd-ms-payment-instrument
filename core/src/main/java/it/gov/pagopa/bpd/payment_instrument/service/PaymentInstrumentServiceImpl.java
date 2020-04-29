@@ -3,6 +3,7 @@ package it.gov.pagopa.bpd.payment_instrument.service;
 import eu.sia.meda.service.BaseService;
 import it.gov.pagopa.bpd.payment_instrument.PaymentInstrumentDAO;
 import it.gov.pagopa.bpd.payment_instrument.PaymentInstrumentHistoryDAO;
+import it.gov.pagopa.bpd.payment_instrument.exception.PaymentInstrumentNotFoundException;
 import it.gov.pagopa.bpd.payment_instrument.model.entity.PaymentInstrument;
 import it.gov.pagopa.bpd.payment_instrument.model.entity.PaymentInstrumentHistory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +34,7 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
 
     @Override
     public PaymentInstrument find(String hpan) {
-        return paymentInstrumentDAO.getOne(hpan);
+        return paymentInstrumentDAO.findById(hpan).orElseThrow(() -> new PaymentInstrumentNotFoundException(hpan));
     }
 
 
@@ -54,7 +55,7 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
 
     @Override
     public void delete(String hpan) {
-        PaymentInstrument paymentInstrument = paymentInstrumentDAO.getOne(hpan);
+        PaymentInstrument paymentInstrument = paymentInstrumentDAO.findById(hpan).orElseThrow(() -> new PaymentInstrumentNotFoundException(hpan));
         paymentInstrument.setStatus(PaymentInstrument.Status.INACTIVE);
         paymentInstrument.setCancellationDate(OffsetDateTime.now());
         paymentInstrument.setEnabled(false);

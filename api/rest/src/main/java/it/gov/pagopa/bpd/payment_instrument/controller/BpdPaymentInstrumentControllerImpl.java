@@ -32,8 +32,10 @@ class BpdPaymentInstrumentControllerImpl extends StatelessController implements 
 
     @Override
     public PaymentInstrumentResource find(String hpan) {
-        logger.debug("BpdPaymentInstrumentControllerImpl.find");
-        logger.debug("hpan = [" + hpan + "]");
+        if (logger.isDebugEnabled()) {
+            logger.debug("BpdPaymentInstrumentControllerImpl.find");
+            logger.debug("hpan = [" + hpan + "]");
+        }
 
         final PaymentInstrument entity = paymentInstrumentService.find(hpan);
 
@@ -43,8 +45,10 @@ class BpdPaymentInstrumentControllerImpl extends StatelessController implements 
 
     @Override
     public PaymentInstrumentResource update(String hpan, PaymentInstrumentDTO paymentInstrument) {
-        logger.debug("BpdPaymentInstrumentControllerImpl.createOrUpdate");
-        logger.debug("hpan = [" + hpan + "], paymentInstrument = [" + paymentInstrument + "]");
+        if (logger.isDebugEnabled()) {
+            logger.debug("BpdPaymentInstrumentControllerImpl.createOrUpdate");
+            logger.debug("hpan = [" + hpan + "], paymentInstrument = [" + paymentInstrument + "]");
+        }
 
         final PaymentInstrument entity = paymentInstrumentFactory.createModel(paymentInstrument);
 
@@ -56,8 +60,10 @@ class BpdPaymentInstrumentControllerImpl extends StatelessController implements 
 
     @Override
     public void delete(String hpan) {
-        logger.debug("BpdPaymentInstrumentControllerImpl.delete");
-        logger.debug("hpan = [" + hpan + "]");
+        if (logger.isDebugEnabled()) {
+            logger.debug("BpdPaymentInstrumentControllerImpl.delete");
+            logger.debug("hpan = [" + hpan + "]");
+        }
 
         paymentInstrumentService.delete(hpan);
     }
@@ -65,8 +71,10 @@ class BpdPaymentInstrumentControllerImpl extends StatelessController implements 
 
     @Override
     public boolean checkActive(String hpan, OffsetDateTime accountingDate) {
-        logger.debug("BpdPaymentInstrumentControllerImpl.checkActive");
-        logger.debug("hpan = [" + hpan + "], accountingDate = [" + accountingDate + "]");
+        if (logger.isDebugEnabled()) {
+            logger.debug("BpdPaymentInstrumentControllerImpl.checkActive");
+            logger.debug("hpan = [" + hpan + "], accountingDate = [" + accountingDate + "]");
+        }
 
         return paymentInstrumentService.checkActive(hpan, accountingDate);
     }
