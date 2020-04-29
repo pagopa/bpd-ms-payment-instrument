@@ -4,6 +4,9 @@ import it.gov.pagopa.bpd.payment_instrument.model.entity.PaymentInstrument;
 
 import java.time.OffsetDateTime;
 
+/**
+ * A service to manage the Business Logic related to PaymentInstrument
+ */
 public interface PaymentInstrumentService {
 
     PaymentInstrument find(String fiscalCode);

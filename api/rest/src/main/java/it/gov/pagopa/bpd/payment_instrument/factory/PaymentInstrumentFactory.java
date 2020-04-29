@@ -5,6 +5,9 @@ import it.gov.pagopa.bpd.payment_instrument.model.entity.PaymentInstrument;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Component;
 
+/**
+ * Mapper between <PaymentInstrumentDTO> DTO class and <PaymentInstrument> Entity class
+ */
 @Component
 public class PaymentInstrumentFactory implements ModelFactory<PaymentInstrumentDTO, PaymentInstrument> {
 
