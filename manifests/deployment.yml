@@ -1,0 +1,16 @@
+apiVersion : apps/v1beta1
+kind: Deployment
+metadata:
+  name: bpdmspaymentinstrument 
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: bpdmspaymentinstrument 
+    spec:
+      containers:
+        - name: bpdmspaymentinstrument 
+          image: cstarregistry.azurecr.io/bpdmspaymentinstrument
+          ports:
+          - containerPort: 8080
