@@ -5,6 +5,8 @@ spring:
   application:
     name: "@project.parent.artifactId@"
     version: "@project.version@"
+  profiles:
+    active: swaggerIT
 
 info:
   build:

@@ -1,6 +1,7 @@
 package it.gov.pagopa.bpd.payment_instrument.controller;
 
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiParam;
 import it.gov.pagopa.bpd.payment_instrument.model.PaymentInstrumentDTO;
 import it.gov.pagopa.bpd.payment_instrument.model.PaymentInstrumentResource;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -22,21 +23,39 @@ public interface BpdPaymentInstrumentController {
 
     @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseStatus(HttpStatus.OK)
-    PaymentInstrumentResource find(@PathVariable("id") @NotBlank String hpan);
+    PaymentInstrumentResource find(
+            @ApiParam(value = "${swagger.paymentInstrument.hpan}", required = true)
+            @PathVariable("id")
+            @NotBlank
+                    String hpan
+    );
 
     @PutMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseStatus(HttpStatus.OK)
-    PaymentInstrumentResource update(@PathVariable("id") @NotBlank String hpan,
-                                     @RequestBody @Valid PaymentInstrumentDTO paymentInstrument);
+    PaymentInstrumentResource update(
+            @ApiParam(value = "${swagger.paymentInstrument.hpan}", required = true)
+            @PathVariable("id")
+            @NotBlank
+                    String hpan,
+            @RequestBody @Valid PaymentInstrumentDTO paymentInstrument);
 
     @DeleteMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    void delete(@PathVariable("id") @NotBlank String hpan);
+    void delete(
+            @ApiParam(value = "${swagger.paymentInstrument.hpan}", required = true)
+            @PathVariable("id")
+            @NotBlank
+                    String hpan
+    );
 
     @GetMapping(value = "/{id}/history/active", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseStatus(HttpStatus.OK)
-    boolean checkActive(@PathVariable("id") @NotBlank String hpan,
-                        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime accountingDate);
+    boolean checkActive(
+            @ApiParam(value = "${swagger.paymentInstrument.hpan}", required = true)
+            @PathVariable("id")
+            @NotBlank
+                    String hpan,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime accountingDate);
 
 
 }

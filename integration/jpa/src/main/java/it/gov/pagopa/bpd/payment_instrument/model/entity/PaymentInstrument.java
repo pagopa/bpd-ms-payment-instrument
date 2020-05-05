@@ -26,7 +26,7 @@ public class PaymentInstrument extends BaseEntity {
     private OffsetDateTime activationDate;
 
     @Column(name = "cancellation_t")
-    private OffsetDateTime cancellationDate;
+    private OffsetDateTime deactivationDate;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status_c")
