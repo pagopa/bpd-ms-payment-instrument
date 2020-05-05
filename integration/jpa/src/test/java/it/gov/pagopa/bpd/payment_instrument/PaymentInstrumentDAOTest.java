@@ -28,7 +28,7 @@ public class PaymentInstrumentDAOTest extends BaseCrudJpaDAOTest<PaymentInstrume
     }
 
     @Override
-    protected PaymentInstrumentDAO getCitizenDAO() {
+    protected PaymentInstrumentDAO getDao() {
         return dao;
     }
 
