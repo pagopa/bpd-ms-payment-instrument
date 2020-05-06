@@ -61,7 +61,7 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
     public void delete(String hpan) {
         PaymentInstrument paymentInstrument = paymentInstrumentDAO.findById(hpan).orElseThrow(() -> new PaymentInstrumentNotFoundException(hpan));
         paymentInstrument.setStatus(PaymentInstrument.Status.INACTIVE);
-        paymentInstrument.setCancellationDate(OffsetDateTime.now());
+        paymentInstrument.setDeactivationDate(OffsetDateTime.now());
         paymentInstrument.setEnabled(false);
         //TODO: set update user with logged fiscal code
         paymentInstrumentDAO.save(paymentInstrument);
