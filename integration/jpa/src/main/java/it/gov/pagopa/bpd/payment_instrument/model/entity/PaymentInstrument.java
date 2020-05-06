@@ -32,14 +32,22 @@ public class PaymentInstrument extends BaseEntity {
     @Column(name = "status_c")
     private Status status;
 
+    public enum Status {
+        ACTIVE, INACTIVE
+    }
+
     @Override
     protected void onUpdate() {
         super.onUpdate();
         activationDate = OffsetDateTime.now();
     }
 
-    public enum Status {
-        ACTIVE, INACTIVE
+    public String getFiscalCode() {
+        return fiscalCode != null ? fiscalCode.toUpperCase() : null;
+    }
+
+    public void setFiscalCode(String fiscalCode) {
+        this.fiscalCode = fiscalCode != null ? fiscalCode.toUpperCase() : null;
     }
 }
 

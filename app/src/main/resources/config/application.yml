@@ -6,7 +6,9 @@ spring:
     name: "@project.parent.artifactId@"
     version: "@project.version@"
   profiles:
-    active: swaggerIT
+    include:
+      # TO enable italian documentations
+      - swaggerIT
 
 info:
   build:
