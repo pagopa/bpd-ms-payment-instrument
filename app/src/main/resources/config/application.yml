@@ -27,4 +27,4 @@ meda:
 
 logging:
   level:
-    it.gov.pagopa.bpd..payment_instrument: ${LOG_LEVEL_BPD_PAYMENT_INSTRUMENT:DEBUG}
+    it.gov.pagopa.bpd.payment_instrument: ${LOG_LEVEL_BPD_PAYMENT_INSTRUMENT:DEBUG}
