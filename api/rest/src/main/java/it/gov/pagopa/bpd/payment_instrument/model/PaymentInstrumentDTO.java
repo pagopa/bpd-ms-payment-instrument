@@ -2,9 +2,11 @@ package it.gov.pagopa.bpd.payment_instrument.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModelProperty;
+import it.gov.pagopa.bpd.common.util.Constants;
 import lombok.Data;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 import java.time.OffsetDateTime;
 
@@ -14,7 +16,8 @@ public class PaymentInstrumentDTO {
     @ApiModelProperty(value = "${swagger.paymentInstrument.fiscalCode}", required = true)
     @JsonProperty(required = true)
     @NotBlank
-    @Size(max = 16)
+    @Size(min = 16, max = 16)
+    @Pattern(regexp = Constants.FISCAL_CODE_REGEX)
     private String fiscalCode;
     //    @FutureOrPresent//FIXME
     @ApiModelProperty(value = "${swagger.paymentInstrument.activationDate}", required = true)
