@@ -1,6 +1,7 @@
 package it.gov.pagopa.bpd.payment_instrument.model.entity;
 
 import it.gov.pagopa.bpd.common.model.entity.BaseEntity;
+import it.gov.pagopa.bpd.common.model.entity.converter.UpperCaseConverter;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -19,6 +20,7 @@ public class PaymentInstrument extends BaseEntity {
     @Column(name = "hpan_s")
     private String hpan;
 
+    @Convert(converter = UpperCaseConverter.class)
     @Column(name = "fiscal_code_s")
     private String fiscalCode;
 
