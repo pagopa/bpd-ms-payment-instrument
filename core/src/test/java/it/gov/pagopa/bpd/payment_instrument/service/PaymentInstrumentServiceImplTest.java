@@ -3,12 +3,12 @@ package it.gov.pagopa.bpd.payment_instrument.service;
 import it.gov.pagopa.bpd.payment_instrument.PaymentInstrumentDAO;
 import it.gov.pagopa.bpd.payment_instrument.PaymentInstrumentHistoryDAO;
 import it.gov.pagopa.bpd.payment_instrument.exception.PaymentInstrumentNotFoundException;
+import it.gov.pagopa.bpd.payment_instrument.exception.PaymentInstrumentNumbersExceededException;
 import it.gov.pagopa.bpd.payment_instrument.model.entity.PaymentInstrument;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Example;
@@ -16,7 +16,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import javax.persistence.EntityNotFoundException;
+import javax.annotation.PostConstruct;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Optional;
@@ -33,6 +33,7 @@ public class PaymentInstrumentServiceImplTest {
 
     private static final String EXISTING_HASH_PAN = "existing-hpan";
     private static final String NOT_EXISTING_HASH_PAN = "not-existing-hpan";
+    private long countResult;
 
     @MockBean
     private PaymentInstrumentDAO paymentInstrumentDAOMock;
@@ -42,22 +43,8 @@ public class PaymentInstrumentServiceImplTest {
     private PaymentInstrumentService paymentInstrumentService;
 
 
-    @Before
-    public void initTest() {
-        Mockito.reset(paymentInstrumentDAOMock, paymentInstrumentHistoryDAOMock);
-
-        when(paymentInstrumentDAOMock.getOne(anyString()))
-                .thenAnswer(invocation -> {
-                    String hashPan = invocation.getArgument(0, String.class);
-                    if (!EXISTING_HASH_PAN.equals(hashPan)) {
-                        throw new EntityNotFoundException();
-
-                    }
-                    PaymentInstrument pi = new PaymentInstrument();
-                    pi.setHpan(hashPan);
-                    return pi;
-                });
-
+    @PostConstruct
+    public void configureTest() {
         when(paymentInstrumentDAOMock.findById(anyString()))
                 .thenAnswer(invocation -> {
                     String hashPan = invocation.getArgument(0, String.class);
@@ -72,13 +59,19 @@ public class PaymentInstrumentServiceImplTest {
 
 
         when(paymentInstrumentDAOMock.count(any(Example.class)))
-                .thenAnswer(invocation -> 4L);
+                .thenAnswer(invocation -> countResult);
 
         when(paymentInstrumentDAOMock.save(any(PaymentInstrument.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0, PaymentInstrument.class));
 
         when(paymentInstrumentHistoryDAOMock.checkActive(eq(EXISTING_HASH_PAN), any()))
                 .thenAnswer(invocation -> new ArrayList<>());
+    }
+
+
+    @Before
+    public void initMockVariables() {
+        countResult = 4;
     }
 
 
@@ -137,6 +130,18 @@ public class PaymentInstrumentServiceImplTest {
         verifyNoMoreInteractions(paymentInstrumentDAOMock);
     }
 
+    @Test(expected = PaymentInstrumentNumbersExceededException.class)
+    public void createOrUpdate_paymentInstrumentNumbersExceededError() {
+        countResult = 5;
+        final String hashPan = NOT_EXISTING_HASH_PAN;
+        PaymentInstrument paymentInstrument = new PaymentInstrument();
+
+        PaymentInstrument result = paymentInstrumentService.createOrUpdate(hashPan, paymentInstrument);
+
+        verify(paymentInstrumentDAOMock, times(1)).findById(eq(hashPan));
+        verify(paymentInstrumentDAOMock, times(1)).count(any(Example.class));
+        verifyNoMoreInteractions(paymentInstrumentDAOMock);
+    }
 
     @Test
     public void deleteOK() {

@@ -5,6 +5,9 @@ import it.gov.pagopa.bpd.payment_instrument.model.entity.PaymentInstrument;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
+/**
+ * Mapper between <PaymentInstrument> Entity class and <PaymentInstrumentResource> Resource class
+ */
 @Service
 public class PaymentInstrumentResourceAssembler {
 

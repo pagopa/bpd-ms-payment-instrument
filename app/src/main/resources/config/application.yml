@@ -5,6 +5,10 @@ spring:
   application:
     name: "@project.parent.artifactId@"
     version: "@project.version@"
+  profiles:
+    include:
+      # TO enable italian documentations
+      - swaggerIT
 
 info:
   build:
@@ -23,4 +27,4 @@ meda:
 
 logging:
   level:
-    it.gov.pagopa.bpd..payment_instrument: ${LOG_LEVEL_BPD_PAYMENT_INSTRUMENT:DEBUG}
+    it.gov.pagopa.bpd.payment_instrument: ${LOG_LEVEL_BPD_PAYMENT_INSTRUMENT:DEBUG}

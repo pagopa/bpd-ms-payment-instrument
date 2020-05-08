@@ -10,6 +10,9 @@ import org.springframework.stereotype.Repository;
 import java.time.OffsetDateTime;
 import java.util.List;
 
+/**
+ * Data Access Object to manage all CRUD operations to the database
+ */
 @Repository
 public interface PaymentInstrumentHistoryDAO extends CrudJpaDAO<PaymentInstrumentHistory, String> {
 

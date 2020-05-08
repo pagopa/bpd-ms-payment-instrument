@@ -57,7 +57,7 @@ public class BpdPaymentInstrumentControllerImplTest {
         PaymentInstrument paymentInstrument = new PaymentInstrument();
         paymentInstrument.setActivationDate(CURRENT_DATE_TIME);
         paymentInstrument.setStatus(PaymentInstrument.Status.ACTIVE);
-        paymentInstrument.setFiscalCode("fiscalCode");
+        paymentInstrument.setFiscalCode("DHFIVD85M84D048L");
 
         doReturn(paymentInstrument)
                 .when(paymentInstrumentServiceMock).find(eq("hpan"));
@@ -90,7 +90,7 @@ public class BpdPaymentInstrumentControllerImplTest {
     @Test
     public void update() throws Exception {
         PaymentInstrumentDTO paymentInstrument = new PaymentInstrumentDTO();
-        paymentInstrument.setFiscalCode("fiscalCode");
+        paymentInstrument.setFiscalCode("DHFIVD85M84D048L");
         paymentInstrument.setActivationDate(CURRENT_DATE_TIME);
         MvcResult result = (MvcResult) mvc.perform(MockMvcRequestBuilders.put("/bpd/payment-instruments/hpan")
                 .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)

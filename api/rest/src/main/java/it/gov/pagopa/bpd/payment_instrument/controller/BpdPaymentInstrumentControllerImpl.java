@@ -12,6 +12,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.time.OffsetDateTime;
 
+/**
+ * See {@link BpdPaymentInstrumentController}
+ */
 @RestController
 class BpdPaymentInstrumentControllerImpl extends StatelessController implements BpdPaymentInstrumentController {
 
