@@ -42,13 +42,7 @@ public class PaymentInstrument extends BaseEntity {
         activationDate = OffsetDateTime.now();
     }
 
-    public String getFiscalCode() {
-        return fiscalCode != null ? fiscalCode.toUpperCase() : null;
-    }
 
-    public void setFiscalCode(String fiscalCode) {
-        this.fiscalCode = fiscalCode != null ? fiscalCode.toUpperCase() : null;
-    }
 }
 
 
