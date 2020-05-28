@@ -1,12 +1,12 @@
 package it.gov.pagopa.bpd.payment_instrument.service;
 
 import eu.sia.meda.service.BaseService;
-import it.gov.pagopa.bpd.payment_instrument.PaymentInstrumentDAO;
-import it.gov.pagopa.bpd.payment_instrument.PaymentInstrumentHistoryDAO;
+import it.gov.pagopa.bpd.payment_instrument.connector.jpa.PaymentInstrumentDAO;
+import it.gov.pagopa.bpd.payment_instrument.connector.jpa.PaymentInstrumentHistoryDAO;
+import it.gov.pagopa.bpd.payment_instrument.connector.jpa.model.PaymentInstrument;
+import it.gov.pagopa.bpd.payment_instrument.connector.jpa.model.PaymentInstrumentHistory;
 import it.gov.pagopa.bpd.payment_instrument.exception.PaymentInstrumentNotFoundException;
 import it.gov.pagopa.bpd.payment_instrument.exception.PaymentInstrumentNumbersExceededException;
-import it.gov.pagopa.bpd.payment_instrument.model.entity.PaymentInstrument;
-import it.gov.pagopa.bpd.payment_instrument.model.entity.PaymentInstrumentHistory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Example;

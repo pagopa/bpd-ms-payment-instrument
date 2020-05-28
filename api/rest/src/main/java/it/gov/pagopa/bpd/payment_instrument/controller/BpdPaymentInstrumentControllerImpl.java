@@ -1,11 +1,11 @@
 package it.gov.pagopa.bpd.payment_instrument.controller;
 
 import eu.sia.meda.core.controller.StatelessController;
-import it.gov.pagopa.bpd.payment_instrument.assembler.PaymentInstrumentResourceAssembler;
-import it.gov.pagopa.bpd.payment_instrument.factory.ModelFactory;
-import it.gov.pagopa.bpd.payment_instrument.model.PaymentInstrumentDTO;
-import it.gov.pagopa.bpd.payment_instrument.model.PaymentInstrumentResource;
-import it.gov.pagopa.bpd.payment_instrument.model.entity.PaymentInstrument;
+import it.gov.pagopa.bpd.payment_instrument.connector.jpa.model.PaymentInstrument;
+import it.gov.pagopa.bpd.payment_instrument.controller.assembler.PaymentInstrumentResourceAssembler;
+import it.gov.pagopa.bpd.payment_instrument.controller.factory.ModelFactory;
+import it.gov.pagopa.bpd.payment_instrument.controller.model.PaymentInstrumentDTO;
+import it.gov.pagopa.bpd.payment_instrument.controller.model.PaymentInstrumentResource;
 import it.gov.pagopa.bpd.payment_instrument.service.PaymentInstrumentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;

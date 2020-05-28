@@ -1,4 +1,4 @@
-package it.gov.pagopa.bpd.payment_instrument.model;
+package it.gov.pagopa.bpd.payment_instrument.controller.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;

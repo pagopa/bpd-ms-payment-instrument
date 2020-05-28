@@ -1,6 +1,6 @@
 package it.gov.pagopa.bpd.payment_instrument.service;
 
-import it.gov.pagopa.bpd.payment_instrument.model.entity.PaymentInstrument;
+import it.gov.pagopa.bpd.payment_instrument.connector.jpa.model.PaymentInstrument;
 
 import java.time.OffsetDateTime;
 

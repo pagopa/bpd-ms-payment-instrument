@@ -1,4 +1,4 @@
-package it.gov.pagopa.bpd.payment_instrument.config;
+package it.gov.pagopa.bpd.payment_instrument.controller.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;

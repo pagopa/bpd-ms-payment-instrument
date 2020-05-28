@@ -1,6 +1,6 @@
-package it.gov.pagopa.bpd.payment_instrument.model.entity;
+package it.gov.pagopa.bpd.payment_instrument.connector.jpa.model;
 
-import it.gov.pagopa.bpd.common.model.entity.BaseEntity;
+import it.gov.pagopa.bpd.common.connector.jpa.model.BaseEntity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;

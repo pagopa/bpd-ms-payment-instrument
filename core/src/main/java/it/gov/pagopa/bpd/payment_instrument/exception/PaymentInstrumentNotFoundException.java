@@ -1,7 +1,7 @@
 package it.gov.pagopa.bpd.payment_instrument.exception;
 
 import it.gov.pagopa.bpd.common.exception.ResourceNotFoundException;
-import it.gov.pagopa.bpd.payment_instrument.model.entity.PaymentInstrument;
+import it.gov.pagopa.bpd.payment_instrument.connector.jpa.model.PaymentInstrument;
 
 public class PaymentInstrumentNotFoundException extends ResourceNotFoundException {
 

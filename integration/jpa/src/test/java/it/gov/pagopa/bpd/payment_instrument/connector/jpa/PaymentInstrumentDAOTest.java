@@ -1,9 +1,9 @@
-package it.gov.pagopa.bpd.payment_instrument;
+package it.gov.pagopa.bpd.payment_instrument.connector.jpa;
 
 
 import eu.sia.meda.layers.connector.query.CriteriaQuery;
-import it.gov.pagopa.bpd.common.BaseCrudJpaDAOTest;
-import it.gov.pagopa.bpd.payment_instrument.model.entity.PaymentInstrument;
+import it.gov.pagopa.bpd.common.connector.jpa.BaseCrudJpaDAOTest;
+import it.gov.pagopa.bpd.payment_instrument.connector.jpa.model.PaymentInstrument;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 

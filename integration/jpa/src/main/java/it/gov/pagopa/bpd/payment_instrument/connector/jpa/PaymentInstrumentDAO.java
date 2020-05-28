@@ -1,7 +1,7 @@
-package it.gov.pagopa.bpd.payment_instrument;
+package it.gov.pagopa.bpd.payment_instrument.connector.jpa;
 
-import eu.sia.meda.connector.jpa.CrudJpaDAO;
-import it.gov.pagopa.bpd.payment_instrument.model.entity.PaymentInstrument;
+import it.gov.pagopa.bpd.common.connector.jpa.CrudJpaDAO;
+import it.gov.pagopa.bpd.payment_instrument.connector.jpa.model.PaymentInstrument;
 import org.springframework.stereotype.Repository;
 
 /**
