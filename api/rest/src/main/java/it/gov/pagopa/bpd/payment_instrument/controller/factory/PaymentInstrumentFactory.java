@@ -1,7 +1,7 @@
-package it.gov.pagopa.bpd.payment_instrument.factory;
+package it.gov.pagopa.bpd.payment_instrument.controller.factory;
 
-import it.gov.pagopa.bpd.payment_instrument.model.PaymentInstrumentDTO;
-import it.gov.pagopa.bpd.payment_instrument.model.entity.PaymentInstrument;
+import it.gov.pagopa.bpd.payment_instrument.connector.jpa.model.PaymentInstrument;
+import it.gov.pagopa.bpd.payment_instrument.controller.model.PaymentInstrumentDTO;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Component;
 

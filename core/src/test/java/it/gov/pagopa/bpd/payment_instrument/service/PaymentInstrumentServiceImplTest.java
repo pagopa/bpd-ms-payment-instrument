@@ -1,10 +1,10 @@
 package it.gov.pagopa.bpd.payment_instrument.service;
 
-import it.gov.pagopa.bpd.payment_instrument.PaymentInstrumentDAO;
-import it.gov.pagopa.bpd.payment_instrument.PaymentInstrumentHistoryDAO;
+import it.gov.pagopa.bpd.payment_instrument.connector.jpa.PaymentInstrumentDAO;
+import it.gov.pagopa.bpd.payment_instrument.connector.jpa.PaymentInstrumentHistoryDAO;
+import it.gov.pagopa.bpd.payment_instrument.connector.jpa.model.PaymentInstrument;
 import it.gov.pagopa.bpd.payment_instrument.exception.PaymentInstrumentNotFoundException;
 import it.gov.pagopa.bpd.payment_instrument.exception.PaymentInstrumentNumbersExceededException;
-import it.gov.pagopa.bpd.payment_instrument.model.entity.PaymentInstrument;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;

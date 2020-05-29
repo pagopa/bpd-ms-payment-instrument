@@ -2,11 +2,11 @@ package it.gov.pagopa.bpd.payment_instrument.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.sia.meda.config.ArchConfiguration;
-import it.gov.pagopa.bpd.payment_instrument.assembler.PaymentInstrumentResourceAssembler;
-import it.gov.pagopa.bpd.payment_instrument.factory.PaymentInstrumentFactory;
-import it.gov.pagopa.bpd.payment_instrument.model.PaymentInstrumentDTO;
-import it.gov.pagopa.bpd.payment_instrument.model.PaymentInstrumentResource;
-import it.gov.pagopa.bpd.payment_instrument.model.entity.PaymentInstrument;
+import it.gov.pagopa.bpd.payment_instrument.connector.jpa.model.PaymentInstrument;
+import it.gov.pagopa.bpd.payment_instrument.controller.assembler.PaymentInstrumentResourceAssembler;
+import it.gov.pagopa.bpd.payment_instrument.controller.factory.PaymentInstrumentFactory;
+import it.gov.pagopa.bpd.payment_instrument.controller.model.PaymentInstrumentDTO;
+import it.gov.pagopa.bpd.payment_instrument.controller.model.PaymentInstrumentResource;
 import it.gov.pagopa.bpd.payment_instrument.service.PaymentInstrumentService;
 import org.junit.Test;
 import org.junit.runner.RunWith;

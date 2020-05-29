@@ -1,8 +1,8 @@
-package it.gov.pagopa.bpd.payment_instrument.model;
+package it.gov.pagopa.bpd.payment_instrument.controller.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModelProperty;
-import it.gov.pagopa.bpd.payment_instrument.model.entity.PaymentInstrument;
+import it.gov.pagopa.bpd.payment_instrument.connector.jpa.model.PaymentInstrument;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 

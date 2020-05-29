@@ -1,4 +1,4 @@
-package it.gov.pagopa.bpd.payment_instrument.model.entity;
+package it.gov.pagopa.bpd.payment_instrument.connector.jpa.model;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;

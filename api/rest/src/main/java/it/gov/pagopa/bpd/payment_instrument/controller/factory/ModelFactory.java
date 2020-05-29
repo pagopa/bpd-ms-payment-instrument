@@ -1,4 +1,4 @@
-package it.gov.pagopa.bpd.payment_instrument.factory;
+package it.gov.pagopa.bpd.payment_instrument.controller.factory;
 
 public interface ModelFactory<T, U> {
 

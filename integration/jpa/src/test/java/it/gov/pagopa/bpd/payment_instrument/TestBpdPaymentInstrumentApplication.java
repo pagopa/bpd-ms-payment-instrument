@@ -1,4 +1,4 @@
-package it.gov.pagopa.bpd;
+package it.gov.pagopa.bpd.payment_instrument;
 
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
