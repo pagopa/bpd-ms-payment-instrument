@@ -10,6 +10,8 @@ import it.gov.pagopa.bpd.payment_instrument.exception.PaymentInstrumentNumbersEx
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Example;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.OffsetDateTime;
@@ -30,7 +32,8 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
 
 
     @Autowired
-    public PaymentInstrumentServiceImpl(PaymentInstrumentDAO paymentInstrumentDAO, PaymentInstrumentHistoryDAO paymentInstrumentHistoryDAO) {
+    public PaymentInstrumentServiceImpl(PaymentInstrumentDAO paymentInstrumentDAO,
+                                        PaymentInstrumentHistoryDAO paymentInstrumentHistoryDAO) {
         this.paymentInstrumentDAO = paymentInstrumentDAO;
         this.paymentInstrumentHistoryDAO = paymentInstrumentHistoryDAO;
     }
@@ -44,26 +47,44 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
 
     @Override
     public PaymentInstrument createOrUpdate(String hpan, PaymentInstrument pi) {
-        final Optional<PaymentInstrument> found = paymentInstrumentDAO.findById(hpan);
-        if (!found.isPresent()) {
+        final Optional<PaymentInstrument> foundPIOpt = paymentInstrumentDAO.findById(hpan);
+        pi.setHpan(hpan);
+        if (!foundPIOpt.isPresent()) {
             final long count = paymentInstrumentDAO.count(Example.of(pi));
             if (count >= numMaxPaymentInstr) {
-                throw new PaymentInstrumentNumbersExceededException(PaymentInstrument.class, numMaxPaymentInstr);
+                throw new PaymentInstrumentNumbersExceededException(
+                        PaymentInstrument.class, numMaxPaymentInstr);
+            }
+            return paymentInstrumentDAO.save(pi);
+        } else {
+            PaymentInstrument foundPI = foundPIOpt.get();
+            if (!foundPI.isEnabled()) {
+                foundPI.setEnabled(true);
+                foundPI.setHpan(hpan);
+                foundPI.setActivationDate(pi.getActivationDate());
+                foundPI.setFiscalCode(pi.getFiscalCode());
+                foundPI.setStatus(PaymentInstrument.Status.ACTIVE);
+                return paymentInstrumentDAO.save(pi);
             }
         }
-        pi.setHpan(hpan);
 
-        return paymentInstrumentDAO.save(pi);
+        return pi;
     }
 
 
     @Override
     public void delete(String hpan) {
-        PaymentInstrument paymentInstrument = paymentInstrumentDAO.findById(hpan).orElseThrow(() -> new PaymentInstrumentNotFoundException(hpan));
-        paymentInstrument.setStatus(PaymentInstrument.Status.INACTIVE);
-        paymentInstrument.setDeactivationDate(OffsetDateTime.now());
-        paymentInstrument.setEnabled(false);
-        //TODO: set update user with logged fiscal code
+        PaymentInstrument paymentInstrument = paymentInstrumentDAO.findById(hpan).orElseThrow(
+                () -> new PaymentInstrumentNotFoundException(hpan));
+        if (paymentInstrument.isEnabled()) {
+            paymentInstrument.setStatus(PaymentInstrument.Status.INACTIVE);
+            paymentInstrument.setDeactivationDate(OffsetDateTime.now());
+            paymentInstrument.setEnabled(false);
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            if (authentication != null) {
+                paymentInstrument.setFiscalCode(authentication.getName());
+            }
+        }
         paymentInstrumentDAO.save(paymentInstrument);
     }
 
@@ -72,7 +93,6 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
     public boolean checkActive(String hpan, OffsetDateTime accountingDate) {
         List<PaymentInstrumentHistory> paymentInstrumentHistoryList =
                 paymentInstrumentHistoryDAO.checkActive(hpan, accountingDate);
-
         return !paymentInstrumentHistoryList.isEmpty();
     }
 

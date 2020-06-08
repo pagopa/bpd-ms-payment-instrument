@@ -32,6 +32,7 @@ import static org.mockito.Mockito.*;
 public class PaymentInstrumentServiceImplTest {
 
     private static final String EXISTING_HASH_PAN = "existing-hpan";
+    private static final String EXISTING_HASH_PAN_INACTIVE = "existing-hpan-inactive";
     private static final String NOT_EXISTING_HASH_PAN = "not-existing-hpan";
     private long countResult;
 
@@ -54,6 +55,12 @@ public class PaymentInstrumentServiceImplTest {
                         pi.setHpan(hashPan);
                         result = Optional.of(pi);
                     }
+                    if (EXISTING_HASH_PAN_INACTIVE.equals(hashPan)) {
+                        PaymentInstrument pi = new PaymentInstrument();
+                        pi.setHpan(hashPan);
+                        pi.setEnabled(false);
+                        result = Optional.of(pi);
+                    }
                     return result;
                 });
 
@@ -66,6 +73,7 @@ public class PaymentInstrumentServiceImplTest {
 
         when(paymentInstrumentHistoryDAOMock.checkActive(eq(EXISTING_HASH_PAN), any()))
                 .thenAnswer(invocation -> new ArrayList<>());
+
     }
 
 
@@ -117,7 +125,7 @@ public class PaymentInstrumentServiceImplTest {
 
     @Test
     public void createOrUpdate_updateOK() {
-        final String hashPan = EXISTING_HASH_PAN;
+        final String hashPan = EXISTING_HASH_PAN_INACTIVE;
         PaymentInstrument paymentInstrument = new PaymentInstrument();
 
         PaymentInstrument result = paymentInstrumentService.createOrUpdate(hashPan, paymentInstrument);
@@ -129,6 +137,20 @@ public class PaymentInstrumentServiceImplTest {
         verify(paymentInstrumentDAOMock, times(1)).save(eq(paymentInstrument));
         verifyNoMoreInteractions(paymentInstrumentDAOMock);
     }
+
+    @Test
+    public void createOrUpdate_updateOK_AlreadyActive() {
+        final String hashPan = EXISTING_HASH_PAN;
+        PaymentInstrument paymentInstrument = new PaymentInstrument();
+
+        PaymentInstrument result = paymentInstrumentService.createOrUpdate(hashPan, paymentInstrument);
+
+        assertNotNull(paymentInstrument);
+        assertEquals(hashPan, result.getHpan());
+        verify(paymentInstrumentDAOMock, times(1)).findById(eq(hashPan));
+        verifyNoMoreInteractions(paymentInstrumentDAOMock);
+    }
+
 
     @Test(expected = PaymentInstrumentNumbersExceededException.class)
     public void createOrUpdate_paymentInstrumentNumbersExceededError() {
