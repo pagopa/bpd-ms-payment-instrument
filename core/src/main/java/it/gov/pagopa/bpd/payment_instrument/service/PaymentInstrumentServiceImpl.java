@@ -9,7 +9,6 @@ import it.gov.pagopa.bpd.payment_instrument.exception.PaymentInstrumentNotFoundE
 import it.gov.pagopa.bpd.payment_instrument.exception.PaymentInstrumentNumbersExceededException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Example;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -50,7 +49,8 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
         final Optional<PaymentInstrument> foundPIOpt = paymentInstrumentDAO.findById(hpan);
         pi.setHpan(hpan);
         if (!foundPIOpt.isPresent()) {
-            final long count = paymentInstrumentDAO.count(Example.of(pi));
+            final long count = paymentInstrumentDAO.count((root, query, criteriaBuilder) ->
+                    criteriaBuilder.equal(root.get("fiscalCode"), pi.getFiscalCode()));
             if (count >= numMaxPaymentInstr) {
                 throw new PaymentInstrumentNumbersExceededException(
                         PaymentInstrument.class, numMaxPaymentInstr);

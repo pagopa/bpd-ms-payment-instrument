@@ -11,7 +11,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.data.domain.Example;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -35,6 +35,7 @@ public class PaymentInstrumentServiceImplTest {
     private static final String EXISTING_HASH_PAN_INACTIVE = "existing-hpan-inactive";
     private static final String NOT_EXISTING_HASH_PAN = "not-existing-hpan";
     private long countResult;
+
 
     @MockBean
     private PaymentInstrumentDAO paymentInstrumentDAOMock;
@@ -65,7 +66,7 @@ public class PaymentInstrumentServiceImplTest {
                 });
 
 
-        when(paymentInstrumentDAOMock.count(any(Example.class)))
+        when(paymentInstrumentDAOMock.count(any(Specification.class)))
                 .thenAnswer(invocation -> countResult);
 
         when(paymentInstrumentDAOMock.save(any(PaymentInstrument.class)))
@@ -110,16 +111,15 @@ public class PaymentInstrumentServiceImplTest {
     public void createOrUpdate_createOK() {
         final String hashPan = NOT_EXISTING_HASH_PAN;
         PaymentInstrument paymentInstrument = new PaymentInstrument();
+        paymentInstrument.setFiscalCode("ALSTRD85M84K048F");
 
         PaymentInstrument result = paymentInstrumentService.createOrUpdate(hashPan, paymentInstrument);
 
         assertNotNull(paymentInstrument);
         assertEquals(hashPan, result.getHpan());
         verify(paymentInstrumentDAOMock, times(1)).findById(eq(hashPan));
-        verify(paymentInstrumentDAOMock, times(1)).count(eq(Example.of(paymentInstrument)));
-        paymentInstrument.setHpan(hashPan);
+        verify(paymentInstrumentDAOMock, times(1)).count(any(Specification.class));
         verify(paymentInstrumentDAOMock, times(1)).save(eq(paymentInstrument));
-        verifyNoMoreInteractions(paymentInstrumentDAOMock);
     }
 
 
@@ -133,7 +133,6 @@ public class PaymentInstrumentServiceImplTest {
         assertNotNull(paymentInstrument);
         assertEquals(hashPan, result.getHpan());
         verify(paymentInstrumentDAOMock, times(1)).findById(eq(hashPan));
-        paymentInstrument.setHpan(hashPan);
         verify(paymentInstrumentDAOMock, times(1)).save(eq(paymentInstrument));
         verifyNoMoreInteractions(paymentInstrumentDAOMock);
     }
@@ -161,7 +160,7 @@ public class PaymentInstrumentServiceImplTest {
         PaymentInstrument result = paymentInstrumentService.createOrUpdate(hashPan, paymentInstrument);
 
         verify(paymentInstrumentDAOMock, times(1)).findById(eq(hashPan));
-        verify(paymentInstrumentDAOMock, times(1)).count(any(Example.class));
+        verify(paymentInstrumentDAOMock, times(1)).count(any(Specification.class));
         verifyNoMoreInteractions(paymentInstrumentDAOMock);
     }
 
