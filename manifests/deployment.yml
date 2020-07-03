@@ -1,0 +1,21 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: bpdmspaymentinstrument
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: bpdmspaymentinstrument
+    spec:
+      containers:
+        - name: bpdmspaymentinstrument
+          image: cstarregistry.azurecr.io/bpdmscitizen
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - secretRef:
+                name: postgres-credentials
+            - configMapRef:
+                name: eventhub-logging
