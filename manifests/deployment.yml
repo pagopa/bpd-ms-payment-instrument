@@ -11,7 +11,7 @@ spec:
     spec:
       containers:
         - name: bpdmspaymentinstrument
-          image: cstarregistry.azurecr.io/bpdmscitizen
+          image: cstarregistry.azurecr.io/bpdmspaymentinstrument
           ports:
             - containerPort: 8080
           envFrom:
