@@ -9,8 +9,6 @@ import it.gov.pagopa.bpd.payment_instrument.exception.PaymentInstrumentNotFoundE
 import it.gov.pagopa.bpd.payment_instrument.exception.PaymentInstrumentNumbersExceededException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.OffsetDateTime;
@@ -80,10 +78,6 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
             paymentInstrument.setStatus(PaymentInstrument.Status.INACTIVE);
             paymentInstrument.setDeactivationDate(OffsetDateTime.now());
             paymentInstrument.setEnabled(false);
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            if (authentication != null) {
-                paymentInstrument.setFiscalCode(authentication.getName());
-            }
         }
         paymentInstrumentDAO.save(paymentInstrument);
     }
