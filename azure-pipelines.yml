@@ -28,7 +28,7 @@ variables:
   containerRegistry: 'cstarregistry.azurecr.io'
   dockerfileRelativePath: 'Dockerfile'
   tag: '$(Build.BuildId)'
-  imagePullSecret: 'cstarregistry92872b72-auth'
+  imagePullSecret: 'cstarregistry-auth'
 
   # Agent VM image name
   vmImageName: 'ubuntu-latest'
@@ -101,12 +101,11 @@ stages:
           runOnce:
             deploy:
               steps:
-                - task: KubernetesManifest@0
-                  displayName: Create imagePullSecret
+                - task: DownloadPipelineArtifact@2
                   inputs:
-                    action: createSecret
-                    secretName: $(imagePullSecret)
-                    dockerRegistryEndpoint: $(dockerRegistryServiceConnection)
+                    buildType: 'current'
+                    artifactName: 'manifest'
+                    targetPath: '$(Pipeline.Workspace)'
                 - task: KubernetesManifest@0
                   displayName: Deploy to Kubernetes cluster
                   inputs:

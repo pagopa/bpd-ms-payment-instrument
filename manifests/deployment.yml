@@ -19,3 +19,7 @@ spec:
                 name: postgres-credentials
             - configMapRef:
                 name: eventhub-logging
+      hostAliases:
+        - hostnames:
+            - bpd-hub-dev.servicebus.windows.net
+          ip: 10.70.5.9
