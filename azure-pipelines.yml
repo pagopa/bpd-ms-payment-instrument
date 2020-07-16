@@ -104,7 +104,7 @@ stages:
                 - download: none
                 - task: CmdLine@2
                   inputs:
-                    script: 'll -a'
+                    script: 'ls -la'
                     workingDirectory: '$(Pipeline.Workspace)'
                 - task: DownloadPipelineArtifact@2
                   inputs:
@@ -113,7 +113,7 @@ stages:
                     targetPath: '$(Pipeline.Workspace)'
                 - task: CmdLine@2
                   inputs:
-                    script: 'll -a'
+                    script: 'ls -la'
                     workingDirectory: '$(Pipeline.Workspace)'
                 - task: KubernetesManifest@0
                   displayName: Deploy to Kubernetes cluster
