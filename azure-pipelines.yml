@@ -46,38 +46,38 @@ stages:
         pool:
           vmImage: $(vmImageName)
         steps:
-#          - task: DownloadSecureFile@1
-#            displayName: 'download settings.xml for Maven'
-#            name: settingsxml
-#            inputs:
-#              secureFile: 'settings.xml'
-#              retryCount: '2'
-#          - task: Maven@3
-#            inputs:
-#              mavenPomFile: 'pom.xml'
-#              goals: 'deploy'
-#              options: '-B -s $(settingsxml.secureFilePath)'
-#              publishJUnitResults: true
-#              testResultsFiles: '**/surefire-reports/TEST-*.xml'
-#              codeCoverageToolOption: 'JaCoCo'
-#              codeCoverageClassFilter: '+:it.gov.pagopa.**,-:**.*Config,-:**.model.**,-:**.enums.**,-:**.*Constants,-:**.*Application,-:**.*Test,-:**.*Test.**'
-#              javaHomeOption: 'JDKVersion'
-#              jdkVersionOption: '1.8'
-#              mavenVersionOption: 'Default'
-#              mavenOptions: '-Xmx3072m'
-#              mavenAuthenticateFeed: false
-#              effectivePomSkip: true
-#              sonarQubeRunAnalysis: false
-#          - task: Docker@2
-#            displayName: Build and push an image to container registry
-#            condition: and(succeeded(), eq(variables.isToDeploy, true))
-#            inputs:
-#              containerRegistry: '$(dockerRegistryServiceConnection)'
-#              repository: '$(imageRepository)'
-#              command: 'buildAndPush'
-#              Dockerfile: '$(Build.Repository.LocalPath)/$(dockerfileRelativePath)'
-#              buildContext: '$(Build.Repository.LocalPath)'
-#              tags: '$(tag)'
+          - task: DownloadSecureFile@1
+            displayName: 'download settings.xml for Maven'
+            name: settingsxml
+            inputs:
+              secureFile: 'settings.xml'
+              retryCount: '2'
+          - task: Maven@3
+            inputs:
+              mavenPomFile: 'pom.xml'
+              goals: 'deploy'
+              options: '-B -s $(settingsxml.secureFilePath)'
+              publishJUnitResults: true
+              testResultsFiles: '**/surefire-reports/TEST-*.xml'
+              codeCoverageToolOption: 'JaCoCo'
+              codeCoverageClassFilter: '+:it.gov.pagopa.**,-:**.*Config,-:**.model.**,-:**.enums.**,-:**.*Constants,-:**.*Application,-:**.*Test,-:**.*Test.**'
+              javaHomeOption: 'JDKVersion'
+              jdkVersionOption: '1.8'
+              mavenVersionOption: 'Default'
+              mavenOptions: '-Xmx3072m'
+              mavenAuthenticateFeed: false
+              effectivePomSkip: true
+              sonarQubeRunAnalysis: false
+          - task: Docker@2
+            displayName: Build and push an image to container registry
+            condition: and(succeeded(), eq(variables.isToDeploy, true))
+            inputs:
+              containerRegistry: '$(dockerRegistryServiceConnection)'
+              repository: '$(imageRepository)'
+              command: 'buildAndPush'
+              Dockerfile: '$(Build.Repository.LocalPath)/$(dockerfileRelativePath)'
+              buildContext: '$(Build.Repository.LocalPath)'
+              tags: '$(tag)'
           - task: PublishPipelineArtifact@1
             displayName: 'Publish Atrifact manifests'
             condition: and(succeeded(), eq(variables.isToDeploy, true))
@@ -90,7 +90,6 @@ stages:
     displayName: Deploy stage
     dependsOn: Build
     condition: and(succeeded(), eq(variables.isToDeploy, true))
-
     jobs:
       - deployment: Deploy
         displayName: Deploy
@@ -102,30 +101,18 @@ stages:
             deploy:
               steps:
                 - download: none
-                - task: CmdLine@2
-                  inputs:
-                    script: 'ls -la'
-                    workingDirectory: '$(Pipeline.Workspace)'
                 - task: DownloadPipelineArtifact@2
                   inputs:
                     buildType: 'current'
                     artifactName: 'manifests'
-                    targetPath: '$(Pipeline.Workspace)'
-                - task: CmdLine@2
-                  inputs:
-                    script: 'ls -la'
-                    workingDirectory: '$(Pipeline.Workspace)'
-                - task: CmdLine@2
-                  inputs:
-                    script: 'ls -la'
-                    workingDirectory: '$(Build.Repository.LocalPath)'
+                    targetPath: '$(Pipeline.Workspace)/manifests'
                 - task: KubernetesManifest@0
                   displayName: Deploy to Kubernetes cluster
                   inputs:
                     action: deploy
                     manifests: |
-                      $(Pipeline.Workspace)/deployment.yml
-                      $(Pipeline.Workspace)/service.yml
+                      $(Pipeline.Workspace)/manifests/deployment.yml
+                      $(Pipeline.Workspace)/manifests/service.yml
                     imagePullSecrets: |
                       $(imagePullSecret)
                     containers: |
