@@ -90,7 +90,6 @@ stages:
     displayName: Deploy stage
     dependsOn: Build
     condition: and(succeeded(), eq(variables.isToDeploy, true))
-
     jobs:
       - deployment: Deploy
         displayName: Deploy
@@ -106,7 +105,7 @@ stages:
                   inputs:
                     buildType: 'current'
                     artifactName: 'manifests'
-                    targetPath: '$(Pipeline.Workspace)'
+                    targetPath: '$(Pipeline.Workspace)/manifests'
                 - task: KubernetesManifest@0
                   displayName: Deploy to Kubernetes cluster
                   inputs:
