@@ -119,15 +119,15 @@ stages:
                   inputs:
                     script: 'ls -la'
                     workingDirectory: '$(Build.Repository.LocalPath)'
-#                - task: KubernetesManifest@0
-#                  displayName: Deploy to Kubernetes cluster
-#                  inputs:
-#                    action: deploy
-#                    manifests: |
-#                      $(Pipeline.Workspace)/manifests/deployment.yml
-#                      $(Pipeline.Workspace)/manifests/service.yml
-#                    imagePullSecrets: |
-#                      $(imagePullSecret)
-#                    containers: |
-#                      $(containerRegistry)/$(imageRepository):$(tag)
+                - task: KubernetesManifest@0
+                  displayName: Deploy to Kubernetes cluster
+                  inputs:
+                    action: deploy
+                    manifests: |
+                      $(Pipeline.Workspace)/deployment.yml
+                      $(Pipeline.Workspace)/service.yml
+                    imagePullSecrets: |
+                      $(imagePullSecret)
+                    containers: |
+                      $(containerRegistry)/$(imageRepository):$(tag)
 
