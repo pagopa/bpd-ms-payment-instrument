@@ -70,6 +70,9 @@ public class BpdPaymentInstrumentControllerImplTest {
 
         doNothing()
                 .when(paymentInstrumentServiceMock).delete(eq("hpan"));
+
+        doNothing()
+                .when(paymentInstrumentServiceMock).deleteByFiscalCode(eq("fiscalCode"));
     }
 
     @Test
@@ -112,6 +115,14 @@ public class BpdPaymentInstrumentControllerImplTest {
                 .andExpect(MockMvcResultMatchers.status().is2xxSuccessful());
         verify(paymentInstrumentServiceMock).delete(any());
     }
+
+    @Test
+    public void deleteByFiscalCode() throws Exception {
+        mvc.perform(MockMvcRequestBuilders.delete("/bpd/payment-instruments/fiscal-code/fiscalCode"))
+                .andExpect(MockMvcResultMatchers.status().is2xxSuccessful());
+        verify(paymentInstrumentServiceMock).deleteByFiscalCode(any());
+    }
+
 
     @Test
     public void checkActive() throws Exception {

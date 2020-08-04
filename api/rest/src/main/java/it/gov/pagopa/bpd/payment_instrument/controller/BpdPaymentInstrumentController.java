@@ -39,6 +39,14 @@ public interface BpdPaymentInstrumentController {
                     String hpan,
             @RequestBody @Valid PaymentInstrumentDTO paymentInstrument);
 
+    @DeleteMapping(value = "fiscal-code/{id}", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    void deleteByFiscalCode(
+            @ApiParam(value = "${swagger.paymentInstrument.fiscalCode}", required = true)
+            @PathVariable("id")
+            @NotBlank String fiscalCode
+    );
+
     @DeleteMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseStatus(HttpStatus.NO_CONTENT)
     void delete(
