@@ -15,5 +15,7 @@ public interface PaymentInstrumentService {
 
     void delete(String hpan);
 
+    void deleteByFiscalCode(String fiscalCode);
+
     boolean checkActive(String hpan, OffsetDateTime accountingDate);
 }

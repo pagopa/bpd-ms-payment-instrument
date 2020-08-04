@@ -19,6 +19,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 import javax.annotation.PostConstruct;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.Assert.assertEquals;
@@ -32,6 +34,7 @@ import static org.mockito.Mockito.*;
 public class PaymentInstrumentServiceImplTest {
 
     private static final String EXISTING_HASH_PAN = "existing-hpan";
+    private static final String EXISTING_FISCAL_CODE = "existing-fiscal-code";
     private static final String EXISTING_HASH_PAN_INACTIVE = "existing-hpan-inactive";
     private static final String NOT_EXISTING_HASH_PAN = "not-existing-hpan";
     private long countResult;
@@ -74,6 +77,22 @@ public class PaymentInstrumentServiceImplTest {
 
         when(paymentInstrumentHistoryDAOMock.checkActive(eq(EXISTING_HASH_PAN), any()))
                 .thenAnswer(invocation -> new ArrayList<>());
+
+        when(paymentInstrumentDAOMock.findByFiscalCode(eq(EXISTING_FISCAL_CODE)))
+                .thenAnswer(invocation -> {
+                    ArrayList<PaymentInstrument> result = new ArrayList<>();
+
+                    PaymentInstrument activePI = new PaymentInstrument();
+                    activePI.setHpan(EXISTING_HASH_PAN);
+                    result.add(activePI);
+
+                    PaymentInstrument inactivePI = new PaymentInstrument();
+                    inactivePI.setHpan(EXISTING_HASH_PAN_INACTIVE);
+                    inactivePI.setEnabled(false);
+                    result.add(inactivePI);
+
+                    return result;
+                });
 
     }
 
@@ -189,6 +208,14 @@ public class PaymentInstrumentServiceImplTest {
         }
     }
 
+    @Test
+    public void deleteByFiscalCodeOK() {
+        final String fiscalCode = EXISTING_FISCAL_CODE;
+        paymentInstrumentService.deleteByFiscalCode(fiscalCode);
+
+        verify(paymentInstrumentDAOMock, times(1)).findByFiscalCode(eq(fiscalCode));
+        verify(paymentInstrumentDAOMock, times(2)).save(any(PaymentInstrument.class));
+    }
 
     @Test
     public void checkActive() {

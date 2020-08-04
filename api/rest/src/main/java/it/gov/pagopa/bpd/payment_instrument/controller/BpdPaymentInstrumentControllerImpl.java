@@ -71,6 +71,16 @@ class BpdPaymentInstrumentControllerImpl extends StatelessController implements 
         paymentInstrumentService.delete(hpan);
     }
 
+    @Override
+    public void deleteByFiscalCode(String fiscalCode) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("BpdPaymentInstrumentControllerImpl.deleteByFiscalCode");
+            logger.debug("fiscalCode = [" + fiscalCode + "]");
+        }
+
+        paymentInstrumentService.deleteByFiscalCode(fiscalCode);
+    }
+
 
     @Override
     public boolean checkActive(String hpan, OffsetDateTime accountingDate) {
