@@ -19,6 +19,8 @@ spec:
                 name: postgres-credentials
             - configMapRef:
                 name: eventhub-logging
+            - configMapRef:
+                name: bpdmspaymentinstrument
       hostAliases:
         - hostnames:
             - bpd-hub-dev.servicebus.windows.net
