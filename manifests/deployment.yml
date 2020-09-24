@@ -11,7 +11,7 @@ spec:
     spec:
       containers:
         - name: bpdmspaymentinstrument
-          image: cstarregistry.azurecr.io/bpdmspaymentinstrument-sit
+          image: cstarregistry.azurecr.io/bpdmspaymentinstrument
           ports:
             - containerPort: 8080
           envFrom:
@@ -21,6 +21,8 @@ spec:
                 name: eventhub-logging
             - configMapRef:
                 name: bpdmspaymentinstrument
+            - configMapRef:
+                name: jvm
       hostAliases:
         - hostnames:
             - bpd-hub-dev.servicebus.windows.net

@@ -1,9 +1,12 @@
-apiVersion: apps/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: bpdmspaymentinstrument
 spec:
-  replicas: 1
+  replicas: 1  
+  selector:
+    matchLabels:
+      app: bpdmspaymentinstrument
   template:
     metadata:
       labels:
@@ -11,7 +14,7 @@ spec:
     spec:
       containers:
         - name: bpdmspaymentinstrument
-          image: cstarregistry.azurecr.io/bpdmspaymentinstrument-uat
+          image: cstaruatregistry.azurecr.io/bpdmspaymentinstrument
           ports:
             - containerPort: 8080
           envFrom:
@@ -21,7 +24,9 @@ spec:
                 name: eventhub-logging
             - configMapRef:
                 name: bpdmspaymentinstrument
+            - configMapRef:
+                name: jvm                
       hostAliases:
         - hostnames:
-            - bpd-hub-dev.servicebus.windows.net
-          ip: 10.70.5.10
+            - bpd-event-uat.servicebus.windows.net
+          ip: 10.70.67.5
