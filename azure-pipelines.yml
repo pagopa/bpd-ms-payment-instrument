@@ -24,6 +24,9 @@ variables:
 
   dockerfileRelativePath: 'Dockerfile'
 
+  # Default value (required in order to correctly trigger PR and brances other than SIT, UAT and PROD)
+  dockerRegistryServiceConnection: 'cstarregistry-connection'
+
   # Agent VM image name for Build
   vmImageNameDefault: 'ubuntu-latest'
 
@@ -34,8 +37,6 @@ variables:
   isSIT: $[eq(variables['Build.SourceBranch'], 'refs/heads/release/st')]
   isUAT: $[eq(variables['Build.SourceBranch'], 'refs/heads/release/uat')]
 
-  ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/develop') }}:
-    dockerRegistryServiceConnection: '1b7900a3-6e8a-403a-b6ce-349854a5c6b8'
   ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/release/st') }}:
     dockerRegistryServiceConnection: 'cstarregistry-connection'
     containerRegistry: 'cstarregistry.azurecr.io'
