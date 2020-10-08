@@ -4,7 +4,6 @@ import eu.sia.meda.service.BaseService;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.PaymentInstrumentDAO;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.PaymentInstrumentHistoryDAO;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.model.PaymentInstrument;
-import it.gov.pagopa.bpd.payment_instrument.connector.jpa.model.PaymentInstrumentHistory;
 import it.gov.pagopa.bpd.payment_instrument.exception.PaymentInstrumentNotFoundException;
 import it.gov.pagopa.bpd.payment_instrument.exception.PaymentInstrumentNumbersExceededException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +11,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.OffsetDateTime;
-import java.util.List;
 import java.util.Optional;
 
 /**
@@ -94,9 +92,7 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
 
     @Override
     public boolean checkActive(String hpan, OffsetDateTime accountingDate) {
-        List<PaymentInstrumentHistory> paymentInstrumentHistoryList =
-                paymentInstrumentHistoryDAO.checkActive(hpan, accountingDate);
-        return !paymentInstrumentHistoryList.isEmpty();
+        return paymentInstrumentHistoryDAO.countActive(hpan, accountingDate) > 0;
     }
 
 }

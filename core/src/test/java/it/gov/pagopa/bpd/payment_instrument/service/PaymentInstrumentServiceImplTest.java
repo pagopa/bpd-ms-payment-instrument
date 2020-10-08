@@ -19,8 +19,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import javax.annotation.PostConstruct;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
 
 import static org.junit.Assert.assertEquals;
@@ -75,8 +73,8 @@ public class PaymentInstrumentServiceImplTest {
         when(paymentInstrumentDAOMock.save(any(PaymentInstrument.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0, PaymentInstrument.class));
 
-        when(paymentInstrumentHistoryDAOMock.checkActive(eq(EXISTING_HASH_PAN), any()))
-                .thenAnswer(invocation -> new ArrayList<>());
+        when(paymentInstrumentHistoryDAOMock.countActive(eq(EXISTING_HASH_PAN), any()))
+                .thenAnswer(invocation -> (long) 0);
 
         when(paymentInstrumentDAOMock.findByFiscalCode(eq(EXISTING_FISCAL_CODE)))
                 .thenAnswer(invocation -> {
