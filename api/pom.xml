@@ -22,5 +22,6 @@
 
     <modules>
         <module>rest</module>
+        <module>event</module>
     </modules>
 </project>
