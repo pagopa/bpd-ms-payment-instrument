@@ -11,6 +11,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 
 /**
@@ -93,6 +95,14 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
     @Override
     public boolean checkActive(String hpan, OffsetDateTime accountingDate) {
         return paymentInstrumentHistoryDAO.countActive(hpan, accountingDate) > 0;
+    }
+
+    public static void main(String[] args) {
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
+        final OffsetDateTime start = OffsetDateTime.parse("2020-10-14T18:28:17.37Z", dateTimeFormatter);
+        final OffsetDateTime end = OffsetDateTime.parse("2020-10-14T18:30:15.808Z", dateTimeFormatter);
+        final long between = ChronoUnit.MILLIS.between(start, end);
+        System.out.println("between = " + between);
     }
 
 }
