@@ -1,8 +1,8 @@
 package it.gov.pagopa.bpd.payment_instrument.listener.factory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import it.gov.pagopa.rtd.transaction_manager.model.SaveTransactionCommandModel;
-import it.gov.pagopa.rtd.transaction_manager.model.Transaction;
+import it.gov.pagopa.bpd.payment_instrument.model.TransactionCommandModel;
+import it.gov.pagopa.bpd.payment_instrument.publisher.model.Transaction;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.kafka.common.header.Headers;
@@ -19,7 +19,7 @@ import java.nio.charset.StandardCharsets;
 
 @Component
 public class SaveTransactionCommandModelFactory implements
-        ModelFactory<Pair<byte[], Headers>, SaveTransactionCommandModel>  {
+        ModelFactory<Pair<byte[], Headers>, TransactionCommandModel> {
 
     private final ObjectMapper objectMapper;
 
@@ -29,7 +29,6 @@ public class SaveTransactionCommandModelFactory implements
     }
 
     /**
-     *
      * @param requestData
      * @return instance of SaveTransactionModel, containing a Transaction instance,
      * mapped from the byte[] payload in the requestData, and the inbound Kafka headers
@@ -37,21 +36,21 @@ public class SaveTransactionCommandModelFactory implements
 
     @SneakyThrows
     @Override
-    public SaveTransactionCommandModel createModel(Pair<byte[], Headers> requestData) {
+    public TransactionCommandModel createModel(Pair<byte[], Headers> requestData) {
         Transaction transaction = parsePayload(requestData.getLeft());
-        SaveTransactionCommandModel saveTransactionCommandModel =
-                SaveTransactionCommandModel.builder()
-                    .payload(transaction)
-                    .headers(requestData.getRight())
-                    .build();
-        return saveTransactionCommandModel;
+        TransactionCommandModel transactionCommandModel =
+                TransactionCommandModel.builder()
+                        .payload(transaction)
+                        .headers(requestData.getRight())
+                        .build();
+        return transactionCommandModel;
     }
 
     /**
      * Method containing the logic for the parsing of the byte[] payload into an instance of Transaction,
      * using the ObjectMapper
-     * @param payload
-     *          inbound JSON payload in byte[] format, defining a Transaction
+     *
+     * @param payload inbound JSON payload in byte[] format, defining a Transaction
      * @return instance of Transaction, mapped from the input json byte[] payload
      */
     private Transaction parsePayload(byte[] payload) {

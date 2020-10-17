@@ -4,9 +4,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 
 /**
- * Configuration class for the TransactionManagerErrorPublisherConnector
+ * Configuration class for the TransactionErrorPublisherConnector
  */
 
 @Configuration
-@PropertySource("classpath:config/transactionManagerErrorPublisher.properties")
-public class TransactionManagerErrorPublisherConfig { }
+@PropertySource("classpath:config/transactionErrorPublisher.properties")
+public class TransactionErrorPublisherConfig {
+}

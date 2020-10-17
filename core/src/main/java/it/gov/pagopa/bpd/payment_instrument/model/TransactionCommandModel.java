@@ -15,7 +15,7 @@ import org.apache.kafka.common.header.Headers;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class SaveTransactionCommandModel {
+public class TransactionCommandModel {
 
     private Transaction payload;
     private Headers headers;

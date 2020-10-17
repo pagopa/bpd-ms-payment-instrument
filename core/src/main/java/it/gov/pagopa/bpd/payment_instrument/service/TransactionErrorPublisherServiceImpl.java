@@ -4,35 +4,35 @@ import eu.sia.meda.event.BaseEventConnector;
 import eu.sia.meda.event.service.BaseErrorPublisherService;
 import eu.sia.meda.event.transformer.ErrorEventRequestTransformer;
 import eu.sia.meda.event.transformer.SimpleEventResponseTransformer;
-import it.gov.pagopa.bpd.payment_instrument.publisher.TransactionManagerErrorPublisherConnector;
+import it.gov.pagopa.bpd.payment_instrument.publisher.TransactionErrorPublisherConnector;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
- * Implementation of the TransactionManagerErrorPublisherService, extends the BaseErrorPublisherService,
+ * Implementation of the TransactionErrorPublisherService, extends the BaseErrorPublisherService,
  * the connector has the responsibility to send error related messages on the appropriate queue
  */
 
 @Service
-class TransactionManagerErrorPublisherServiceImpl
+class TransactionErrorPublisherServiceImpl
         extends BaseErrorPublisherService
-        implements TransactionManagerErrorPublisherService {
+        implements TransactionErrorPublisherService {
 
 
-    private final TransactionManagerErrorPublisherConnector transactionManagerErrorPublisherConnector;
+    private final TransactionErrorPublisherConnector transactionErrorPublisherConnector;
 
     @Autowired
-    public TransactionManagerErrorPublisherServiceImpl(
-            TransactionManagerErrorPublisherConnector transactionManagerErrorPublisherConnector,
+    public TransactionErrorPublisherServiceImpl(
+            TransactionErrorPublisherConnector transactionErrorPublisherConnector,
             ErrorEventRequestTransformer errorEventRequestTransformer,
             SimpleEventResponseTransformer simpleEventResponseTransformer) {
         super(errorEventRequestTransformer, simpleEventResponseTransformer);
-        this.transactionManagerErrorPublisherConnector = transactionManagerErrorPublisherConnector;
+        this.transactionErrorPublisherConnector = transactionErrorPublisherConnector;
     }
 
     @Override
     protected BaseEventConnector<byte[], Boolean, byte[], Void> getErrorPublisherConnector() {
-        return transactionManagerErrorPublisherConnector;
+        return transactionErrorPublisherConnector;
     }
 
 
