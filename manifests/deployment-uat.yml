@@ -20,6 +20,8 @@ spec:
           envFrom:
             - secretRef:
                 name: postgres-credentials
+            - secretRef:
+                name: bpdmspaymentinstrument
             - configMapRef:
                 name: eventhub-logging
             - configMapRef:
