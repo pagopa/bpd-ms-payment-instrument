@@ -25,6 +25,8 @@ spec:
             - configMapRef:
                 name: eventhub-logging
             - configMapRef:
+                name: eventhub-common
+            - configMapRef:
                 name: bpdmspaymentinstrument
             - configMapRef:
                 name: jvm                
