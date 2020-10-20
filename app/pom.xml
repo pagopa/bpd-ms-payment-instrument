@@ -18,12 +18,11 @@
             <artifactId>bpd-ms-payment-instrument-api-rest</artifactId>
             <scope>runtime</scope>
         </dependency>
-        <!--        <dependency>-->
-        <!--            <groupId>it.gov.pagopa.bpd.ms.payment_instrument.api</groupId>-->
-        <!--            <artifactId>bpd-ms-payment-instrument-app-api-listener</artifactId>-->
-        <!--            <version>${symbol_dollar}{bpd.payment-instrument.version}</version>-->
-        <!--            <scope>runtime</scope>-->
-        <!--        </dependency>-->
+        <dependency>
+            <groupId>it.gov.pagopa.bpd.ms.payment_instrument.api</groupId>
+            <artifactId>bpd-ms-payment-instrument-api-event</artifactId>
+            <scope>runtime</scope>
+        </dependency>
     </dependencies>
 
     <build>
