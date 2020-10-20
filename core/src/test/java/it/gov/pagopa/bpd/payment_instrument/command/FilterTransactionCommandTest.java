@@ -56,7 +56,8 @@ public class FilterTransactionCommandTest extends BaseTest {
             Assert.assertTrue(isOk);
             BDDMockito.verify(paymentInstrumentServiceMock, Mockito.atLeastOnce())
                     .checkActive(Mockito.eq(transaction.getHpan()), Mockito.eq(transaction.getTrxDate()));
-            BDDMockito.verify(pointTransactionProducerServiceMock, Mockito.atLeastOnce());
+            BDDMockito.verify(pointTransactionProducerServiceMock, Mockito.atLeastOnce())
+                    .publishPointTransactionEvent(Mockito.any());
 
         } catch (Exception e) {
             e.printStackTrace();
