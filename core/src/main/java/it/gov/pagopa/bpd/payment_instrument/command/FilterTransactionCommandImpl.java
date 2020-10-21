@@ -65,26 +65,26 @@ class FilterTransactionCommandImpl extends BaseCommand<Boolean> implements Filte
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy hh:mm:ss.SSSXXXXX");
 
         try {
+
             OffsetDateTime execStart = OffsetDateTime.now();
             validateRequest(transaction);
 
-            try {
-                OffsetDateTime checkActiveStart = OffsetDateTime.now();
-                boolean checkActive = paymentInstrumentService.checkActive(transaction.getHpan(), transaction.getTrxDate());
-                OffsetDateTime checkActiveEnd = OffsetDateTime.now();
-                log.info("Executed checkActive for transaction: {}, {}, {} " +
-                                "- Started at {}, Ended at {} - Total exec time: {}",
-                        transaction.getIdTrxAcquirer(),
-                        transaction.getAcquirerCode(),
-                        transaction.getTrxDate(),
-                        dateTimeFormatter.format(checkActiveStart),
-                        dateTimeFormatter.format(checkActiveEnd),
-                        ChronoUnit.MILLIS.between(checkActiveStart, checkActiveEnd));
+            OffsetDateTime checkActiveStart = OffsetDateTime.now();
+            boolean checkActive = paymentInstrumentService.checkActive(transaction.getHpan(), transaction.getTrxDate());
+            OffsetDateTime checkActiveEnd = OffsetDateTime.now();
+            log.info("Executed checkActive for transaction: {}, {}, {} " +
+                     "- Started at {}, Ended at {} - Total exec time: {}",
+                    transaction.getIdTrxAcquirer(),
+                    transaction.getAcquirerCode(),
+                    transaction.getTrxDate(),
+                    dateTimeFormatter.format(checkActiveStart),
+                    dateTimeFormatter.format(checkActiveEnd),
+                    ChronoUnit.MILLIS.between(checkActiveStart, checkActiveEnd));
 
-                if (checkActive) {
-                    OffsetDateTime pubStart = OffsetDateTime.now();
-                    pointTransactionProducerService.publishPointTransactionEvent(transaction);
-                    OffsetDateTime pubEnd = OffsetDateTime.now();
+            if (checkActive) {
+                OffsetDateTime pubStart = OffsetDateTime.now();
+                pointTransactionProducerService.publishPointTransactionEvent(transaction);
+                OffsetDateTime pubEnd = OffsetDateTime.now();
                     log.info("Executed publishing on BPD for transaction: {}, {}, {} " +
                                     "- Started at {}, Ended at {} - Total exec time: {}",
                             transaction.getIdTrxAcquirer(),
@@ -94,12 +94,9 @@ class FilterTransactionCommandImpl extends BaseCommand<Boolean> implements Filte
                             dateTimeFormatter.format(pubEnd),
                             ChronoUnit.MILLIS.between(pubStart, pubEnd));
 
-                } else {
-                    log.info("Met a transaction for an inactive payment instrument on BPD.");
-                }
-
-            } catch (Exception e) {
-                logger.error(e.getMessage(), e);
+            } else {
+                log.info("Met a transaction for an inactive payment instrument on BPD. [{}, {}, {}]",
+                        transaction.getIdTrxAcquirer(), transaction.getAcquirerCode(), transaction.getTrxDate());
             }
 
             OffsetDateTime end_exec = OffsetDateTime.now();
