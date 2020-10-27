@@ -47,12 +47,12 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
         final Optional<PaymentInstrument> foundPIOpt = paymentInstrumentDAO.findById(hpan);
         pi.setHpan(hpan);
         if (!foundPIOpt.isPresent()) {
-            final long count = paymentInstrumentDAO.count((root, query, criteriaBuilder) ->
-                    criteriaBuilder.equal(root.get("fiscalCode"), pi.getFiscalCode()));
-            if (count >= numMaxPaymentInstr) {
-                throw new PaymentInstrumentNumbersExceededException(
-                        PaymentInstrument.class, numMaxPaymentInstr);
-            }
+//            final long count = paymentInstrumentDAO.count((root, query, criteriaBuilder) ->
+//                    criteriaBuilder.equal(root.get("fiscalCode"), pi.getFiscalCode()));
+//            if (count >= numMaxPaymentInstr) {
+//                throw new PaymentInstrumentNumbersExceededException(
+//                        PaymentInstrument.class, numMaxPaymentInstr);
+//            }
             return paymentInstrumentDAO.save(pi);
         } else {
             PaymentInstrument foundPI = foundPIOpt.get();
