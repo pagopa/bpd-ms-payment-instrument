@@ -84,6 +84,17 @@ stages:
               mavenAuthenticateFeed: false
               effectivePomSkip: true
               sonarQubeRunAnalysis: false
+          - task: Bash@3
+            displayName: Get POM version
+            name: getpomversion
+            condition: and(succeeded(), eq(variables.isToDeploy, true))
+            inputs:
+              targetType: 'inline'
+              script: |
+                version=$(cat pom.xml | grep "^    <version>.*</version>$" | awk -F'[><]' '{print $3}')
+                echo "##vso[task.setvariable variable=pomversion]$version"
+                echo "##vso[task.setvariable variable=outputpomversion;isOutput=true]$version"
+              failOnStderr: true
           - task: Docker@2
             displayName: Build and push an image to container registry
             condition: and(succeeded(), eq(variables.isToDeploy, true))
@@ -96,6 +107,7 @@ stages:
               tags: |
                 $(Build.BuildId)
                 latest
+                $(pomversion)
           - task: PublishPipelineArtifact@1
             displayName: 'Publish Atrifact manifests'
             condition: and(succeeded(), eq(variables.isToDeploy, true))
@@ -107,6 +119,8 @@ stages:
   - stage: Deploy
     displayName: Deploy stage
     dependsOn: Build
+    variables:
+      pomversion: $[ stageDependencies.Build.Build.outputs['getpomversion.outputpomversion'] ]
     condition: and(succeeded(), eq(variables.isToDeploy, true))
 
     jobs:
@@ -136,7 +150,7 @@ stages:
                     imagePullSecrets: |
                       $(imagePullSecret)
                     containers: |
-                      $(containerRegistry)/$(imageRepository):$(Build.BuildId)
+                      $(containerRegistry)/$(imageRepository):$(pomversion)
                     
       - deployment: Deploy2
         displayName: Deploy UAT
@@ -163,7 +177,7 @@ stages:
                   manifests: |
                     $(Pipeline.Workspace)/manifests/$(deployment).yml
                     $(Pipeline.Workspace)/manifests/service.yml
-                  containers: '$(containerRegistry)/$(imageRepository):$(Build.BuildId)'
+                  containers: '$(containerRegistry)/$(imageRepository):$(pomversion)'
                   imagePullSecrets: '$(imagePullSecret)'
       - deployment: Deploy3
         displayName: Deploy PROD
@@ -190,5 +204,5 @@ stages:
                     manifests: |
                       $(Pipeline.Workspace)/manifests/$(deployment).yml
                       $(Pipeline.Workspace)/manifests/service.yml
-                    containers: '$(containerRegistry)/$(imageRepository):$(Build.BuildId)'
+                    containers: '$(containerRegistry)/$(imageRepository):$(pomversion)'
                     imagePullSecrets: '$(imagePullSecret)'
