@@ -17,6 +17,10 @@
             <groupId>it.gov.pagopa.bpd.ms.payment_instrument.integration</groupId>
             <artifactId>bpd-ms-payment-instrument-integration-jpa</artifactId>
         </dependency>
+        <dependency>
+            <groupId>it.gov.pagopa.bpd.ms.payment_instrument.integration</groupId>
+            <artifactId>bpd-ms-payment-instrument-integration-event</artifactId>
+        </dependency>
     </dependencies>
 
 </project>
