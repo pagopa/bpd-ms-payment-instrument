@@ -29,7 +29,7 @@ spec:
             - configMapRef:
                 name: bpdmspaymentinstrument
             - configMapRef:
-                name: jvm                
+                name: jvm
       hostAliases:
         - hostnames:
             - bpd-event-uat.servicebus.windows.net
