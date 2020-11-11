@@ -9,7 +9,7 @@ import java.time.OffsetDateTime;
  */
 public interface PaymentInstrumentService {
 
-    PaymentInstrument find(String fiscalCode);
+    PaymentInstrument find(String hpan,String fiscalCode);
 
     PaymentInstrument createOrUpdate(String hpan, PaymentInstrument pi);
 

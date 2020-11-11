@@ -34,13 +34,14 @@ class BpdPaymentInstrumentControllerImpl extends StatelessController implements 
 
 
     @Override
-    public PaymentInstrumentResource find(String hpan) {
+    public PaymentInstrumentResource find(String hpan,String fiscalCode) {
         if (logger.isDebugEnabled()) {
             logger.debug("BpdPaymentInstrumentControllerImpl.find");
             logger.debug("hpan = [" + hpan + "]");
+            logger.debug("fiscalCode = [" + fiscalCode + "]");
         }
 
-        final PaymentInstrument entity = paymentInstrumentService.find(hpan);
+        final PaymentInstrument entity = paymentInstrumentService.find(hpan,fiscalCode);
 
         return paymentInstrumentResourceAssembler.toResource(entity);
     }

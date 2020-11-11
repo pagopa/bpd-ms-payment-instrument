@@ -28,4 +28,6 @@ public class PaymentInstrumentDTO {
     @JsonProperty(required = true)
     private OffsetDateTime activationDate;
 
+    private String channel;
+
 }
