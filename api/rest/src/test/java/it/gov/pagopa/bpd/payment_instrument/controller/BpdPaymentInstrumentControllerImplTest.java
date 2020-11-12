@@ -60,7 +60,7 @@ public class BpdPaymentInstrumentControllerImplTest {
         paymentInstrument.setFiscalCode("DHFIVD85M84D048L");
 
         doReturn(paymentInstrument)
-                .when(paymentInstrumentServiceMock).find(eq("hpan"));
+                .when(paymentInstrumentServiceMock).find(eq("hpan"), eq("DHFIVD85M84D048L"));
 
         doReturn(new PaymentInstrument())
                 .when(paymentInstrumentServiceMock).createOrUpdate(eq("hpan"), eq(paymentInstrument));
@@ -78,7 +78,7 @@ public class BpdPaymentInstrumentControllerImplTest {
     @Test
     public void find() throws Exception {
         MvcResult result = (MvcResult) mvc.perform(MockMvcRequestBuilders
-                .get("/bpd/payment-instruments/hpan")
+                .get("/bpd/payment-instruments/hpan?fiscalCode=DHFIVD85M84D048L")
                 .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)
                 .accept(MediaType.APPLICATION_JSON_UTF8_VALUE))
                 .andExpect(MockMvcResultMatchers.status().is2xxSuccessful())
@@ -86,7 +86,7 @@ public class BpdPaymentInstrumentControllerImplTest {
         PaymentInstrumentResource pageResult = objectMapper.readValue(result.getResponse().getContentAsString(),
                 PaymentInstrumentResource.class);
         assertNotNull(pageResult);
-        verify(paymentInstrumentServiceMock).find(eq("hpan"));
+        verify(paymentInstrumentServiceMock).find(eq("hpan"),eq("DHFIVD85M84D048L"));
         verify(paymentInstrumentResourceAssemblerMock).toResource(any(PaymentInstrument.class));
     }
 

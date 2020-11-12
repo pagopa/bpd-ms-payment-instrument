@@ -5,6 +5,9 @@ import it.gov.pagopa.bpd.payment_instrument.connector.jpa.PaymentInstrumentDAO;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.PaymentInstrumentHistoryDAO;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.model.PaymentInstrument;
 import it.gov.pagopa.bpd.payment_instrument.exception.PaymentInstrumentNotFoundException;
+import it.gov.pagopa.bpd.payment_instrument.exception.PaymentInstrumentNumbersExceededException;
+import it.gov.pagopa.bpd.payment_instrument.exception.PaymentInstrumentDifferentChannelException;
+import it.gov.pagopa.bpd.payment_instrument.exception.PaymentInstrumentOnDifferentUserException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -13,6 +16,10 @@ import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.Set;
+import java.util.HashSet;
+import java.util.List;
 
 /**
  * @See PaymentInstrumentService
@@ -36,8 +43,14 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
 
 
     @Override
-    public PaymentInstrument find(String hpan) {
-        return paymentInstrumentDAO.findById(hpan).orElseThrow(() -> new PaymentInstrumentNotFoundException(hpan));
+    public PaymentInstrument find(String hpan,String fiscalCode) {
+        PaymentInstrument pi = paymentInstrumentDAO.findById(hpan).orElseThrow(() -> new PaymentInstrumentNotFoundException(hpan));
+
+        if(fiscalCode!=null && !fiscalCode.equals(pi.getFiscalCode())){
+            throw new PaymentInstrumentOnDifferentUserException(hpan);
+        }
+
+        return pi;
     }
 
 
@@ -62,6 +75,10 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
                 foundPI.setFiscalCode(pi.getFiscalCode());
                 foundPI.setStatus(PaymentInstrument.Status.ACTIVE);
                 return paymentInstrumentDAO.save(pi);
+            }else{
+                if(!foundPI.getFiscalCode().equals(pi.getFiscalCode())){
+                    throw new PaymentInstrumentOnDifferentUserException(hpan);
+                }
             }
         }
 
