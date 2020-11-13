@@ -5,6 +5,7 @@ import it.gov.pagopa.bpd.payment_instrument.connector.jpa.PaymentInstrumentHisto
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.model.PaymentInstrument;
 import it.gov.pagopa.bpd.payment_instrument.exception.PaymentInstrumentNotFoundException;
 import it.gov.pagopa.bpd.payment_instrument.exception.PaymentInstrumentNumbersExceededException;
+import it.gov.pagopa.bpd.payment_instrument.exception.PaymentInstrumentOnDifferentUserException;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -33,6 +34,7 @@ public class PaymentInstrumentServiceImplTest {
 
     private static final String EXISTING_HASH_PAN = "existing-hpan";
     private static final String EXISTING_FISCAL_CODE = "existing-fiscal-code";
+    private static final String EXISTING_FISCAL_CODE_ERROR = "existing-fiscal-code-error";
     private static final String EXISTING_HASH_PAN_INACTIVE = "existing-hpan-inactive";
     private static final String NOT_EXISTING_HASH_PAN = "not-existing-hpan";
     private long countResult;
@@ -51,15 +53,18 @@ public class PaymentInstrumentServiceImplTest {
         when(paymentInstrumentDAOMock.findById(anyString()))
                 .thenAnswer(invocation -> {
                     String hashPan = invocation.getArgument(0, String.class);
+
                     Optional<PaymentInstrument> result = Optional.empty();
                     if (EXISTING_HASH_PAN.equals(hashPan)) {
                         PaymentInstrument pi = new PaymentInstrument();
                         pi.setHpan(hashPan);
+                        pi.setFiscalCode(EXISTING_FISCAL_CODE);
                         result = Optional.of(pi);
                     }
                     if (EXISTING_HASH_PAN_INACTIVE.equals(hashPan)) {
                         PaymentInstrument pi = new PaymentInstrument();
                         pi.setHpan(hashPan);
+                        pi.setFiscalCode(EXISTING_FISCAL_CODE);
                         pi.setEnabled(false);
                         result = Optional.of(pi);
                     }
@@ -104,8 +109,9 @@ public class PaymentInstrumentServiceImplTest {
     @Test
     public void find_OK() {
         final String hashPan = EXISTING_HASH_PAN;
+        final String fiscalCode = EXISTING_FISCAL_CODE;
 
-        PaymentInstrument result = paymentInstrumentService.find(hashPan);
+        PaymentInstrument result = paymentInstrumentService.find(hashPan,fiscalCode);
 
         assertNotNull(result);
         verify(paymentInstrumentDAOMock, only()).findById(eq(hashPan));
@@ -116,8 +122,20 @@ public class PaymentInstrumentServiceImplTest {
     @Test(expected = PaymentInstrumentNotFoundException.class)
     public void find_KO() {
         final String hashPan = NOT_EXISTING_HASH_PAN;
+        final String fiscalCode = EXISTING_FISCAL_CODE;
 
-        paymentInstrumentService.find(hashPan);
+        paymentInstrumentService.find(hashPan,fiscalCode);
+
+        verify(paymentInstrumentDAOMock, only()).findById(eq(hashPan));
+        verify(paymentInstrumentDAOMock, times(1)).findById(eq(hashPan));
+    }
+
+    @Test(expected = PaymentInstrumentOnDifferentUserException.class)
+    public void find_KO_FiscalCode() {
+        final String hashPan = EXISTING_HASH_PAN;
+        final String fiscalCode = EXISTING_FISCAL_CODE_ERROR;
+
+        paymentInstrumentService.find(hashPan,fiscalCode);
 
         verify(paymentInstrumentDAOMock, only()).findById(eq(hashPan));
         verify(paymentInstrumentDAOMock, times(1)).findById(eq(hashPan));
@@ -144,6 +162,7 @@ public class PaymentInstrumentServiceImplTest {
     public void createOrUpdate_updateOK() {
         final String hashPan = EXISTING_HASH_PAN_INACTIVE;
         PaymentInstrument paymentInstrument = new PaymentInstrument();
+        paymentInstrument.setFiscalCode(EXISTING_FISCAL_CODE);
 
         PaymentInstrument result = paymentInstrumentService.createOrUpdate(hashPan, paymentInstrument);
 
@@ -158,6 +177,21 @@ public class PaymentInstrumentServiceImplTest {
     public void createOrUpdate_updateOK_AlreadyActive() {
         final String hashPan = EXISTING_HASH_PAN;
         PaymentInstrument paymentInstrument = new PaymentInstrument();
+        paymentInstrument.setFiscalCode(EXISTING_FISCAL_CODE);
+
+        PaymentInstrument result = paymentInstrumentService.createOrUpdate(hashPan, paymentInstrument);
+
+        assertNotNull(paymentInstrument);
+        assertEquals(hashPan, result.getHpan());
+        verify(paymentInstrumentDAOMock, times(1)).findById(eq(hashPan));
+        verifyNoMoreInteractions(paymentInstrumentDAOMock);
+    }
+
+    @Test(expected = PaymentInstrumentOnDifferentUserException.class)
+    public void createOrUpdate_updateOK_AlreadyActive_DifferentUser() {
+        final String hashPan = EXISTING_HASH_PAN;
+        PaymentInstrument paymentInstrument = new PaymentInstrument();
+        paymentInstrument.setFiscalCode(EXISTING_FISCAL_CODE_ERROR);
 
         PaymentInstrument result = paymentInstrumentService.createOrUpdate(hashPan, paymentInstrument);
 

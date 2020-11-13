@@ -2,16 +2,24 @@ package it.gov.pagopa.bpd.payment_instrument.controller;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiParam;
+import org.springframework.web.bind.annotation.RequestParam;
 import it.gov.pagopa.bpd.payment_instrument.controller.model.PaymentInstrumentDTO;
 import it.gov.pagopa.bpd.payment_instrument.controller.model.PaymentInstrumentResource;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import io.swagger.annotations.ApiModelProperty;
+import it.gov.pagopa.bpd.common.converter.UpperCaseConverter;
+import it.gov.pagopa.bpd.common.util.Constants;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import java.time.OffsetDateTime;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
 
 /**
  * Controller to expose MicroService
@@ -27,7 +35,13 @@ public interface BpdPaymentInstrumentController {
             @ApiParam(value = "${swagger.paymentInstrument.hpan}", required = true)
             @PathVariable("id")
             @NotBlank
-                    String hpan
+                    String hpan,
+            @ApiParam(value = "${swagger.paymentInstrument.fiscalCode}", required = true)
+            @RequestParam(value = "fiscalCode", required = false)
+            @Size(min = 16, max = 16)
+            @JsonDeserialize(converter = UpperCaseConverter.class)
+            @Pattern(regexp = Constants.FISCAL_CODE_REGEX)
+                    String fiscalCode
     );
 
     @PutMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
