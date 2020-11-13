@@ -86,22 +86,39 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
     }
 
     @Override
-    public void delete(String hpan) {
+    public void delete(String hpan, String fiscalCode, OffsetDateTime cancellationDate) {
         PaymentInstrument paymentInstrument = paymentInstrumentDAO.findById(hpan).orElseThrow(
                 () -> new PaymentInstrumentNotFoundException(hpan));
-        checkAndDelete(paymentInstrument);
+        checkAndDelete(paymentInstrument, fiscalCode, cancellationDate);
     }
 
     @Override
     public void deleteByFiscalCode(String fiscalCode) {
-        paymentInstrumentDAO.findByFiscalCode(fiscalCode).forEach(
-                paymentInstrument -> checkAndDelete(paymentInstrument));
+        List<PaymentInstrument> paymentInstrumentList = paymentInstrumentDAO.findByFiscalCode(fiscalCode);
+
+        if(paymentInstrumentList!=null && !paymentInstrumentList.isEmpty()) {
+            Set<String> channelSet = new HashSet<String>();
+            paymentInstrumentList.forEach(pi -> channelSet.add(pi.getChannel()));
+
+            if (channelSet.size() > 1) {
+                throw new PaymentInstrumentDifferentChannelException(fiscalCode);
+            }
+            paymentInstrumentList.forEach(
+                    paymentInstrument -> checkAndDelete(paymentInstrument, fiscalCode, null));
+        }
     }
 
-    private void checkAndDelete(PaymentInstrument paymentInstrument) {
+    private void checkAndDelete(PaymentInstrument paymentInstrument,
+                                String fiscalCode, OffsetDateTime cancellationDate) {
+
+        if (fiscalCode != null && !fiscalCode.equals(paymentInstrument.getFiscalCode())) {
+            throw new PaymentInstrumentOnDifferentUserException(fiscalCode);
+        }
+
         if (paymentInstrument.isEnabled()) {
             paymentInstrument.setStatus(PaymentInstrument.Status.INACTIVE);
-            paymentInstrument.setDeactivationDate(OffsetDateTime.now());
+            paymentInstrument.setDeactivationDate(cancellationDate != null ?
+                    cancellationDate :OffsetDateTime.now());
             paymentInstrument.setEnabled(false);
         }
         paymentInstrumentDAO.save(paymentInstrument);
