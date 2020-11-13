@@ -87,10 +87,12 @@ public class PaymentInstrumentServiceImplTest {
 
                     PaymentInstrument activePI = new PaymentInstrument();
                     activePI.setHpan(EXISTING_HASH_PAN);
+                    activePI.setFiscalCode(EXISTING_FISCAL_CODE);
                     result.add(activePI);
 
                     PaymentInstrument inactivePI = new PaymentInstrument();
                     inactivePI.setHpan(EXISTING_HASH_PAN_INACTIVE);
+                    inactivePI.setFiscalCode(EXISTING_FISCAL_CODE);
                     inactivePI.setEnabled(false);
                     result.add(inactivePI);
 
@@ -219,11 +221,35 @@ public class PaymentInstrumentServiceImplTest {
     public void deleteOK() {
         final String hashPan = EXISTING_HASH_PAN;
 
-        paymentInstrumentService.delete(hashPan);
+        paymentInstrumentService.delete(hashPan, null, null);
 
         verify(paymentInstrumentDAOMock, times(1)).findById(eq(hashPan));
         verify(paymentInstrumentDAOMock, times(1)).save(any(PaymentInstrument.class));
         verifyNoMoreInteractions(paymentInstrumentDAOMock);
+    }
+
+    @Test
+    public void deleteOK_WithFiscalCodeAndCancellationDate() {
+        final String hashPan = EXISTING_HASH_PAN;
+
+        paymentInstrumentService.delete(hashPan, EXISTING_FISCAL_CODE, OffsetDateTime.now());
+
+        verify(paymentInstrumentDAOMock, times(1)).findById(eq(hashPan));
+        verify(paymentInstrumentDAOMock, times(1)).save(any(PaymentInstrument.class));
+        verifyNoMoreInteractions(paymentInstrumentDAOMock);
+    }
+
+    @Test(expected = PaymentInstrumentOnDifferentUserException.class)
+    public void deleteKO_WithWrongFiscalCode() {
+        final String hashPan = EXISTING_HASH_PAN;
+
+        try {
+            paymentInstrumentService.delete(hashPan, EXISTING_FISCAL_CODE_ERROR, OffsetDateTime.now());
+        } finally {
+            verify(paymentInstrumentDAOMock, times(1)).findById(eq(hashPan));
+            verifyNoMoreInteractions(paymentInstrumentDAOMock);
+        }
+
     }
 
 
@@ -232,7 +258,7 @@ public class PaymentInstrumentServiceImplTest {
         final String hashPan = NOT_EXISTING_HASH_PAN;
 
         try {
-            paymentInstrumentService.delete(hashPan);
+            paymentInstrumentService.delete(hashPan, null, null);
 
         } finally {
             verify(paymentInstrumentDAOMock, only()).findById(eq(hashPan));

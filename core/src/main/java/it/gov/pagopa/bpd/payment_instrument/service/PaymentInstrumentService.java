@@ -13,7 +13,7 @@ public interface PaymentInstrumentService {
 
     PaymentInstrument createOrUpdate(String hpan, PaymentInstrument pi);
 
-    void delete(String hpan);
+    void delete(String hpan, String fiscalCode, OffsetDateTime cancellationDate);
 
     void deleteByFiscalCode(String fiscalCode);
 

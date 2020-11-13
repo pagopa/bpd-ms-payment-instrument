@@ -86,10 +86,10 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
     }
 
     @Override
-    public void delete(String hpan) {
+    public void delete(String hpan, String fiscalCode, OffsetDateTime cancellationDate) {
         PaymentInstrument paymentInstrument = paymentInstrumentDAO.findById(hpan).orElseThrow(
                 () -> new PaymentInstrumentNotFoundException(hpan));
-        checkAndDelete(paymentInstrument);
+        checkAndDelete(paymentInstrument, fiscalCode, cancellationDate);
     }
 
     @Override
@@ -104,14 +104,21 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
                 throw new PaymentInstrumentDifferentChannelException(fiscalCode);
             }
             paymentInstrumentList.forEach(
-                    paymentInstrument -> checkAndDelete(paymentInstrument));
+                    paymentInstrument -> checkAndDelete(paymentInstrument, fiscalCode, null));
         }
     }
 
-    private void checkAndDelete(PaymentInstrument paymentInstrument) {
+    private void checkAndDelete(PaymentInstrument paymentInstrument,
+                                String fiscalCode, OffsetDateTime cancellationDate) {
+
+        if (fiscalCode != null && !fiscalCode.equals(paymentInstrument.getFiscalCode())) {
+            throw new PaymentInstrumentOnDifferentUserException(fiscalCode);
+        }
+
         if (paymentInstrument.isEnabled()) {
             paymentInstrument.setStatus(PaymentInstrument.Status.INACTIVE);
-            paymentInstrument.setDeactivationDate(OffsetDateTime.now());
+            paymentInstrument.setDeactivationDate(cancellationDate != null ?
+                    cancellationDate :OffsetDateTime.now());
             paymentInstrument.setEnabled(false);
         }
         paymentInstrumentDAO.save(paymentInstrument);

@@ -63,13 +63,13 @@ class BpdPaymentInstrumentControllerImpl extends StatelessController implements 
 
 
     @Override
-    public void delete(String hpan) {
+    public void delete(String hpan, String fiscalCode,  OffsetDateTime cancellationDate) {
         if (logger.isDebugEnabled()) {
             logger.debug("BpdPaymentInstrumentControllerImpl.delete");
             logger.debug("hpan = [" + hpan + "]");
         }
 
-        paymentInstrumentService.delete(hpan);
+        paymentInstrumentService.delete(hpan, fiscalCode, cancellationDate);
     }
 
     @Override
