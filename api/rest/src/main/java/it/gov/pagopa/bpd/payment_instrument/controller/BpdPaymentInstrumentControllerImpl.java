@@ -73,13 +73,13 @@ class BpdPaymentInstrumentControllerImpl extends StatelessController implements 
     }
 
     @Override
-    public void deleteByFiscalCode(String fiscalCode) {
+    public void deleteByFiscalCode(String fiscalCode, String channel) {
         if (logger.isDebugEnabled()) {
             logger.debug("BpdPaymentInstrumentControllerImpl.deleteByFiscalCode");
-            logger.debug("fiscalCode = [" + fiscalCode + "]");
+            logger.debug("fiscalCode = [" + fiscalCode + "], channel = [" + channel + "]");
         }
 
-        paymentInstrumentService.deleteByFiscalCode(fiscalCode);
+        paymentInstrumentService.deleteByFiscalCode(fiscalCode, channel);
     }
 
 
