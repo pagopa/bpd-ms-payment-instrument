@@ -73,7 +73,7 @@ public class BpdPaymentInstrumentControllerImplTest {
                 .when(paymentInstrumentServiceMock).delete(eq("hpan"), Mockito.any(), Mockito.any());
 
         doNothing()
-                .when(paymentInstrumentServiceMock).deleteByFiscalCode(eq("fiscalCode"));
+                .when(paymentInstrumentServiceMock).deleteByFiscalCode(eq("fiscalCode"), eq("channel"));
     }
 
     @Test
@@ -119,9 +119,10 @@ public class BpdPaymentInstrumentControllerImplTest {
 
     @Test
     public void deleteByFiscalCode() throws Exception {
-        mvc.perform(MockMvcRequestBuilders.delete("/bpd/payment-instruments/fiscal-code/fiscalCode"))
+        mvc.perform(MockMvcRequestBuilders
+                .delete("/bpd/payment-instruments/fiscal-code/fiscalCode/channel"))
                 .andExpect(MockMvcResultMatchers.status().is2xxSuccessful());
-        verify(paymentInstrumentServiceMock).deleteByFiscalCode(any());
+        verify(paymentInstrumentServiceMock).deleteByFiscalCode(any(), any());
     }
 
 

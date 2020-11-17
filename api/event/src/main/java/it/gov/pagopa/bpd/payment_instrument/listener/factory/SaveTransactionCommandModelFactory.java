@@ -38,6 +38,8 @@ public class SaveTransactionCommandModelFactory implements
     @Override
     public TransactionCommandModel createModel(Pair<byte[], Headers> requestData) {
         Transaction transaction = parsePayload(requestData.getLeft());
+        //TODO: Proper fix
+        transaction.setMcc("0000");
         TransactionCommandModel transactionCommandModel =
                 TransactionCommandModel.builder()
                         .payload(transaction)
