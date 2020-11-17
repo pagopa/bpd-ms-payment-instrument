@@ -5,7 +5,6 @@ import it.gov.pagopa.bpd.payment_instrument.connector.jpa.PaymentInstrumentDAO;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.PaymentInstrumentHistoryDAO;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.model.PaymentInstrument;
 import it.gov.pagopa.bpd.payment_instrument.exception.PaymentInstrumentNotFoundException;
-import it.gov.pagopa.bpd.payment_instrument.exception.PaymentInstrumentNumbersExceededException;
 import it.gov.pagopa.bpd.payment_instrument.exception.PaymentInstrumentDifferentChannelException;
 import it.gov.pagopa.bpd.payment_instrument.exception.PaymentInstrumentOnDifferentUserException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +15,6 @@ import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.List;
@@ -32,13 +30,16 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
 
     @Value(value = "${numMaxPaymentInstr}")
     private int numMaxPaymentInstr;
+    private final String appIOChannel;
 
 
     @Autowired
     public PaymentInstrumentServiceImpl(PaymentInstrumentDAO paymentInstrumentDAO,
-                                        PaymentInstrumentHistoryDAO paymentInstrumentHistoryDAO) {
+                                        PaymentInstrumentHistoryDAO paymentInstrumentHistoryDAO,
+                                        @Value("${core.PaymentInstrumentService.appIOChannel}") String appIOChannel) {
         this.paymentInstrumentDAO = paymentInstrumentDAO;
         this.paymentInstrumentHistoryDAO = paymentInstrumentHistoryDAO;
+        this.appIOChannel = appIOChannel;
     }
 
 
@@ -86,22 +87,41 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
     }
 
     @Override
-    public void delete(String hpan) {
+    public void delete(String hpan, String fiscalCode, OffsetDateTime cancellationDate) {
         PaymentInstrument paymentInstrument = paymentInstrumentDAO.findById(hpan).orElseThrow(
                 () -> new PaymentInstrumentNotFoundException(hpan));
-        checkAndDelete(paymentInstrument);
+        checkAndDelete(paymentInstrument, fiscalCode, cancellationDate);
     }
 
     @Override
-    public void deleteByFiscalCode(String fiscalCode) {
-        paymentInstrumentDAO.findByFiscalCode(fiscalCode).forEach(
-                paymentInstrument -> checkAndDelete(paymentInstrument));
+    public void deleteByFiscalCode(String fiscalCode, String channel) {
+        List<PaymentInstrument> paymentInstrumentList = paymentInstrumentDAO.findByFiscalCode(fiscalCode);
+
+        if (paymentInstrumentList != null && !paymentInstrumentList.isEmpty()) {
+            if (!channel.equals(appIOChannel)) {
+                Set<String> channelSet = new HashSet<>();
+                paymentInstrumentList.forEach(pi -> channelSet.add(pi.getChannel()));
+
+                if (channelSet.size() > 1 || !channelSet.contains(channel)) {
+                    throw new PaymentInstrumentDifferentChannelException(fiscalCode);
+                }
+            }
+            paymentInstrumentList.forEach(
+                    paymentInstrument -> checkAndDelete(paymentInstrument, fiscalCode, null));
+        }
     }
 
-    private void checkAndDelete(PaymentInstrument paymentInstrument) {
+    private void checkAndDelete(PaymentInstrument paymentInstrument,
+                                String fiscalCode, OffsetDateTime cancellationDate) {
+
+        if (fiscalCode != null && !fiscalCode.equals(paymentInstrument.getFiscalCode())) {
+            throw new PaymentInstrumentOnDifferentUserException(fiscalCode);
+        }
+
         if (paymentInstrument.isEnabled()) {
             paymentInstrument.setStatus(PaymentInstrument.Status.INACTIVE);
-            paymentInstrument.setDeactivationDate(OffsetDateTime.now());
+            paymentInstrument.setDeactivationDate(cancellationDate != null ?
+                    cancellationDate :OffsetDateTime.now());
             paymentInstrument.setEnabled(false);
         }
         paymentInstrumentDAO.save(paymentInstrument);

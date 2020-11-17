@@ -63,7 +63,6 @@ public class Transaction {
 
     @NotNull
     @NotBlank
-    @Size(max = 5)
     String mcc;
 
     String acquirerId;

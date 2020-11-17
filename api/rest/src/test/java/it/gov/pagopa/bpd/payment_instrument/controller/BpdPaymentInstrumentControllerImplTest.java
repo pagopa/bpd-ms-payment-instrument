@@ -10,6 +10,7 @@ import it.gov.pagopa.bpd.payment_instrument.controller.model.PaymentInstrumentRe
 import it.gov.pagopa.bpd.payment_instrument.service.PaymentInstrumentService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -69,10 +70,10 @@ public class BpdPaymentInstrumentControllerImplTest {
                 .when(paymentInstrumentServiceMock).checkActive(eq("hpan"), any());
 
         doNothing()
-                .when(paymentInstrumentServiceMock).delete(eq("hpan"));
+                .when(paymentInstrumentServiceMock).delete(eq("hpan"), Mockito.any(), Mockito.any());
 
         doNothing()
-                .when(paymentInstrumentServiceMock).deleteByFiscalCode(eq("fiscalCode"));
+                .when(paymentInstrumentServiceMock).deleteByFiscalCode(eq("fiscalCode"), eq("channel"));
     }
 
     @Test
@@ -113,14 +114,15 @@ public class BpdPaymentInstrumentControllerImplTest {
     public void delete() throws Exception {
         mvc.perform(MockMvcRequestBuilders.delete("/bpd/payment-instruments/hpan"))
                 .andExpect(MockMvcResultMatchers.status().is2xxSuccessful());
-        verify(paymentInstrumentServiceMock).delete(any());
+        verify(paymentInstrumentServiceMock).delete(any(), any(), any());
     }
 
     @Test
     public void deleteByFiscalCode() throws Exception {
-        mvc.perform(MockMvcRequestBuilders.delete("/bpd/payment-instruments/fiscal-code/fiscalCode"))
+        mvc.perform(MockMvcRequestBuilders
+                .delete("/bpd/payment-instruments/fiscal-code/fiscalCode/channel"))
                 .andExpect(MockMvcResultMatchers.status().is2xxSuccessful());
-        verify(paymentInstrumentServiceMock).deleteByFiscalCode(any());
+        verify(paymentInstrumentServiceMock).deleteByFiscalCode(any(), any());
     }
 
 
