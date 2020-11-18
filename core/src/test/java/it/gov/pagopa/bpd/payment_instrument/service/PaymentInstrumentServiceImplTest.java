@@ -11,6 +11,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.jpa.domain.Specification;
@@ -289,6 +290,12 @@ public class PaymentInstrumentServiceImplTest {
     @Test
     public void checkActive() {
         Assert.assertFalse(paymentInstrumentService.checkActive(EXISTING_HASH_PAN, OffsetDateTime.now()));
+    }
+
+    @Test
+    public void reactivateForRollback() {
+        paymentInstrumentService.reactivateForRollback("fiscalCode", OffsetDateTime.now());
+        verify(paymentInstrumentDAOMock, times(1)).reactivateForRollback(Mockito.any(), Mockito.any());
     }
 
 }
