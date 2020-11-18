@@ -18,4 +18,6 @@ public interface PaymentInstrumentService {
     void deleteByFiscalCode(String fiscalCode, String channel);
 
     boolean checkActive(String hpan, OffsetDateTime accountingDate);
+
+    void reactivateForRollback(String fiscalCode, OffsetDateTime requestTimestamp);
 }

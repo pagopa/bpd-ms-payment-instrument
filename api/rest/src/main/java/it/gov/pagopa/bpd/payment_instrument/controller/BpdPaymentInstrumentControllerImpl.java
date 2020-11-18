@@ -10,6 +10,7 @@ import it.gov.pagopa.bpd.payment_instrument.service.PaymentInstrumentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.validation.constraints.NotBlank;
 import java.time.OffsetDateTime;
 
 /**
@@ -70,6 +71,15 @@ class BpdPaymentInstrumentControllerImpl extends StatelessController implements 
         }
 
         paymentInstrumentService.delete(hpan, fiscalCode, cancellationDate);
+    }
+
+    @Override
+    public void rollback(String fiscalCode, OffsetDateTime requestTimestamp) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("BpdPaymentInstrumentControllerImpl.rollback");
+            logger.debug("fiscalCode = [" + fiscalCode + "], requestTimestamp = [" + requestTimestamp + "]");
+        }
+        paymentInstrumentService.reactivateForRollback(fiscalCode, requestTimestamp);
     }
 
     @Override

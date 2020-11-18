@@ -128,9 +128,16 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
     }
 
 
+
+
     @Override
     public boolean checkActive(String hpan, OffsetDateTime accountingDate) {
         return paymentInstrumentHistoryDAO.countActive(hpan, accountingDate.toLocalDate()) > 0;
+    }
+
+    @Override
+    public void reactivateForRollback(String fiscalCode, OffsetDateTime requestTimestamp) {
+        paymentInstrumentDAO.reactivateForRollback(fiscalCode, requestTimestamp);
     }
 
     public static void main(String[] args) {
