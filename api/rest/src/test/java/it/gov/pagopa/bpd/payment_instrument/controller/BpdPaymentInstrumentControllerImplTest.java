@@ -141,7 +141,7 @@ public class BpdPaymentInstrumentControllerImplTest {
     public void rollback() throws Exception {
         OffsetDateTime date = OffsetDateTime.from(CURRENT_DATE_TIME);
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
-        mvc.perform(MockMvcRequestBuilders.patch("/bpd/payment-instruments/fiscalCode")
+        mvc.perform(MockMvcRequestBuilders.put("/bpd/payment-instruments/rollback/fiscalCode")
                 .param("requestTimestamp",  date.format(dateTimeFormatter)))
                 .andExpect(MockMvcResultMatchers.status().is2xxSuccessful());
         verify(paymentInstrumentServiceMock).reactivateForRollback(any(), any());
