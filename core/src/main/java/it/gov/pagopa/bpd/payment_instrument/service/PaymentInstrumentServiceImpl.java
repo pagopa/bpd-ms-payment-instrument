@@ -47,7 +47,8 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
     public PaymentInstrument find(String hpan,String fiscalCode) {
         PaymentInstrument pi = paymentInstrumentDAO.findById(hpan).orElseThrow(() -> new PaymentInstrumentNotFoundException(hpan));
 
-        if(fiscalCode!=null && !fiscalCode.equals(pi.getFiscalCode())){
+        if((pi.isEnabled() || PaymentInstrument.Status.ACTIVE.equals(pi.getStatus()))
+                && fiscalCode!=null && !fiscalCode.equals(pi.getFiscalCode())){
             throw new PaymentInstrumentOnDifferentUserException(hpan);
         }
 
@@ -76,10 +77,6 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
                 foundPI.setFiscalCode(pi.getFiscalCode());
                 foundPI.setStatus(PaymentInstrument.Status.ACTIVE);
                 return paymentInstrumentDAO.save(pi);
-            }else{
-                if(!foundPI.getFiscalCode().equals(pi.getFiscalCode())){
-                    throw new PaymentInstrumentOnDifferentUserException(hpan);
-                }
             }
         }
 
