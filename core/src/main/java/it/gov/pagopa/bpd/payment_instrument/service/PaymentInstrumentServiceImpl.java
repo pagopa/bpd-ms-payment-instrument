@@ -119,6 +119,8 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
             paymentInstrument.setStatus(PaymentInstrument.Status.INACTIVE);
             paymentInstrument.setDeactivationDate(cancellationDate != null ?
                     cancellationDate :OffsetDateTime.now());
+            paymentInstrument.setUpdateUser(fiscalCode);
+            paymentInstrument.setUpdateDate(OffsetDateTime.now());
             paymentInstrument.setEnabled(false);
         }
         paymentInstrumentDAO.save(paymentInstrument);
@@ -134,7 +136,8 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
 
     @Override
     public void reactivateForRollback(String fiscalCode, OffsetDateTime requestTimestamp) {
-        paymentInstrumentDAO.reactivateForRollback(fiscalCode, requestTimestamp);
+        OffsetDateTime updateDateTime = OffsetDateTime.now();
+        paymentInstrumentDAO.reactivateForRollback(fiscalCode, requestTimestamp, updateDateTime);
     }
 
     public static void main(String[] args) {
