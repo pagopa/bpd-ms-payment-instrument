@@ -63,6 +63,7 @@ public class PaymentInstrumentServiceImplTest {
                         PaymentInstrument pi = new PaymentInstrument();
                         pi.setHpan(hashPan);
                         pi.setFiscalCode(EXISTING_FISCAL_CODE);
+                        pi.setEnabled(true);
                         result = Optional.of(pi);
                     }
                     if (EXISTING_HASH_PAN_INACTIVE.equals(hashPan)) {
@@ -195,21 +196,6 @@ public class PaymentInstrumentServiceImplTest {
         verify(paymentInstrumentDAOMock, times(1)).findById(eq(hashPan));
         verifyNoMoreInteractions(paymentInstrumentDAOMock);
     }
-
-    @Test(expected = PaymentInstrumentOnDifferentUserException.class)
-    public void createOrUpdate_updateOK_AlreadyActive_DifferentUser() {
-        final String hashPan = EXISTING_HASH_PAN;
-        PaymentInstrument paymentInstrument = new PaymentInstrument();
-        paymentInstrument.setFiscalCode(EXISTING_FISCAL_CODE_ERROR);
-
-        PaymentInstrument result = paymentInstrumentService.createOrUpdate(hashPan, paymentInstrument);
-
-        assertNotNull(paymentInstrument);
-        assertEquals(hashPan, result.getHpan());
-        verify(paymentInstrumentDAOMock, times(1)).findById(eq(hashPan));
-        verifyNoMoreInteractions(paymentInstrumentDAOMock);
-    }
-
 
 //    @Test(expected = PaymentInstrumentNumbersExceededException.class)
 //    public void createOrUpdate_paymentInstrumentNumbersExceededError() {
