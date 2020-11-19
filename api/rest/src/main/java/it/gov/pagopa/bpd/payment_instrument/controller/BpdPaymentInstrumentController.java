@@ -37,12 +37,12 @@ public interface BpdPaymentInstrumentController {
             @PathVariable("id")
             @NotBlank
                     String hpan,
-            @ApiParam(value = "${swagger.paymentInstrument.fiscalCode}", required = true)
+            @ApiParam(value = "${swagger.paymentInstrument.fiscalCode}", required = false)
             @RequestParam(value = "fiscalCode", required = false)
             @Size(min = 16, max = 16)
             @JsonDeserialize(converter = UpperCaseConverter.class)
             @Pattern(regexp = Constants.FISCAL_CODE_REGEX)
-            String fiscalCode
+                    String fiscalCode
     );
 
     @PutMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
@@ -78,6 +78,17 @@ public interface BpdPaymentInstrumentController {
                     String fiscalCode,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
                     OffsetDateTime cancellationDate
+    );
+
+    @PutMapping(value = "/rollback/{fiscalCode}", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    void rollback(
+            @ApiParam(required = true)
+            @PathVariable("fiscalCode")
+            @NotBlank
+                    String fiscalCode,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+                    OffsetDateTime requestTimestamp
     );
 
     @GetMapping(value = "/{id}/history/active", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)

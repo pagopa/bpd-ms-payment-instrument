@@ -7,7 +7,7 @@ import java.io.Serializable;
 
 public class PaymentInstrumentDifferentChannelException extends MedaDomainRuntimeException {
 
-    private static final String CODE = "too many channel";
+    private static final String CODE = "too many channels";
     private static final HttpStatus STATUS = HttpStatus.BAD_REQUEST;
 
 

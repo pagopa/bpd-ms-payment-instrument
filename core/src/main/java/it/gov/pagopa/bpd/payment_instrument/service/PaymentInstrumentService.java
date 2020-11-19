@@ -19,5 +19,7 @@ public interface PaymentInstrumentService {
 
     boolean checkActive(String hpan, OffsetDateTime accountingDate);
 
+    void reactivateForRollback(String fiscalCode, OffsetDateTime requestTimestamp);
+
     String getFiscalCode(String hpan);
 }
