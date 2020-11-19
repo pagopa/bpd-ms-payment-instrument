@@ -2,9 +2,11 @@ package it.gov.pagopa.bpd.payment_instrument.command;
 
 import it.gov.pagopa.bpd.common.BaseTest;
 import it.gov.pagopa.bpd.payment_instrument.model.TransactionCommandModel;
+import it.gov.pagopa.bpd.payment_instrument.publisher.model.OutgoingTransaction;
 import it.gov.pagopa.bpd.payment_instrument.publisher.model.Transaction;
 import it.gov.pagopa.bpd.payment_instrument.service.PaymentInstrumentService;
 import it.gov.pagopa.bpd.payment_instrument.service.PointTransactionPublisherService;
+import it.gov.pagopa.bpd.payment_instrument.service.mapper.TransactionMapper;
 import lombok.SneakyThrows;
 import org.junit.Assert;
 import org.junit.Before;
@@ -14,6 +16,7 @@ import org.junit.rules.ExpectedException;
 import org.mockito.BDDMockito;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.Spy;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
@@ -30,26 +33,37 @@ public class FilterTransactionCommandTest extends BaseTest {
     PaymentInstrumentService paymentInstrumentServiceMock;
     @Mock
     PointTransactionPublisherService pointTransactionProducerServiceMock;
+    @Spy
+    TransactionMapper transactionMapperSpy;
 
     @Before
     public void initTest() {
         Mockito.reset(
                 paymentInstrumentServiceMock,
-                pointTransactionProducerServiceMock);
+                pointTransactionProducerServiceMock,
+                transactionMapperSpy);
     }
 
     @Test
     public void test_BDPActive() {
 
         Transaction transaction = getRequestObject();
-        FilterTransactionCommand filterTransactionCommand = buildCommandInstance(transaction);
+        OutgoingTransaction outgoingTransaction = transactionMapperSpy.map(transaction);
+        outgoingTransaction.setFiscalCode("fiscalCode");
+        FilterTransactionCommand filterTransactionCommand = new FilterTransactionCommandImpl(
+                TransactionCommandModel.builder().payload(transaction).build(),
+                pointTransactionProducerServiceMock,
+                paymentInstrumentServiceMock,
+                transactionMapperSpy
+        );
+
 
         try {
 
             BDDMockito.doReturn(true).when(paymentInstrumentServiceMock)
                     .checkActive(Mockito.eq(transaction.getHpan()), Mockito.eq(transaction.getTrxDate()));
             BDDMockito.doNothing().when(pointTransactionProducerServiceMock)
-                    .publishPointTransactionEvent(Mockito.eq(transaction));
+                    .publishPointTransactionEvent(Mockito.eq(outgoingTransaction));
 
             Boolean isOk = filterTransactionCommand.execute();
 
@@ -98,14 +112,21 @@ public class FilterTransactionCommandTest extends BaseTest {
     public void test_BDPNotActive() {
 
         Transaction transaction = getRequestObject();
-        FilterTransactionCommand filterTransactionCommand = buildCommandInstance(transaction);
+        OutgoingTransaction outgoingTransaction = transactionMapperSpy.map(transaction);
+        outgoingTransaction.setFiscalCode("fiscalCode");
+        FilterTransactionCommand filterTransactionCommand = new FilterTransactionCommandImpl(
+                TransactionCommandModel.builder().payload(transaction).build(),
+                pointTransactionProducerServiceMock,
+                paymentInstrumentServiceMock,
+                transactionMapperSpy
+        );
 
         try {
 
             BDDMockito.doReturn(false).when(paymentInstrumentServiceMock)
                     .checkActive(Mockito.eq(transaction.getHpan()), Mockito.eq(transaction.getTrxDate()));
             BDDMockito.doNothing().when(pointTransactionProducerServiceMock)
-                    .publishPointTransactionEvent(Mockito.eq(transaction));
+                    .publishPointTransactionEvent(Mockito.eq(outgoingTransaction));
 
             Boolean isOk = filterTransactionCommand.execute();
 

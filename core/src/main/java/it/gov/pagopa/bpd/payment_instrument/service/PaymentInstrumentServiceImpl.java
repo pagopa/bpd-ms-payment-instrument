@@ -4,8 +4,8 @@ import eu.sia.meda.service.BaseService;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.PaymentInstrumentDAO;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.PaymentInstrumentHistoryDAO;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.model.PaymentInstrument;
-import it.gov.pagopa.bpd.payment_instrument.exception.PaymentInstrumentNotFoundException;
 import it.gov.pagopa.bpd.payment_instrument.exception.PaymentInstrumentDifferentChannelException;
+import it.gov.pagopa.bpd.payment_instrument.exception.PaymentInstrumentNotFoundException;
 import it.gov.pagopa.bpd.payment_instrument.exception.PaymentInstrumentOnDifferentUserException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,10 +14,10 @@ import org.springframework.stereotype.Service;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
-import java.util.Optional;
-import java.util.Set;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 /**
  * @See PaymentInstrumentService
@@ -131,6 +131,12 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
     @Override
     public boolean checkActive(String hpan, OffsetDateTime accountingDate) {
         return paymentInstrumentHistoryDAO.countActive(hpan, accountingDate.toLocalDate()) > 0;
+    }
+
+    @Override
+    public String getFiscalCode(String hpan) {
+        PaymentInstrument pi = paymentInstrumentDAO.findById(hpan).orElseThrow(() -> new PaymentInstrumentNotFoundException(hpan));
+        return pi.getFiscalCode();
     }
 
     public static void main(String[] args) {

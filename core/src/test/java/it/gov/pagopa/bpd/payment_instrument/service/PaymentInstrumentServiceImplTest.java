@@ -5,12 +5,12 @@ import it.gov.pagopa.bpd.payment_instrument.connector.jpa.PaymentInstrumentHisto
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.model.PaymentInstrument;
 import it.gov.pagopa.bpd.payment_instrument.exception.PaymentInstrumentDifferentChannelException;
 import it.gov.pagopa.bpd.payment_instrument.exception.PaymentInstrumentNotFoundException;
-import it.gov.pagopa.bpd.payment_instrument.exception.PaymentInstrumentNumbersExceededException;
 import it.gov.pagopa.bpd.payment_instrument.exception.PaymentInstrumentOnDifferentUserException;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.jpa.domain.Specification;
@@ -23,9 +23,9 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Optional;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.mockito.ArgumentMatchers.*;
+import static org.junit.Assert.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @RunWith(SpringRunner.class)
@@ -53,7 +53,7 @@ public class PaymentInstrumentServiceImplTest {
 
     @PostConstruct
     public void configureTest() {
-        when(paymentInstrumentDAOMock.findById(anyString()))
+        when(paymentInstrumentDAOMock.findById(Mockito.eq(EXISTING_HASH_PAN)))
                 .thenAnswer(invocation -> {
                     String hashPan = invocation.getArgument(0, String.class);
 
@@ -289,6 +289,22 @@ public class PaymentInstrumentServiceImplTest {
     @Test
     public void checkActive() {
         Assert.assertFalse(paymentInstrumentService.checkActive(EXISTING_HASH_PAN, OffsetDateTime.now()));
+    }
+
+    @Test
+    public void getFiscalCode_OK() {
+        Optional<PaymentInstrument> pi = paymentInstrumentDAOMock.findById(EXISTING_HASH_PAN);
+
+        assertNotNull(pi.get().getFiscalCode());
+        verify(paymentInstrumentDAOMock).findById(EXISTING_HASH_PAN);
+        verify(paymentInstrumentDAOMock, times(1)).findById(eq(EXISTING_HASH_PAN));
+    }
+
+    @Test
+    public void getFiscalCode_KO() {
+        Optional<PaymentInstrument> pi = paymentInstrumentDAOMock.findById(NOT_EXISTING_HASH_PAN);
+
+        assertFalse(pi.isPresent());
     }
 
 }

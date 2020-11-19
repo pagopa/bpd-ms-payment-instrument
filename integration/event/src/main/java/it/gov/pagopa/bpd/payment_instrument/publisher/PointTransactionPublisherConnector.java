@@ -3,7 +3,7 @@ package it.gov.pagopa.bpd.payment_instrument.publisher;
 import eu.sia.meda.event.BaseEventConnector;
 import eu.sia.meda.event.transformer.IEventRequestTransformer;
 import eu.sia.meda.event.transformer.IEventResponseTransformer;
-import it.gov.pagopa.bpd.payment_instrument.publisher.model.Transaction;
+import it.gov.pagopa.bpd.payment_instrument.publisher.model.OutgoingTransaction;
 import org.springframework.stereotype.Service;
 
 /**
@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class PointTransactionPublisherConnector
-        extends BaseEventConnector<Transaction, Boolean, Transaction, Void> {
+        extends BaseEventConnector<OutgoingTransaction, Boolean, OutgoingTransaction, Void> {
 
     /**
      * @param transaction         Transaction instance to be used as message content
@@ -23,8 +23,8 @@ public class PointTransactionPublisherConnector
      * @return Exit status for the call
      */
     public Boolean doCall(
-            Transaction transaction, IEventRequestTransformer<Transaction,
-            Transaction> requestTransformer,
+            OutgoingTransaction transaction, IEventRequestTransformer<OutgoingTransaction,
+            OutgoingTransaction> requestTransformer,
             IEventResponseTransformer<Void, Boolean> responseTransformer,
             Object... args) {
         return this.call(transaction, requestTransformer, responseTransformer, args);
