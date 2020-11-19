@@ -37,7 +37,7 @@ public interface BpdPaymentInstrumentController {
             @PathVariable("id")
             @NotBlank
                     String hpan,
-            @ApiParam(value = "${swagger.paymentInstrument.fiscalCode}", required = true)
+            @ApiParam(value = "${swagger.paymentInstrument.fiscalCode}", required = false)
             @RequestParam(value = "fiscalCode", required = false)
             @Size(min = 16, max = 16)
             @JsonDeserialize(converter = UpperCaseConverter.class)
