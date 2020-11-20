@@ -1,6 +1,7 @@
 package it.gov.pagopa.bpd.payment_instrument.command;
 
 import eu.sia.meda.core.command.BaseCommand;
+import it.gov.pagopa.bpd.payment_instrument.connector.jpa.model.PaymentInstrumentHistory;
 import it.gov.pagopa.bpd.payment_instrument.model.TransactionCommandModel;
 import it.gov.pagopa.bpd.payment_instrument.publisher.model.OutgoingTransaction;
 import it.gov.pagopa.bpd.payment_instrument.publisher.model.Transaction;
@@ -78,7 +79,7 @@ class FilterTransactionCommandImpl extends BaseCommand<Boolean> implements Filte
             validateRequest(transaction);
 
             OffsetDateTime checkActiveStart = OffsetDateTime.now();
-            boolean checkActive = paymentInstrumentService.checkActive(transaction.getHpan(), transaction.getTrxDate());
+            PaymentInstrumentHistory checkActive = paymentInstrumentService.checkActive(transaction.getHpan(), transaction.getTrxDate());
             OffsetDateTime checkActiveEnd = OffsetDateTime.now();
             log.info("Executed checkActive for transaction: {}, {}, {} " +
                      "- Started at {}, Ended at {} - Total exec time: {}",
@@ -89,10 +90,10 @@ class FilterTransactionCommandImpl extends BaseCommand<Boolean> implements Filte
                     dateTimeFormatter.format(checkActiveEnd),
                     ChronoUnit.MILLIS.between(checkActiveStart, checkActiveEnd));
 
-            if (checkActive) {
+            if (checkActive != null) {
                 OffsetDateTime pubStart = OffsetDateTime.now();
                 OutgoingTransaction outgoingTransaction = transactionMapper.map(transaction);
-                outgoingTransaction.setFiscalCode(paymentInstrumentService.getFiscalCode(transaction.getHpan()));
+                outgoingTransaction.setFiscalCode(checkActive.getFiscalCode());
                 pointTransactionProducerService.publishPointTransactionEvent(outgoingTransaction);
                 OffsetDateTime pubEnd = OffsetDateTime.now();
                 log.info("Executed publishing on BPD for transaction: {}, {}, {} " +

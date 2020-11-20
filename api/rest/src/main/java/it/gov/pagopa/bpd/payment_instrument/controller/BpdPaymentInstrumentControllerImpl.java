@@ -10,7 +10,6 @@ import it.gov.pagopa.bpd.payment_instrument.service.PaymentInstrumentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.validation.constraints.NotBlank;
 import java.time.OffsetDateTime;
 
 /**
@@ -100,7 +99,7 @@ class BpdPaymentInstrumentControllerImpl extends StatelessController implements 
             logger.debug("hpan = [" + hpan + "], accountingDate = [" + accountingDate + "]");
         }
 
-        return paymentInstrumentService.checkActive(hpan, accountingDate);
+        return paymentInstrumentService.checkActive(hpan, accountingDate) != null;
     }
 
 }

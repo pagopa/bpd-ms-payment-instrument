@@ -1,6 +1,7 @@
 package it.gov.pagopa.bpd.payment_instrument.service;
 
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.model.PaymentInstrument;
+import it.gov.pagopa.bpd.payment_instrument.connector.jpa.model.PaymentInstrumentHistory;
 
 import java.time.OffsetDateTime;
 
@@ -17,7 +18,7 @@ public interface PaymentInstrumentService {
 
     void deleteByFiscalCode(String fiscalCode, String channel);
 
-    boolean checkActive(String hpan, OffsetDateTime accountingDate);
+    PaymentInstrumentHistory checkActive(String hpan, OffsetDateTime accountingDate);
 
     void reactivateForRollback(String fiscalCode, OffsetDateTime requestTimestamp);
 

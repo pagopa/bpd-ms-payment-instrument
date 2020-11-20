@@ -3,6 +3,7 @@ package it.gov.pagopa.bpd.payment_instrument.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.sia.meda.config.ArchConfiguration;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.model.PaymentInstrument;
+import it.gov.pagopa.bpd.payment_instrument.connector.jpa.model.PaymentInstrumentHistory;
 import it.gov.pagopa.bpd.payment_instrument.controller.assembler.PaymentInstrumentResourceAssembler;
 import it.gov.pagopa.bpd.payment_instrument.controller.factory.PaymentInstrumentFactory;
 import it.gov.pagopa.bpd.payment_instrument.controller.model.PaymentInstrumentDTO;
@@ -59,6 +60,8 @@ public class BpdPaymentInstrumentControllerImplTest {
         paymentInstrument.setActivationDate(CURRENT_DATE_TIME);
         paymentInstrument.setStatus(PaymentInstrument.Status.ACTIVE);
         paymentInstrument.setFiscalCode("DHFIVD85M84D048L");
+        PaymentInstrumentHistory pih = new PaymentInstrumentHistory();
+        pih.setFiscalCode("DHFIVD85M84D048L");
 
         doReturn(paymentInstrument)
                 .when(paymentInstrumentServiceMock).find(eq("hpan"), eq("DHFIVD85M84D048L"));
@@ -66,7 +69,7 @@ public class BpdPaymentInstrumentControllerImplTest {
         doReturn(new PaymentInstrument())
                 .when(paymentInstrumentServiceMock).createOrUpdate(eq("hpan"), eq(paymentInstrument));
 
-        doReturn(true)
+        doReturn(pih)
                 .when(paymentInstrumentServiceMock).checkActive(eq("hpan"), any());
 
         doNothing()

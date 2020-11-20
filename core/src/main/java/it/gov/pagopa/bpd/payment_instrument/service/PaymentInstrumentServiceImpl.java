@@ -4,6 +4,7 @@ import eu.sia.meda.service.BaseService;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.PaymentInstrumentDAO;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.PaymentInstrumentHistoryDAO;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.model.PaymentInstrument;
+import it.gov.pagopa.bpd.payment_instrument.connector.jpa.model.PaymentInstrumentHistory;
 import it.gov.pagopa.bpd.payment_instrument.exception.PaymentInstrumentDifferentChannelException;
 import it.gov.pagopa.bpd.payment_instrument.exception.PaymentInstrumentNotFoundException;
 import it.gov.pagopa.bpd.payment_instrument.exception.PaymentInstrumentOnDifferentUserException;
@@ -125,11 +126,9 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
     }
 
 
-
-
     @Override
-    public boolean checkActive(String hpan, OffsetDateTime accountingDate) {
-        return paymentInstrumentHistoryDAO.countActive(hpan, accountingDate.toLocalDate()) > 0;
+    public PaymentInstrumentHistory checkActive(String hpan, OffsetDateTime accountingDate) {
+        return paymentInstrumentHistoryDAO.findActive(hpan, accountingDate.toLocalDate());
     }
 
     @Override

@@ -3,10 +3,10 @@ package it.gov.pagopa.bpd.payment_instrument.service;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.PaymentInstrumentDAO;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.PaymentInstrumentHistoryDAO;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.model.PaymentInstrument;
+import it.gov.pagopa.bpd.payment_instrument.connector.jpa.model.PaymentInstrumentHistory;
 import it.gov.pagopa.bpd.payment_instrument.exception.PaymentInstrumentDifferentChannelException;
 import it.gov.pagopa.bpd.payment_instrument.exception.PaymentInstrumentNotFoundException;
 import it.gov.pagopa.bpd.payment_instrument.exception.PaymentInstrumentOnDifferentUserException;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -82,8 +82,12 @@ public class PaymentInstrumentServiceImplTest {
         when(paymentInstrumentDAOMock.save(any(PaymentInstrument.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0, PaymentInstrument.class));
 
-        when(paymentInstrumentHistoryDAOMock.countActive(eq(EXISTING_HASH_PAN), any()))
-                .thenAnswer(invocation -> (long) 0);
+        when(paymentInstrumentHistoryDAOMock.findActive(eq(EXISTING_HASH_PAN), any()))
+                .thenAnswer(invocation -> {
+                    PaymentInstrumentHistory pih = new PaymentInstrumentHistory();
+                    pih.setFiscalCode(EXISTING_FISCAL_CODE);
+                    return pih;
+                });
 
         when(paymentInstrumentDAOMock.findByFiscalCode(eq(EXISTING_FISCAL_CODE)))
                 .thenAnswer(invocation -> {
@@ -270,11 +274,6 @@ public class PaymentInstrumentServiceImplTest {
     @Test(expected = PaymentInstrumentDifferentChannelException.class)
     public void deleteByFiscalCode_AnotherChannel_KO() {
         paymentInstrumentService.deleteByFiscalCode(EXISTING_FISCAL_CODE, ANOTHER_CHANNEL_1);
-    }
-
-    @Test
-    public void checkActive() {
-        Assert.assertFalse(paymentInstrumentService.checkActive(EXISTING_HASH_PAN, OffsetDateTime.now()));
     }
 
     @Test
