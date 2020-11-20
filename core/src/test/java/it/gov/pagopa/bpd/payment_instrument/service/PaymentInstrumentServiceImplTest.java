@@ -295,7 +295,7 @@ public class PaymentInstrumentServiceImplTest {
     @Test
     public void reactivateForRollback() {
         paymentInstrumentService.reactivateForRollback("fiscalCode", OffsetDateTime.now());
-        verify(paymentInstrumentDAOMock, times(1)).reactivateForRollback(Mockito.any(), Mockito.any());
+        verify(paymentInstrumentDAOMock, times(1)).reactivateForRollback(Mockito.any(), Mockito.any(), Mockito.any());
     }
 
 }
