@@ -78,6 +78,10 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
                 foundPI.setFiscalCode(pi.getFiscalCode());
                 foundPI.setStatus(PaymentInstrument.Status.ACTIVE);
                 return paymentInstrumentDAO.save(pi);
+            }else{
+                if(foundPI.getFiscalCode()!=null && !foundPI.getFiscalCode().equals(pi.getFiscalCode())){
+                    throw new PaymentInstrumentOnDifferentUserException(hpan);
+                }
             }
         }
 

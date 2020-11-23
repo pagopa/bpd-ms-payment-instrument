@@ -245,7 +245,6 @@ public class PaymentInstrumentServiceImplTest {
             verify(paymentInstrumentDAOMock, times(1)).findById(eq(hashPan));
             verifyNoMoreInteractions(paymentInstrumentDAOMock);
         }
-
     }
 
 
