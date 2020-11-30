@@ -82,6 +82,7 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
                 if(foundPI.getFiscalCode()!=null && !foundPI.getFiscalCode().equals(pi.getFiscalCode())){
                     throw new PaymentInstrumentOnDifferentUserException(hpan);
                 }
+                pi=foundPI;
             }
         }
 
@@ -100,9 +101,9 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
         List<PaymentInstrument> paymentInstrumentList = paymentInstrumentDAO.findByFiscalCode(fiscalCode);
 
         if (paymentInstrumentList != null && !paymentInstrumentList.isEmpty()) {
-            if (!channel.equals(appIOChannel)) {
+            if (!appIOChannel.equals(channel)) {
                 Set<String> channelSet = new HashSet<>();
-                paymentInstrumentList.forEach(pi -> channelSet.add(pi.getChannel()));
+                paymentInstrumentList.stream().filter(pi -> pi.isEnabled()).forEach(pi -> channelSet.add(pi.getChannel()));
 
                 if (channelSet.size() > 1 || !channelSet.contains(channel)) {
                     throw new PaymentInstrumentDifferentChannelException(fiscalCode);
