@@ -32,6 +32,9 @@ public class PaymentInstrument extends BaseEntity {
     @Column(name = "status_c")
     private Status status;
 
+    @Column(name = "channel_s")
+    private String channel;
+
     public enum Status {
         ACTIVE, INACTIVE
     }

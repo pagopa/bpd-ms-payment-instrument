@@ -3,13 +3,14 @@ package it.gov.pagopa.bpd.payment_instrument.service;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.PaymentInstrumentDAO;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.PaymentInstrumentHistoryDAO;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.model.PaymentInstrument;
+import it.gov.pagopa.bpd.payment_instrument.connector.jpa.model.PaymentInstrumentHistory;
+import it.gov.pagopa.bpd.payment_instrument.exception.PaymentInstrumentDifferentChannelException;
 import it.gov.pagopa.bpd.payment_instrument.exception.PaymentInstrumentNotFoundException;
-import it.gov.pagopa.bpd.payment_instrument.exception.PaymentInstrumentNumbersExceededException;
 import it.gov.pagopa.bpd.payment_instrument.exception.PaymentInstrumentOnDifferentUserException;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.jpa.domain.Specification;
@@ -22,14 +23,14 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Optional;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.mockito.ArgumentMatchers.*;
+import static org.junit.Assert.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = PaymentInstrumentServiceImpl.class)
-@TestPropertySource(properties = "numMaxPaymentInstr=5")
+@TestPropertySource(locations = "classpath:config/paymentInstrument.properties")
 public class PaymentInstrumentServiceImplTest {
 
     private static final String EXISTING_HASH_PAN = "existing-hpan";
@@ -37,6 +38,8 @@ public class PaymentInstrumentServiceImplTest {
     private static final String EXISTING_FISCAL_CODE_ERROR = "existing-fiscal-code-error";
     private static final String EXISTING_HASH_PAN_INACTIVE = "existing-hpan-inactive";
     private static final String NOT_EXISTING_HASH_PAN = "not-existing-hpan";
+    private static final String APPIO_CHANNEL = "app-io-channel";
+    private static final String ANOTHER_CHANNEL_1 = "another-channel_1";
     private long countResult;
 
 
@@ -50,7 +53,7 @@ public class PaymentInstrumentServiceImplTest {
 
     @PostConstruct
     public void configureTest() {
-        when(paymentInstrumentDAOMock.findById(anyString()))
+        when(paymentInstrumentDAOMock.findById(Mockito.eq(EXISTING_HASH_PAN)))
                 .thenAnswer(invocation -> {
                     String hashPan = invocation.getArgument(0, String.class);
 
@@ -59,6 +62,7 @@ public class PaymentInstrumentServiceImplTest {
                         PaymentInstrument pi = new PaymentInstrument();
                         pi.setHpan(hashPan);
                         pi.setFiscalCode(EXISTING_FISCAL_CODE);
+                        pi.setEnabled(true);
                         result = Optional.of(pi);
                     }
                     if (EXISTING_HASH_PAN_INACTIVE.equals(hashPan)) {
@@ -78,8 +82,12 @@ public class PaymentInstrumentServiceImplTest {
         when(paymentInstrumentDAOMock.save(any(PaymentInstrument.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0, PaymentInstrument.class));
 
-        when(paymentInstrumentHistoryDAOMock.countActive(eq(EXISTING_HASH_PAN), any()))
-                .thenAnswer(invocation -> (long) 0);
+        when(paymentInstrumentHistoryDAOMock.findActive(eq(EXISTING_HASH_PAN), any()))
+                .thenAnswer(invocation -> {
+                    PaymentInstrumentHistory pih = new PaymentInstrumentHistory();
+                    pih.setFiscalCode(EXISTING_FISCAL_CODE);
+                    return pih;
+                });
 
         when(paymentInstrumentDAOMock.findByFiscalCode(eq(EXISTING_FISCAL_CODE)))
                 .thenAnswer(invocation -> {
@@ -87,10 +95,15 @@ public class PaymentInstrumentServiceImplTest {
 
                     PaymentInstrument activePI = new PaymentInstrument();
                     activePI.setHpan(EXISTING_HASH_PAN);
+                    activePI.setFiscalCode(EXISTING_FISCAL_CODE);
+                    activePI.setHpan(EXISTING_HASH_PAN);
+                    activePI.setChannel(APPIO_CHANNEL);
                     result.add(activePI);
 
                     PaymentInstrument inactivePI = new PaymentInstrument();
                     inactivePI.setHpan(EXISTING_HASH_PAN_INACTIVE);
+                    inactivePI.setFiscalCode(EXISTING_FISCAL_CODE);
+                    inactivePI.setChannel(APPIO_CHANNEL);
                     inactivePI.setEnabled(false);
                     result.add(inactivePI);
 
@@ -187,21 +200,6 @@ public class PaymentInstrumentServiceImplTest {
         verifyNoMoreInteractions(paymentInstrumentDAOMock);
     }
 
-    @Test(expected = PaymentInstrumentOnDifferentUserException.class)
-    public void createOrUpdate_updateOK_AlreadyActive_DifferentUser() {
-        final String hashPan = EXISTING_HASH_PAN;
-        PaymentInstrument paymentInstrument = new PaymentInstrument();
-        paymentInstrument.setFiscalCode(EXISTING_FISCAL_CODE_ERROR);
-
-        PaymentInstrument result = paymentInstrumentService.createOrUpdate(hashPan, paymentInstrument);
-
-        assertNotNull(paymentInstrument);
-        assertEquals(hashPan, result.getHpan());
-        verify(paymentInstrumentDAOMock, times(1)).findById(eq(hashPan));
-        verifyNoMoreInteractions(paymentInstrumentDAOMock);
-    }
-
-
 //    @Test(expected = PaymentInstrumentNumbersExceededException.class)
 //    public void createOrUpdate_paymentInstrumentNumbersExceededError() {
 //        countResult = 5;
@@ -219,11 +217,34 @@ public class PaymentInstrumentServiceImplTest {
     public void deleteOK() {
         final String hashPan = EXISTING_HASH_PAN;
 
-        paymentInstrumentService.delete(hashPan);
+        paymentInstrumentService.delete(hashPan, null, null);
 
         verify(paymentInstrumentDAOMock, times(1)).findById(eq(hashPan));
         verify(paymentInstrumentDAOMock, times(1)).save(any(PaymentInstrument.class));
         verifyNoMoreInteractions(paymentInstrumentDAOMock);
+    }
+
+    @Test
+    public void deleteOK_WithFiscalCodeAndCancellationDate() {
+        final String hashPan = EXISTING_HASH_PAN;
+
+        paymentInstrumentService.delete(hashPan, EXISTING_FISCAL_CODE, OffsetDateTime.now());
+
+        verify(paymentInstrumentDAOMock, times(1)).findById(eq(hashPan));
+        verify(paymentInstrumentDAOMock, times(1)).save(any(PaymentInstrument.class));
+        verifyNoMoreInteractions(paymentInstrumentDAOMock);
+    }
+
+    @Test(expected = PaymentInstrumentOnDifferentUserException.class)
+    public void deleteKO_WithWrongFiscalCode() {
+        final String hashPan = EXISTING_HASH_PAN;
+
+        try {
+            paymentInstrumentService.delete(hashPan, EXISTING_FISCAL_CODE_ERROR, OffsetDateTime.now());
+        } finally {
+            verify(paymentInstrumentDAOMock, times(1)).findById(eq(hashPan));
+            verifyNoMoreInteractions(paymentInstrumentDAOMock);
+        }
     }
 
 
@@ -232,7 +253,7 @@ public class PaymentInstrumentServiceImplTest {
         final String hashPan = NOT_EXISTING_HASH_PAN;
 
         try {
-            paymentInstrumentService.delete(hashPan);
+            paymentInstrumentService.delete(hashPan, null, null);
 
         } finally {
             verify(paymentInstrumentDAOMock, only()).findById(eq(hashPan));
@@ -241,17 +262,39 @@ public class PaymentInstrumentServiceImplTest {
     }
 
     @Test
-    public void deleteByFiscalCodeOK() {
+    public void deleteByFiscalCode_AppIOChannel_OK() {
         final String fiscalCode = EXISTING_FISCAL_CODE;
-        paymentInstrumentService.deleteByFiscalCode(fiscalCode);
+        paymentInstrumentService.deleteByFiscalCode(fiscalCode, APPIO_CHANNEL);
 
         verify(paymentInstrumentDAOMock, times(1)).findByFiscalCode(eq(fiscalCode));
         verify(paymentInstrumentDAOMock, times(2)).save(any(PaymentInstrument.class));
     }
 
+    @Test(expected = PaymentInstrumentDifferentChannelException.class)
+    public void deleteByFiscalCode_AnotherChannel_KO() {
+        paymentInstrumentService.deleteByFiscalCode(EXISTING_FISCAL_CODE, ANOTHER_CHANNEL_1);
+    }
+
     @Test
-    public void checkActive() {
-        Assert.assertFalse(paymentInstrumentService.checkActive(EXISTING_HASH_PAN, OffsetDateTime.now()));
+    public void getFiscalCode_OK() {
+        Optional<PaymentInstrument> pi = paymentInstrumentDAOMock.findById(EXISTING_HASH_PAN);
+
+        assertNotNull(pi.get().getFiscalCode());
+        verify(paymentInstrumentDAOMock).findById(EXISTING_HASH_PAN);
+        verify(paymentInstrumentDAOMock, times(1)).findById(eq(EXISTING_HASH_PAN));
+    }
+
+    @Test
+    public void getFiscalCode_KO() {
+        Optional<PaymentInstrument> pi = paymentInstrumentDAOMock.findById(NOT_EXISTING_HASH_PAN);
+
+        assertFalse(pi.isPresent());
+    }
+
+    @Test
+    public void reactivateForRollback() {
+        paymentInstrumentService.reactivateForRollback("fiscalCode", OffsetDateTime.now());
+        verify(paymentInstrumentDAOMock, times(1)).reactivateForRollback(Mockito.any(), Mockito.any(), Mockito.any());
     }
 
 }

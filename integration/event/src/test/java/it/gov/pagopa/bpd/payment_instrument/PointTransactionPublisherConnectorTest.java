@@ -3,7 +3,7 @@ package it.gov.pagopa.bpd.payment_instrument;
 import eu.sia.meda.event.BaseEventConnectorTest;
 import eu.sia.meda.util.TestUtils;
 import it.gov.pagopa.bpd.payment_instrument.publisher.PointTransactionPublisherConnector;
-import it.gov.pagopa.bpd.payment_instrument.publisher.model.Transaction;
+import it.gov.pagopa.bpd.payment_instrument.publisher.model.OutgoingTransaction;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Import;
@@ -20,7 +20,7 @@ import org.springframework.test.context.TestPropertySource;
                 "connectors.eventConfigurations.items.PointTransactionPublisherConnector.bootstrapServers=${spring.embedded.kafka.brokers}"
         })
 public class PointTransactionPublisherConnectorTest extends
-        BaseEventConnectorTest<Transaction, Boolean, Transaction, Void, PointTransactionPublisherConnector> {
+        BaseEventConnectorTest<OutgoingTransaction, Boolean, OutgoingTransaction, Void, PointTransactionPublisherConnector> {
 
     @Value("${connectors.eventConfigurations.items.PointTransactionPublisherConnector.topic}")
     private String topic;
@@ -34,8 +34,8 @@ public class PointTransactionPublisherConnectorTest extends
     }
 
     @Override
-    protected Transaction getRequestObject() {
-        return TestUtils.mockInstance(new Transaction());
+    protected OutgoingTransaction getRequestObject() {
+        return TestUtils.mockInstance(new OutgoingTransaction());
     }
 
     @Override

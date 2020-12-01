@@ -1,70 +1,73 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
         <groupId>it.gov.pagopa.bpd.ms</groupId>
-        <version>1.0-SNAPSHOT</version>
+        <version>1.0.3</version>
         <artifactId>bpd-ms-starter-parent</artifactId>
     </parent>
 
     <artifactId>bpd-ms-payment-instrument</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0.0-rc2</version>
     <packaging>pom</packaging>
+
+    <properties>
+        <bpd-commons.version>1.0.4</bpd-commons.version>
+    </properties>
 
     <dependencyManagement>
         <dependencies>
             <dependency>
                 <groupId>it.gov.pagopa.bpd.ms.payment_instrument.integration</groupId>
                 <artifactId>bpd-ms-payment-instrument-integration-jpa</artifactId>
-                <version>1.0-SNAPSHOT</version>
+                <version>1.0.0-rc2</version>
             </dependency>
             <dependency>
                 <groupId>it.gov.pagopa.bpd.ms.payment_instrument.integration</groupId>
                 <artifactId>bpd-ms-payment-instrument-integration-event</artifactId>
-                <version>1.0-SNAPSHOT</version>
+                <version>1.0.0-rc2</version>
             </dependency>
             <dependency>
                 <groupId>it.gov.pagopa.bpd.ms.payment_instrument</groupId>
                 <artifactId>bpd-ms-payment-instrument-core</artifactId>
-                <version>1.0-SNAPSHOT</version>
+                <version>1.0.0-rc2</version>
             </dependency>
             <dependency>
                 <groupId>it.gov.pagopa.bpd.ms.payment_instrument.api</groupId>
                 <artifactId>bpd-ms-payment-instrument-api-rest</artifactId>
-                <version>1.0-SNAPSHOT</version>
+                <version>1.0.0-rc2</version>
             </dependency>
             <dependency>
                 <groupId>it.gov.pagopa.bpd.ms.payment_instrument.api</groupId>
                 <artifactId>bpd-ms-payment-instrument-api-event</artifactId>
-                <version>1.0-SNAPSHOT</version>
+                <version>1.0.0-rc2</version>
             </dependency>
             <dependency>
                 <groupId>it.gov.pagopa.bpd.commons.api</groupId>
                 <artifactId>bpd-commons-api-rest</artifactId>
-                <version>1.0-SNAPSHOT</version>
+                <version>${bpd-commons.version}</version>
             </dependency>
             <dependency>
                 <groupId>it.gov.pagopa.bpd.commons</groupId>
                 <artifactId>bpd-commons-base</artifactId>
-                <version>1.0-SNAPSHOT</version>
+                <version>${bpd-commons.version}</version>
             </dependency>
             <dependency>
                 <groupId>it.gov.pagopa.bpd.commons</groupId>
                 <artifactId>bpd-commons-base</artifactId>
-                <version>1.0-SNAPSHOT</version>
+                <version>${bpd-commons.version}</version>
                 <type>test-jar</type>
             </dependency>
             <dependency>
                 <groupId>it.gov.pagopa.bpd.commons.integration</groupId>
                 <artifactId>bpd-commons-integration-jpa</artifactId>
-                <version>1.0-SNAPSHOT</version>
+                <version>${bpd-commons.version}</version>
             </dependency>
             <dependency>
                 <groupId>it.gov.pagopa.bpd.commons.integration</groupId>
                 <artifactId>bpd-commons-integration-jpa</artifactId>
-                <version>1.0-SNAPSHOT</version>
+                <version>${bpd-commons.version}</version>
                 <type>test-jar</type>
             </dependency>
         </dependencies>
@@ -95,5 +98,29 @@
         <module>api</module>
     </modules>
 
+    <distributionManagement>
+        <repository>
+            <id>cstar</id>
+            <url>https://pkgs.dev.azure.com/sia-dds/cstar/_packaging/cstar/maven/v1</url>
+        </repository>
+    </distributionManagement>
+
+    <repositories>
+        <repository>
+            <id>cstar</id>
+            <url>https://pkgs.dev.azure.com/sia-dds/cstar/_packaging/cstar/maven/v1</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+
+    <scm>
+        <developerConnection>scm:git:https://github.com/pagopa/bpd-ms-payment-instrument.git</developerConnection>
+      <tag>1.0.0-rc2</tag>
+  </scm>
 
 </project>

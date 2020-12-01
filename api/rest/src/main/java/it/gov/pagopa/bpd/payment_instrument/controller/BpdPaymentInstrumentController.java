@@ -18,6 +18,7 @@ import it.gov.pagopa.bpd.common.util.Constants;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import java.time.OffsetDateTime;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
@@ -36,7 +37,7 @@ public interface BpdPaymentInstrumentController {
             @PathVariable("id")
             @NotBlank
                     String hpan,
-            @ApiParam(value = "${swagger.paymentInstrument.fiscalCode}", required = true)
+            @ApiParam(value = "${swagger.paymentInstrument.fiscalCode}", required = false)
             @RequestParam(value = "fiscalCode", required = false)
             @Size(min = 16, max = 16)
             @JsonDeserialize(converter = UpperCaseConverter.class)
@@ -53,12 +54,15 @@ public interface BpdPaymentInstrumentController {
                     String hpan,
             @RequestBody @Valid PaymentInstrumentDTO paymentInstrument);
 
-    @DeleteMapping(value = "fiscal-code/{id}", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @DeleteMapping(value = "/fiscal-code/{id}/{channel}", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseStatus(HttpStatus.NO_CONTENT)
     void deleteByFiscalCode(
             @ApiParam(value = "${swagger.paymentInstrument.fiscalCode}", required = true)
             @PathVariable("id")
-            @NotBlank String fiscalCode
+            @NotBlank String fiscalCode,
+            @ApiParam(value = "${swagger.paymentInstrument.channel}", required = true)
+            @PathVariable("channel")
+            @NotBlank String channel
     );
 
     @DeleteMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
@@ -67,7 +71,24 @@ public interface BpdPaymentInstrumentController {
             @ApiParam(value = "${swagger.paymentInstrument.hpan}", required = true)
             @PathVariable("id")
             @NotBlank
-                    String hpan
+                    String hpan,
+            @ApiParam(value = "${swagger.winningTransaction.fiscalCode}", required = false)
+            @RequestParam(required = false)
+            @Valid @Size(min = 16, max = 16) @Pattern(regexp = Constants.FISCAL_CODE_REGEX)
+                    String fiscalCode,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+                    OffsetDateTime cancellationDate
+    );
+
+    @PutMapping(value = "/rollback/{fiscalCode}", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    void rollback(
+            @ApiParam(required = true)
+            @PathVariable("fiscalCode")
+            @NotBlank
+                    String fiscalCode,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+                    OffsetDateTime requestTimestamp
     );
 
     @GetMapping(value = "/{id}/history/active", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)

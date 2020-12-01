@@ -3,6 +3,7 @@ package it.gov.pagopa.bpd.payment_instrument.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.sia.meda.config.ArchConfiguration;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.model.PaymentInstrument;
+import it.gov.pagopa.bpd.payment_instrument.connector.jpa.model.PaymentInstrumentHistory;
 import it.gov.pagopa.bpd.payment_instrument.controller.assembler.PaymentInstrumentResourceAssembler;
 import it.gov.pagopa.bpd.payment_instrument.controller.factory.PaymentInstrumentFactory;
 import it.gov.pagopa.bpd.payment_instrument.controller.model.PaymentInstrumentDTO;
@@ -10,6 +11,7 @@ import it.gov.pagopa.bpd.payment_instrument.controller.model.PaymentInstrumentRe
 import it.gov.pagopa.bpd.payment_instrument.service.PaymentInstrumentService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -58,6 +60,8 @@ public class BpdPaymentInstrumentControllerImplTest {
         paymentInstrument.setActivationDate(CURRENT_DATE_TIME);
         paymentInstrument.setStatus(PaymentInstrument.Status.ACTIVE);
         paymentInstrument.setFiscalCode("DHFIVD85M84D048L");
+        PaymentInstrumentHistory pih = new PaymentInstrumentHistory();
+        pih.setFiscalCode("DHFIVD85M84D048L");
 
         doReturn(paymentInstrument)
                 .when(paymentInstrumentServiceMock).find(eq("hpan"), eq("DHFIVD85M84D048L"));
@@ -65,14 +69,14 @@ public class BpdPaymentInstrumentControllerImplTest {
         doReturn(new PaymentInstrument())
                 .when(paymentInstrumentServiceMock).createOrUpdate(eq("hpan"), eq(paymentInstrument));
 
-        doReturn(true)
+        doReturn(pih)
                 .when(paymentInstrumentServiceMock).checkActive(eq("hpan"), any());
 
         doNothing()
-                .when(paymentInstrumentServiceMock).delete(eq("hpan"));
+                .when(paymentInstrumentServiceMock).delete(eq("hpan"), Mockito.any(), Mockito.any());
 
         doNothing()
-                .when(paymentInstrumentServiceMock).deleteByFiscalCode(eq("fiscalCode"));
+                .when(paymentInstrumentServiceMock).deleteByFiscalCode(eq("fiscalCode"), eq("channel"));
     }
 
     @Test
@@ -113,14 +117,15 @@ public class BpdPaymentInstrumentControllerImplTest {
     public void delete() throws Exception {
         mvc.perform(MockMvcRequestBuilders.delete("/bpd/payment-instruments/hpan"))
                 .andExpect(MockMvcResultMatchers.status().is2xxSuccessful());
-        verify(paymentInstrumentServiceMock).delete(any());
+        verify(paymentInstrumentServiceMock).delete(any(), any(), any());
     }
 
     @Test
     public void deleteByFiscalCode() throws Exception {
-        mvc.perform(MockMvcRequestBuilders.delete("/bpd/payment-instruments/fiscal-code/fiscalCode"))
+        mvc.perform(MockMvcRequestBuilders
+                .delete("/bpd/payment-instruments/fiscal-code/fiscalCode/channel"))
                 .andExpect(MockMvcResultMatchers.status().is2xxSuccessful());
-        verify(paymentInstrumentServiceMock).deleteByFiscalCode(any());
+        verify(paymentInstrumentServiceMock).deleteByFiscalCode(any(), any());
     }
 
 
@@ -133,5 +138,15 @@ public class BpdPaymentInstrumentControllerImplTest {
                 .andExpect(MockMvcResultMatchers.status().is2xxSuccessful()).andReturn();
         assertNotNull(result);
         verify(paymentInstrumentServiceMock).checkActive(eq("hpan"), any());
+    }
+
+    @Test
+    public void rollback() throws Exception {
+        OffsetDateTime date = OffsetDateTime.from(CURRENT_DATE_TIME);
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
+        mvc.perform(MockMvcRequestBuilders.put("/bpd/payment-instruments/rollback/fiscalCode")
+                .param("requestTimestamp",  date.format(dateTimeFormatter)))
+                .andExpect(MockMvcResultMatchers.status().is2xxSuccessful());
+        verify(paymentInstrumentServiceMock).reactivateForRollback(any(), any());
     }
 }

@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.time.OffsetDateTime;
+import java.time.LocalDate;
 
 /**
  * Data Access Object to manage all CRUD operations to the database
@@ -15,11 +15,13 @@ import java.time.OffsetDateTime;
 @Repository
 public interface PaymentInstrumentHistoryDAO extends CrudJpaDAO<PaymentInstrumentHistory, String> {
 
-    @Query(value = "select count(1) " +
-            "from PaymentInstrumentHistory pih " +
-            "where pih.hpan = :hpan " +
-            "and pih.activationDate <= :accountingDate " +
-            "and (:accountingDate < pih.deactivationDate or pih.deactivationDate is null)"
+    @Query(nativeQuery = true,
+            value = "select * " +
+                    "from bpd_payment_instrument_history pih " +
+                    "where pih.hpan_s = :hpan " +
+                    "and date_trunc('day',pih.activation_t) < :accountingDate " +
+                    "and (:accountingDate <= date_trunc('day',pih.deactivation_t) " +
+                    "or pih.deactivation_t is null)"
     )
-    Long countActive(@Param("hpan") String hpan, @Param("accountingDate") OffsetDateTime accountingDate);
+    PaymentInstrumentHistory findActive(@Param("hpan") String hpan, @Param("accountingDate") LocalDate accountingDate);
 }

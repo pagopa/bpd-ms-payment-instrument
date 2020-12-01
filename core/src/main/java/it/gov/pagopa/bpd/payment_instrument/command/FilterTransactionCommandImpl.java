@@ -1,10 +1,13 @@
 package it.gov.pagopa.bpd.payment_instrument.command;
 
 import eu.sia.meda.core.command.BaseCommand;
+import it.gov.pagopa.bpd.payment_instrument.connector.jpa.model.PaymentInstrumentHistory;
 import it.gov.pagopa.bpd.payment_instrument.model.TransactionCommandModel;
+import it.gov.pagopa.bpd.payment_instrument.publisher.model.OutgoingTransaction;
 import it.gov.pagopa.bpd.payment_instrument.publisher.model.Transaction;
 import it.gov.pagopa.bpd.payment_instrument.service.PaymentInstrumentService;
 import it.gov.pagopa.bpd.payment_instrument.service.PointTransactionPublisherService;
+import it.gov.pagopa.bpd.payment_instrument.service.mapper.TransactionMapper;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +37,7 @@ class FilterTransactionCommandImpl extends BaseCommand<Boolean> implements Filte
     private TransactionCommandModel transactionCommandModel;
     private PointTransactionPublisherService pointTransactionProducerService;
     private PaymentInstrumentService paymentInstrumentService;
+    private TransactionMapper transactionMapper;
 
 
     public FilterTransactionCommandImpl(TransactionCommandModel transactionCommandModel) {
@@ -43,10 +47,15 @@ class FilterTransactionCommandImpl extends BaseCommand<Boolean> implements Filte
     public FilterTransactionCommandImpl(
             TransactionCommandModel transactionCommandModel,
             PointTransactionPublisherService pointTransactionProducerService,
-            PaymentInstrumentService paymentInstrumentService) {
+            PaymentInstrumentService paymentInstrumentService,
+            TransactionMapper transactionMapper) {
         this.transactionCommandModel = transactionCommandModel;
         this.pointTransactionProducerService = pointTransactionProducerService;
         this.paymentInstrumentService = paymentInstrumentService;
+        this.transactionMapper = transactionMapper;
+    }
+
+    public FilterTransactionCommandImpl(TransactionCommandModel build, PointTransactionPublisherService pointTransactionProducerServiceMock, PaymentInstrumentService paymentInstrumentServiceMock) {
     }
 
     /**
@@ -70,7 +79,7 @@ class FilterTransactionCommandImpl extends BaseCommand<Boolean> implements Filte
             validateRequest(transaction);
 
             OffsetDateTime checkActiveStart = OffsetDateTime.now();
-            boolean checkActive = paymentInstrumentService.checkActive(transaction.getHpan(), transaction.getTrxDate());
+            PaymentInstrumentHistory checkActive = paymentInstrumentService.checkActive(transaction.getHpan(), transaction.getTrxDate());
             OffsetDateTime checkActiveEnd = OffsetDateTime.now();
             log.info("Executed checkActive for transaction: {}, {}, {} " +
                      "- Started at {}, Ended at {} - Total exec time: {}",
@@ -81,18 +90,20 @@ class FilterTransactionCommandImpl extends BaseCommand<Boolean> implements Filte
                     dateTimeFormatter.format(checkActiveEnd),
                     ChronoUnit.MILLIS.between(checkActiveStart, checkActiveEnd));
 
-            if (checkActive) {
+            if (checkActive != null) {
                 OffsetDateTime pubStart = OffsetDateTime.now();
-                pointTransactionProducerService.publishPointTransactionEvent(transaction);
+                OutgoingTransaction outgoingTransaction = transactionMapper.map(transaction);
+                outgoingTransaction.setFiscalCode(checkActive.getFiscalCode());
+                pointTransactionProducerService.publishPointTransactionEvent(outgoingTransaction);
                 OffsetDateTime pubEnd = OffsetDateTime.now();
-                    log.info("Executed publishing on BPD for transaction: {}, {}, {} " +
-                                    "- Started at {}, Ended at {} - Total exec time: {}",
-                            transaction.getIdTrxAcquirer(),
-                            transaction.getAcquirerCode(),
-                            transaction.getTrxDate(),
-                            dateTimeFormatter.format(pubStart),
-                            dateTimeFormatter.format(pubEnd),
-                            ChronoUnit.MILLIS.between(pubStart, pubEnd));
+                log.info("Executed publishing on BPD for transaction: {}, {}, {} " +
+                                "- Started at {}, Ended at {} - Total exec time: {}",
+                        outgoingTransaction.getIdTrxAcquirer(),
+                        outgoingTransaction.getAcquirerCode(),
+                        outgoingTransaction.getTrxDate(),
+                        dateTimeFormatter.format(pubStart),
+                        dateTimeFormatter.format(pubEnd),
+                        ChronoUnit.MILLIS.between(pubStart, pubEnd));
 
             } else {
                 log.info("Met a transaction for an inactive payment instrument on BPD. [{}, {}, {}]",
@@ -141,6 +152,11 @@ class FilterTransactionCommandImpl extends BaseCommand<Boolean> implements Filte
     @Autowired
     public void setPaymentInstrumentService(PaymentInstrumentService paymentInstrumentService) {
         this.paymentInstrumentService = paymentInstrumentService;
+    }
+
+    @Autowired
+    public void setTransactionMapper(TransactionMapper transactionMapper) {
+        this.transactionMapper = transactionMapper;
     }
 
 
