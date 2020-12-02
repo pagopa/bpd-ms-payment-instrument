@@ -45,11 +45,11 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
 
 
     @Override
-    public PaymentInstrument find(String hpan,String fiscalCode) {
+    public PaymentInstrument find(String hpan, String fiscalCode) {
         PaymentInstrument pi = paymentInstrumentDAO.findById(hpan).orElseThrow(() -> new PaymentInstrumentNotFoundException(hpan));
 
-        if((pi.isEnabled() || PaymentInstrument.Status.ACTIVE.equals(pi.getStatus()))
-                && fiscalCode!=null && !fiscalCode.equals(pi.getFiscalCode())){
+        if ((pi.isEnabled() || PaymentInstrument.Status.ACTIVE.equals(pi.getStatus()))
+                && fiscalCode != null && !fiscalCode.equals(pi.getFiscalCode())) {
             throw new PaymentInstrumentOnDifferentUserException(hpan);
         }
 
@@ -78,11 +78,11 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
                 foundPI.setFiscalCode(pi.getFiscalCode());
                 foundPI.setStatus(PaymentInstrument.Status.ACTIVE);
                 return paymentInstrumentDAO.save(pi);
-            }else{
-                if(foundPI.getFiscalCode()!=null && !foundPI.getFiscalCode().equals(pi.getFiscalCode())){
+            } else {
+                if (foundPI.getFiscalCode() != null && !foundPI.getFiscalCode().equals(pi.getFiscalCode())) {
                     throw new PaymentInstrumentOnDifferentUserException(hpan);
                 }
-                pi=foundPI;
+                pi = foundPI;
             }
         }
 
@@ -105,7 +105,7 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
                 Set<String> channelSet = new HashSet<>();
                 paymentInstrumentList.stream().filter(pi -> pi.isEnabled()).forEach(pi -> channelSet.add(pi.getChannel()));
 
-                if (channelSet.size() > 1 || !channelSet.contains(channel)) {
+                if (channelSet.size() != 0 && (channelSet.size() > 1 || !channelSet.contains(channel))) {
                     throw new PaymentInstrumentDifferentChannelException(fiscalCode);
                 }
             }
@@ -124,7 +124,7 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
         if (paymentInstrument.isEnabled()) {
             paymentInstrument.setStatus(PaymentInstrument.Status.INACTIVE);
             paymentInstrument.setDeactivationDate(cancellationDate != null ?
-                    cancellationDate :OffsetDateTime.now());
+                    cancellationDate : OffsetDateTime.now());
             paymentInstrument.setUpdateUser(fiscalCode);
             paymentInstrument.setUpdateDate(OffsetDateTime.now());
             paymentInstrument.setEnabled(false);
