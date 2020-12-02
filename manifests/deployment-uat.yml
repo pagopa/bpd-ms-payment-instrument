@@ -30,6 +30,13 @@ spec:
                 name: bpdmspaymentinstrument
             - configMapRef:
                 name: jvm
+          resources:
+            limits:
+              cpu: 800m
+              memory: 4Gi
+            requests:
+              cpu: 10m
+              memory: 256Mi
       hostAliases:
         - hostnames:
             - bpd-event-uat.servicebus.windows.net
