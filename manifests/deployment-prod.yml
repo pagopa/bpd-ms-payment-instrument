@@ -11,6 +11,10 @@ spec:
     metadata:
       labels:
         app: bpdmspaymentinstrument
+      annotations:
+        prometheus.io/path: /actuator/prometheus
+        prometheus.io/port: '8080'
+        prometheus.io/scrape: 'true'
     spec:
       containers:
         - name: bpdmspaymentinstrument
