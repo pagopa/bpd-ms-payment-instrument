@@ -1,5 +1,6 @@
 package it.gov.pagopa.bpd.payment_instrument.service;
 
+import it.gov.pagopa.bpd.payment_instrument.connector.jpa.PaymentInstrumentConverter;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.PaymentInstrumentDAO;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.PaymentInstrumentHistoryDAO;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.model.PaymentInstrument;
@@ -7,10 +8,13 @@ import it.gov.pagopa.bpd.payment_instrument.connector.jpa.model.PaymentInstrumen
 import it.gov.pagopa.bpd.payment_instrument.exception.PaymentInstrumentDifferentChannelException;
 import it.gov.pagopa.bpd.payment_instrument.exception.PaymentInstrumentNotFoundException;
 import it.gov.pagopa.bpd.payment_instrument.exception.PaymentInstrumentOnDifferentUserException;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.BDDMockito;
 import org.mockito.Mockito;
+import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.jpa.domain.Specification;
@@ -21,6 +25,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import javax.annotation.PostConstruct;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.Assert.*;
@@ -109,6 +114,27 @@ public class PaymentInstrumentServiceImplTest {
 
                     return result;
                 });
+
+        Mockito.when(paymentInstrumentDAOMock.getPaymentInstrument(Mockito.eq(EXISTING_FISCAL_CODE), Mockito.anyString()))
+                .thenAnswer((Answer<List<PaymentInstrumentConverter>>)
+                        invocation -> {
+                            List<PaymentInstrumentConverter> converter = new ArrayList<PaymentInstrumentConverter>();
+                            PaymentInstrumentConverter item = new PaymentInstrumentConverter() {
+                                @Override
+                                public Long getCount() {
+                                    return 1L;
+                                }
+
+                                @Override
+                                public String getChannel() {
+                                    return "123";
+                                }
+
+                            };
+                            converter.add(item);
+
+                            return converter;
+                        });
 
     }
 
@@ -297,4 +323,20 @@ public class PaymentInstrumentServiceImplTest {
         verify(paymentInstrumentDAOMock, times(1)).reactivateForRollback(Mockito.any(), Mockito.any(), Mockito.any());
     }
 
+    @Test
+    public void getPaymentInstrument() {
+        List<PaymentInstrumentConverter> converter = paymentInstrumentService.getPaymentInstrument("fiscalCode", "channel");
+
+        Assert.assertNotNull(converter);
+        verify(paymentInstrumentDAOMock, times(1)).getPaymentInstrument(Mockito.any(), Mockito.any());
+    }
+
+    @Test
+    public void getPaymentInstrument_KO() {
+        List<PaymentInstrumentConverter> converter = paymentInstrumentService.getPaymentInstrument("wrongFiscalCode", "channel");
+
+        Assert.assertNotNull(converter);
+        verify(paymentInstrumentDAOMock, times(1)).getPaymentInstrument(Mockito.any(), Mockito.any());
+        BDDMockito.verifyZeroInteractions(paymentInstrumentDAOMock);
+    }
 }
