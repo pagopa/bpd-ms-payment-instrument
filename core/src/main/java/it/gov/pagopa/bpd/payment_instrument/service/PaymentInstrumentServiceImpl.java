@@ -1,6 +1,7 @@
 package it.gov.pagopa.bpd.payment_instrument.service;
 
 import eu.sia.meda.service.BaseService;
+import it.gov.pagopa.bpd.payment_instrument.connector.jpa.PaymentInstrumentConverter;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.PaymentInstrumentDAO;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.PaymentInstrumentHistoryDAO;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.model.PaymentInstrument;
@@ -148,6 +149,11 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
     public String getFiscalCode(String hpan) {
         PaymentInstrument pi = paymentInstrumentDAO.findById(hpan).orElseThrow(() -> new PaymentInstrumentNotFoundException(hpan));
         return pi.getFiscalCode();
+    }
+
+    @Override
+    public List<PaymentInstrumentConverter> getPaymentInstrument(String fiscalCode, String channel) {
+        return paymentInstrumentDAO.getPaymentInstrument(fiscalCode, channel);
     }
 
     public static void main(String[] args) {
