@@ -11,6 +11,10 @@ spec:
     metadata:
       labels:
         app: bpdmspaymentinstrument
+      annotations:
+        prometheus.io/path: /actuator/prometheus
+        prometheus.io/port: '8080'
+        prometheus.io/scrape: 'true'
     spec:
       containers:
         - name: bpdmspaymentinstrument
@@ -30,6 +34,13 @@ spec:
                 name: bpdmspaymentinstrument
             - configMapRef:
                 name: jvm
+          resources:
+            limits:
+              cpu: 800m
+              memory: 4Gi
+            requests:
+              cpu: 10m
+              memory: 256Mi
       hostAliases:
         - hostnames:
             - bpd-event-uat.servicebus.windows.net
