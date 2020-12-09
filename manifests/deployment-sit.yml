@@ -4,6 +4,9 @@ metadata:
   name: bpdmspaymentinstrument
 spec:
   replicas: 1
+  selector:
+    matchLabels:
+      app: bpdmspaymentinstrument
   template:
     metadata:
       labels:
