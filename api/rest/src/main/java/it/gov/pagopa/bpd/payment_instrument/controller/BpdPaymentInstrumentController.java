@@ -1,26 +1,25 @@
 package it.gov.pagopa.bpd.payment_instrument.controller;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiParam;
-import org.springframework.web.bind.annotation.RequestParam;
+import it.gov.pagopa.bpd.common.annotation.UpperCase;
+import it.gov.pagopa.bpd.common.converter.UpperCaseConverter;
+import it.gov.pagopa.bpd.common.util.Constants;
+import it.gov.pagopa.bpd.payment_instrument.controller.model.PaymentInstrumentConverterResource;
 import it.gov.pagopa.bpd.payment_instrument.controller.model.PaymentInstrumentDTO;
 import it.gov.pagopa.bpd.payment_instrument.controller.model.PaymentInstrumentResource;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import io.swagger.annotations.ApiModelProperty;
-import it.gov.pagopa.bpd.common.converter.UpperCaseConverter;
-import it.gov.pagopa.bpd.common.util.Constants;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
-import java.time.OffsetDateTime;
-import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
+import java.time.OffsetDateTime;
+import java.util.List;
 
 /**
  * Controller to expose MicroService
@@ -98,7 +97,21 @@ public interface BpdPaymentInstrumentController {
             @PathVariable("id")
             @NotBlank
                     String hpan,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime accountingDate);
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime accountingDate
+    );
+
+    @GetMapping(value = "/number/{fiscalCode}", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseStatus(HttpStatus.OK)
+    List<PaymentInstrumentConverterResource> getPaymentInstrumentNumber(
+            @ApiParam(value = "${swagger.paymentInstrument.fiscalCode}", required = true)
+            @PathVariable("fiscalCode") @UpperCase
+            @Valid @NotBlank @Size(min = 16, max = 16) @Pattern(regexp = Constants.FISCAL_CODE_REGEX)
+                    String fiscalCode,
+            @ApiParam(value = "${swagger.paymentInstrument.channel}", required = false)
+            @RequestParam(value = "channel", required = false, defaultValue = "")
+            @Valid
+                    String channel
+    );
 
 
 }

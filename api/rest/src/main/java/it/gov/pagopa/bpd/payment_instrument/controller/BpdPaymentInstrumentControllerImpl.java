@@ -1,9 +1,12 @@
 package it.gov.pagopa.bpd.payment_instrument.controller;
 
 import eu.sia.meda.core.controller.StatelessController;
+import it.gov.pagopa.bpd.payment_instrument.connector.jpa.PaymentInstrumentConverter;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.model.PaymentInstrument;
+import it.gov.pagopa.bpd.payment_instrument.controller.assembler.PaymentInstrumentConverterResourceAssembler;
 import it.gov.pagopa.bpd.payment_instrument.controller.assembler.PaymentInstrumentResourceAssembler;
 import it.gov.pagopa.bpd.payment_instrument.controller.factory.ModelFactory;
+import it.gov.pagopa.bpd.payment_instrument.controller.model.PaymentInstrumentConverterResource;
 import it.gov.pagopa.bpd.payment_instrument.controller.model.PaymentInstrumentDTO;
 import it.gov.pagopa.bpd.payment_instrument.controller.model.PaymentInstrumentResource;
 import it.gov.pagopa.bpd.payment_instrument.service.PaymentInstrumentService;
@@ -11,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.OffsetDateTime;
+import java.util.List;
 
 /**
  * See {@link BpdPaymentInstrumentController}
@@ -20,15 +24,18 @@ class BpdPaymentInstrumentControllerImpl extends StatelessController implements 
 
     private final PaymentInstrumentService paymentInstrumentService;
     private final PaymentInstrumentResourceAssembler paymentInstrumentResourceAssembler;
+    private final PaymentInstrumentConverterResourceAssembler paymentInstrumentConverterResourceAssembler;
     private final ModelFactory<PaymentInstrumentDTO, PaymentInstrument> paymentInstrumentFactory;
 
 
     @Autowired
     public BpdPaymentInstrumentControllerImpl(PaymentInstrumentService paymentInstrumentService,
                                               PaymentInstrumentResourceAssembler paymentInstrumentResourceAssembler,
+                                              PaymentInstrumentConverterResourceAssembler paymentInstrumentConverterResourceAssembler,
                                               ModelFactory<PaymentInstrumentDTO, PaymentInstrument> paymentInstrumentFactory) {
         this.paymentInstrumentService = paymentInstrumentService;
         this.paymentInstrumentResourceAssembler = paymentInstrumentResourceAssembler;
+        this.paymentInstrumentConverterResourceAssembler = paymentInstrumentConverterResourceAssembler;
         this.paymentInstrumentFactory = paymentInstrumentFactory;
     }
 
@@ -100,6 +107,13 @@ class BpdPaymentInstrumentControllerImpl extends StatelessController implements 
         }
 
         return paymentInstrumentService.checkActive(hpan, accountingDate) != null;
+    }
+
+
+    @Override
+    public List<PaymentInstrumentConverterResource> getPaymentInstrumentNumber(String fiscalCode, String channel) {
+        List<PaymentInstrumentConverter> pi = paymentInstrumentService.getPaymentInstrument(fiscalCode, channel);
+        return paymentInstrumentConverterResourceAssembler.toResource(pi);
     }
 
 }
