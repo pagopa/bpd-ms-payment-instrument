@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: bpdmspaymentinstrument
 spec:
-  replicas: 1  
+  replicas: 10
   selector:
     matchLabels:
       app: bpdmspaymentinstrument
@@ -34,6 +34,34 @@ spec:
                 name: bpdmspaymentinstrument
             - configMapRef:
                 name: jvm
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+              scheme: HTTP
+            timeoutSeconds: 5
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 5
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+              scheme: HTTP
+            timeoutSeconds: 5
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 3
+          startupProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 20
+            timeoutSeconds: 5
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 20
       hostAliases:
         - hostnames:
             - u87cstarprod.servicebus.windows.net
