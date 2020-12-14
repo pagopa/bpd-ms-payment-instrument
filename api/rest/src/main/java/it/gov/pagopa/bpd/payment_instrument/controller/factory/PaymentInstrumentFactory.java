@@ -1,7 +1,7 @@
 package it.gov.pagopa.bpd.payment_instrument.controller.factory;
 
-import it.gov.pagopa.bpd.payment_instrument.connector.jpa.model.PaymentInstrument;
 import it.gov.pagopa.bpd.payment_instrument.controller.model.PaymentInstrumentDTO;
+import it.gov.pagopa.bpd.payment_instrument.model.PaymentInstrumentServiceModel;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Component;
 
@@ -9,14 +9,13 @@ import org.springframework.stereotype.Component;
  * Mapper between <PaymentInstrumentDTO> DTO class and <PaymentInstrument> Entity class
  */
 @Component
-public class PaymentInstrumentFactory implements ModelFactory<PaymentInstrumentDTO, PaymentInstrument> {
+public class PaymentInstrumentFactory implements ModelFactory<PaymentInstrumentDTO, PaymentInstrumentServiceModel> {
 
     @Override
-    public PaymentInstrument createModel(PaymentInstrumentDTO dto) {
-        final PaymentInstrument result = new PaymentInstrument();
+    public PaymentInstrumentServiceModel createModel(PaymentInstrumentDTO dto) {
+        final PaymentInstrumentServiceModel result = new PaymentInstrumentServiceModel();
 
         BeanUtils.copyProperties(dto, result);
-        result.setStatus(PaymentInstrument.Status.ACTIVE);
 
         return result;
     }
