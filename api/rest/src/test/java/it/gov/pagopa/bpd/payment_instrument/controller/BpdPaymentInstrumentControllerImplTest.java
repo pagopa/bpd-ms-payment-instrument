@@ -12,6 +12,7 @@ import it.gov.pagopa.bpd.payment_instrument.controller.factory.PaymentInstrument
 import it.gov.pagopa.bpd.payment_instrument.controller.model.PaymentInstrumentConverterResource;
 import it.gov.pagopa.bpd.payment_instrument.controller.model.PaymentInstrumentDTO;
 import it.gov.pagopa.bpd.payment_instrument.controller.model.PaymentInstrumentResource;
+import it.gov.pagopa.bpd.payment_instrument.model.PaymentInstrumentServiceModel;
 import it.gov.pagopa.bpd.payment_instrument.service.PaymentInstrumentService;
 import org.junit.Assert;
 import org.junit.Test;
@@ -90,8 +91,8 @@ public class BpdPaymentInstrumentControllerImplTest {
         doReturn(paymentInstrument)
                 .when(paymentInstrumentServiceMock).find(eq("hpan"), eq("DHFIVD85M84D048L"));
 
-        doReturn(new PaymentInstrument())
-                .when(paymentInstrumentServiceMock).createOrUpdate(eq("hpan"), eq(paymentInstrument));
+        doReturn(new PaymentInstrumentServiceModel())
+                .when(paymentInstrumentServiceMock).createOrUpdate(eq("hpan"), any());
 
         doReturn(pih)
                 .when(paymentInstrumentServiceMock).checkActive(eq("hpan"), any());
@@ -137,7 +138,7 @@ public class BpdPaymentInstrumentControllerImplTest {
         assertNotNull(pageResult);
         verify(paymentInstrumentServiceMock).createOrUpdate(eq("hpan"), any());
         verify(paymentInstrumentFactoryMock).createModel(eq(paymentInstrument));
-        verify(paymentInstrumentResourceAssemblerMock).toResource(any(PaymentInstrument.class));
+        verify(paymentInstrumentResourceAssemblerMock).fromServiceToResource(any(PaymentInstrumentServiceModel.class));
     }
 
     @Test

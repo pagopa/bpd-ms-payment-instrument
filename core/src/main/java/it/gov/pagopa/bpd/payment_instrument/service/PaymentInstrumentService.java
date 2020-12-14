@@ -3,6 +3,7 @@ package it.gov.pagopa.bpd.payment_instrument.service;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.PaymentInstrumentConverter;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.model.PaymentInstrument;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.model.PaymentInstrumentHistory;
+import it.gov.pagopa.bpd.payment_instrument.model.PaymentInstrumentServiceModel;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -14,7 +15,7 @@ public interface PaymentInstrumentService {
 
     PaymentInstrument find(String hpan, String fiscalCode);
 
-    PaymentInstrument createOrUpdate(String hpan, PaymentInstrument pi);
+    PaymentInstrumentServiceModel createOrUpdate(String hpan, PaymentInstrumentServiceModel pi);
 
     void delete(String hpan, String fiscalCode, OffsetDateTime cancellationDate);
 

@@ -18,6 +18,10 @@ public interface PaymentInstrumentDAO extends CrudJpaDAO<PaymentInstrument, Stri
 
     List<PaymentInstrument> findByFiscalCode(String fiscalCode);
 
+    List<PaymentInstrument> findByHpanIn(List<String> idList);
+//    List<PaymentInstrument>  saveAll(Iterable<PaymentInstrument> paymentInstrumentList);
+
+
     @Modifying
     @Query("update PaymentInstrument " +
             "set enabled = true, " +
