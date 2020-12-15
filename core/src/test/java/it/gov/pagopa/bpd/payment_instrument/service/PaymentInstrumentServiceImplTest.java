@@ -1,5 +1,6 @@
 package it.gov.pagopa.bpd.payment_instrument.service;
 
+import it.gov.pagopa.bpd.payment_instrument.assembler.PaymentInstrumentAssembler;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.PaymentInstrumentConverter;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.PaymentInstrumentDAO;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.PaymentInstrumentHistoryDAO;
@@ -8,6 +9,7 @@ import it.gov.pagopa.bpd.payment_instrument.connector.jpa.model.PaymentInstrumen
 import it.gov.pagopa.bpd.payment_instrument.exception.PaymentInstrumentDifferentChannelException;
 import it.gov.pagopa.bpd.payment_instrument.exception.PaymentInstrumentNotFoundException;
 import it.gov.pagopa.bpd.payment_instrument.exception.PaymentInstrumentOnDifferentUserException;
+import it.gov.pagopa.bpd.payment_instrument.model.PaymentInstrumentServiceModel;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -17,6 +19,7 @@ import org.mockito.Mockito;
 import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
@@ -25,6 +28,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import javax.annotation.PostConstruct;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -45,6 +49,7 @@ public class PaymentInstrumentServiceImplTest {
     private static final String NOT_EXISTING_HASH_PAN = "not-existing-hpan";
     private static final String APPIO_CHANNEL = "app-io-channel";
     private static final String ANOTHER_CHANNEL_1 = "another-channel_1";
+    private static final String TOKEN = "token";
     private long countResult;
 
 
@@ -54,6 +59,8 @@ public class PaymentInstrumentServiceImplTest {
     private PaymentInstrumentHistoryDAO paymentInstrumentHistoryDAOMock;
     @Autowired
     private PaymentInstrumentService paymentInstrumentService;
+    @SpyBean
+    private PaymentInstrumentAssembler paymentInstrumentAssembler;
 
 
     @PostConstruct
@@ -76,6 +83,32 @@ public class PaymentInstrumentServiceImplTest {
                         pi.setFiscalCode(EXISTING_FISCAL_CODE);
                         pi.setEnabled(false);
                         result = Optional.of(pi);
+                    }
+                    return result;
+                });
+
+        when(paymentInstrumentDAOMock.findByHpanIn(any()))
+                .thenAnswer(invocation -> {
+                    String hashPanList = invocation.getArgument(0).toString();
+                    List<PaymentInstrument> result = new ArrayList<>();
+                    if (hashPanList.toLowerCase().contains(EXISTING_HASH_PAN.toLowerCase())) {
+                        PaymentInstrument pi = new PaymentInstrument();
+                        pi.setFiscalCode(EXISTING_FISCAL_CODE);
+                        pi.setEnabled(true);
+                        pi.setHpan(EXISTING_HASH_PAN);
+                        PaymentInstrument pi2 = new PaymentInstrument();
+                        pi2.setFiscalCode(EXISTING_FISCAL_CODE);
+                        pi2.setEnabled(true);
+                        pi2.setHpan(TOKEN);
+                        result.add(pi);
+                        result.add(pi2);
+                    }
+                    if (hashPanList.toLowerCase().contains(EXISTING_HASH_PAN_INACTIVE.toLowerCase())) {
+                        PaymentInstrument pi = new PaymentInstrument();
+                        pi.setHpan(EXISTING_HASH_PAN_INACTIVE);
+                        pi.setFiscalCode(EXISTING_FISCAL_CODE);
+                        pi.setEnabled(false);
+                        result.add((pi));
                     }
                     return result;
                 });
@@ -183,61 +216,48 @@ public class PaymentInstrumentServiceImplTest {
 
     @Test
     public void createOrUpdate_createOK() {
-        final String hashPan = NOT_EXISTING_HASH_PAN;
-        PaymentInstrument paymentInstrument = new PaymentInstrument();
-        paymentInstrument.setFiscalCode("ALSTRD85M84K048F");
+        final String fiscalCode = EXISTING_FISCAL_CODE;
+        PaymentInstrumentServiceModel paymentInstrument = new PaymentInstrumentServiceModel();
+        paymentInstrument.setFiscalCode(fiscalCode);
+        paymentInstrument.setTokenPanList(Collections.singletonList("token"));
 
-        PaymentInstrument result = paymentInstrumentService.createOrUpdate(hashPan, paymentInstrument);
-
+        PaymentInstrumentServiceModel result = paymentInstrumentService.createOrUpdate(NOT_EXISTING_HASH_PAN, paymentInstrument);
         assertNotNull(paymentInstrument);
-        assertEquals(hashPan, result.getHpan());
-        verify(paymentInstrumentDAOMock, times(1)).findById(eq(hashPan));
-//        verify(paymentInstrumentDAOMock, times(1)).count(any(Specification.class));
-        verify(paymentInstrumentDAOMock, times(1)).save(eq(paymentInstrument));
+        assertEquals(fiscalCode, result.getFiscalCode());
+        verify(paymentInstrumentDAOMock, times(1)).findByHpanIn(any());
+        verify(paymentInstrumentDAOMock, times(1)).saveAll(any());
     }
 
 
     @Test
     public void createOrUpdate_updateOK() {
-        final String hashPan = EXISTING_HASH_PAN_INACTIVE;
-        PaymentInstrument paymentInstrument = new PaymentInstrument();
+        PaymentInstrumentServiceModel paymentInstrument = new PaymentInstrumentServiceModel();
         paymentInstrument.setFiscalCode(EXISTING_FISCAL_CODE);
+        paymentInstrument.setTokenPanList(Collections.singletonList("token"));
 
-        PaymentInstrument result = paymentInstrumentService.createOrUpdate(hashPan, paymentInstrument);
+        PaymentInstrumentServiceModel result = paymentInstrumentService.createOrUpdate(EXISTING_HASH_PAN_INACTIVE, paymentInstrument);
 
         assertNotNull(paymentInstrument);
-        assertEquals(hashPan, result.getHpan());
-        verify(paymentInstrumentDAOMock, times(1)).findById(eq(hashPan));
-        verify(paymentInstrumentDAOMock, times(1)).save(eq(paymentInstrument));
+        assertEquals(EXISTING_FISCAL_CODE, result.getFiscalCode());
+        verify(paymentInstrumentDAOMock, times(1)).findByHpanIn(any());
+        verify(paymentInstrumentDAOMock, times(1)).saveAll(any());
         verifyNoMoreInteractions(paymentInstrumentDAOMock);
     }
 
     @Test
     public void createOrUpdate_updateOK_AlreadyActive() {
-        final String hashPan = EXISTING_HASH_PAN;
-        PaymentInstrument paymentInstrument = new PaymentInstrument();
+        PaymentInstrumentServiceModel paymentInstrument = new PaymentInstrumentServiceModel();
         paymentInstrument.setFiscalCode(EXISTING_FISCAL_CODE);
+        paymentInstrument.setTokenPanList(Collections.singletonList(TOKEN));
 
-        PaymentInstrument result = paymentInstrumentService.createOrUpdate(hashPan, paymentInstrument);
+        PaymentInstrumentServiceModel result = paymentInstrumentService.createOrUpdate(EXISTING_HASH_PAN, paymentInstrument);
 
         assertNotNull(paymentInstrument);
-        assertEquals(hashPan, result.getHpan());
-        verify(paymentInstrumentDAOMock, times(1)).findById(eq(hashPan));
+        assertEquals(EXISTING_FISCAL_CODE, result.getFiscalCode());
+        verify(paymentInstrumentDAOMock, times(1)).findByHpanIn(any());
         verifyNoMoreInteractions(paymentInstrumentDAOMock);
     }
 
-//    @Test(expected = PaymentInstrumentNumbersExceededException.class)
-//    public void createOrUpdate_paymentInstrumentNumbersExceededError() {
-//        countResult = 5;
-//        final String hashPan = NOT_EXISTING_HASH_PAN;
-//        PaymentInstrument paymentInstrument = new PaymentInstrument();
-//
-//        PaymentInstrument result = paymentInstrumentService.createOrUpdate(hashPan, paymentInstrument);
-//
-//        verify(paymentInstrumentDAOMock, times(1)).findById(eq(hashPan));
-//        verify(paymentInstrumentDAOMock, times(1)).count(any(Specification.class));
-//        verifyNoMoreInteractions(paymentInstrumentDAOMock);
-//    }
 
     @Test
     public void deleteOK() {

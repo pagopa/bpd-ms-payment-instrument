@@ -9,6 +9,7 @@ import it.gov.pagopa.bpd.payment_instrument.controller.factory.ModelFactory;
 import it.gov.pagopa.bpd.payment_instrument.controller.model.PaymentInstrumentConverterResource;
 import it.gov.pagopa.bpd.payment_instrument.controller.model.PaymentInstrumentDTO;
 import it.gov.pagopa.bpd.payment_instrument.controller.model.PaymentInstrumentResource;
+import it.gov.pagopa.bpd.payment_instrument.model.PaymentInstrumentServiceModel;
 import it.gov.pagopa.bpd.payment_instrument.service.PaymentInstrumentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
@@ -25,14 +26,14 @@ class BpdPaymentInstrumentControllerImpl extends StatelessController implements 
     private final PaymentInstrumentService paymentInstrumentService;
     private final PaymentInstrumentResourceAssembler paymentInstrumentResourceAssembler;
     private final PaymentInstrumentConverterResourceAssembler paymentInstrumentConverterResourceAssembler;
-    private final ModelFactory<PaymentInstrumentDTO, PaymentInstrument> paymentInstrumentFactory;
+    private final ModelFactory<PaymentInstrumentDTO, PaymentInstrumentServiceModel> paymentInstrumentFactory;
 
 
     @Autowired
     public BpdPaymentInstrumentControllerImpl(PaymentInstrumentService paymentInstrumentService,
                                               PaymentInstrumentResourceAssembler paymentInstrumentResourceAssembler,
                                               PaymentInstrumentConverterResourceAssembler paymentInstrumentConverterResourceAssembler,
-                                              ModelFactory<PaymentInstrumentDTO, PaymentInstrument> paymentInstrumentFactory) {
+                                              ModelFactory<PaymentInstrumentDTO, PaymentInstrumentServiceModel> paymentInstrumentFactory) {
         this.paymentInstrumentService = paymentInstrumentService;
         this.paymentInstrumentResourceAssembler = paymentInstrumentResourceAssembler;
         this.paymentInstrumentConverterResourceAssembler = paymentInstrumentConverterResourceAssembler;
@@ -41,14 +42,14 @@ class BpdPaymentInstrumentControllerImpl extends StatelessController implements 
 
 
     @Override
-    public PaymentInstrumentResource find(String hpan,String fiscalCode) {
+    public PaymentInstrumentResource find(String hpan, String fiscalCode) {
         if (logger.isDebugEnabled()) {
             logger.debug("BpdPaymentInstrumentControllerImpl.find");
             logger.debug("hpan = [" + hpan + "]");
             logger.debug("fiscalCode = [" + fiscalCode + "]");
         }
 
-        final PaymentInstrument entity = paymentInstrumentService.find(hpan,fiscalCode);
+        final PaymentInstrument entity = paymentInstrumentService.find(hpan, fiscalCode);
 
         return paymentInstrumentResourceAssembler.toResource(entity);
     }
@@ -61,16 +62,14 @@ class BpdPaymentInstrumentControllerImpl extends StatelessController implements 
             logger.debug("hpan = [" + hpan + "], paymentInstrument = [" + paymentInstrument + "]");
         }
 
-        final PaymentInstrument entity = paymentInstrumentFactory.createModel(paymentInstrument);
+        final PaymentInstrumentServiceModel serviceModel = paymentInstrumentFactory.createModel(paymentInstrument);
 
-        PaymentInstrument paymentInstrumentEntity = paymentInstrumentService.createOrUpdate(hpan, entity);
-
-        return paymentInstrumentResourceAssembler.toResource(paymentInstrumentEntity);
+        return paymentInstrumentResourceAssembler.fromServiceToResource(paymentInstrumentService.createOrUpdate(hpan, serviceModel));
     }
 
 
     @Override
-    public void delete(String hpan, String fiscalCode,  OffsetDateTime cancellationDate) {
+    public void delete(String hpan, String fiscalCode, OffsetDateTime cancellationDate) {
         if (logger.isDebugEnabled()) {
             logger.debug("BpdPaymentInstrumentControllerImpl.delete");
             logger.debug("hpan = [" + hpan + "]");

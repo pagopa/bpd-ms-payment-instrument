@@ -1,6 +1,7 @@
 package it.gov.pagopa.bpd.payment_instrument.service;
 
 import eu.sia.meda.service.BaseService;
+import it.gov.pagopa.bpd.payment_instrument.assembler.PaymentInstrumentAssembler;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.PaymentInstrumentConverter;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.PaymentInstrumentDAO;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.PaymentInstrumentHistoryDAO;
@@ -9,6 +10,7 @@ import it.gov.pagopa.bpd.payment_instrument.connector.jpa.model.PaymentInstrumen
 import it.gov.pagopa.bpd.payment_instrument.exception.PaymentInstrumentDifferentChannelException;
 import it.gov.pagopa.bpd.payment_instrument.exception.PaymentInstrumentNotFoundException;
 import it.gov.pagopa.bpd.payment_instrument.exception.PaymentInstrumentOnDifferentUserException;
+import it.gov.pagopa.bpd.payment_instrument.model.PaymentInstrumentServiceModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -16,10 +18,11 @@ import org.springframework.stereotype.Service;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @See PaymentInstrumentService
@@ -29,6 +32,7 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
 
     private final PaymentInstrumentDAO paymentInstrumentDAO;
     private final PaymentInstrumentHistoryDAO paymentInstrumentHistoryDAO;
+    private final PaymentInstrumentAssembler paymentInstrumentAssembler;
 
     @Value(value = "${numMaxPaymentInstr}")
     private int numMaxPaymentInstr;
@@ -38,9 +42,10 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
     @Autowired
     public PaymentInstrumentServiceImpl(PaymentInstrumentDAO paymentInstrumentDAO,
                                         PaymentInstrumentHistoryDAO paymentInstrumentHistoryDAO,
-                                        @Value("${core.PaymentInstrumentService.appIOChannel}") String appIOChannel) {
+                                        PaymentInstrumentAssembler paymentInstrumentAssembler, @Value("${core.PaymentInstrumentService.appIOChannel}") String appIOChannel) {
         this.paymentInstrumentDAO = paymentInstrumentDAO;
         this.paymentInstrumentHistoryDAO = paymentInstrumentHistoryDAO;
+        this.paymentInstrumentAssembler = paymentInstrumentAssembler;
         this.appIOChannel = appIOChannel;
     }
 
@@ -59,34 +64,38 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
 
 
     @Override
-    public PaymentInstrument createOrUpdate(String hpan, PaymentInstrument pi) {
-        final Optional<PaymentInstrument> foundPIOpt = paymentInstrumentDAO.findById(hpan);
-        pi.setHpan(hpan);
-        if (!foundPIOpt.isPresent()) {
-//            final long count = paymentInstrumentDAO.count((root, query, criteriaBuilder) ->
-//                    criteriaBuilder.equal(root.get("fiscalCode"), pi.getFiscalCode()));
-//            if (count >= numMaxPaymentInstr) {
-//                throw new PaymentInstrumentNumbersExceededException(
-//                        PaymentInstrument.class, numMaxPaymentInstr);
-//            }
-            return paymentInstrumentDAO.save(pi);
-        } else {
-            PaymentInstrument foundPI = foundPIOpt.get();
+    public PaymentInstrumentServiceModel createOrUpdate(String hpan, PaymentInstrumentServiceModel pi) {
+        List<String> idList = new ArrayList<>();
+        idList.add(hpan);
+        if (pi.getTokenPanList() != null) {
+            idList.addAll(pi.getTokenPanList());
+        }
+        List<PaymentInstrument> toSaveOrUpdate = new ArrayList<>();
+        List<PaymentInstrument> piList = paymentInstrumentDAO.findByHpanIn(idList);
+        List<String> piListHpan = piList.stream()
+                .map(PaymentInstrument::getHpan)
+                .collect(Collectors.toList());
+        List<String> notYetEnrolledIdList = idList.stream()
+                .filter(element -> !piListHpan.contains(element))
+                .collect(Collectors.toList());
+        for (String id : notYetEnrolledIdList) {
+            PaymentInstrument newPaymentInstrument = paymentInstrumentAssembler.toResource(pi, id);
+            toSaveOrUpdate.add(newPaymentInstrument);
+        }
+        for (PaymentInstrument foundPI : piList) {
             if (!foundPI.isEnabled()) {
                 foundPI.setEnabled(true);
-                foundPI.setHpan(hpan);
                 foundPI.setActivationDate(pi.getActivationDate());
                 foundPI.setFiscalCode(pi.getFiscalCode());
                 foundPI.setStatus(PaymentInstrument.Status.ACTIVE);
-                return paymentInstrumentDAO.save(pi);
-            } else {
-                if (foundPI.getFiscalCode() != null && !foundPI.getFiscalCode().equals(pi.getFiscalCode())) {
-                    throw new PaymentInstrumentOnDifferentUserException(hpan);
-                }
-                pi = foundPI;
+                toSaveOrUpdate.add(foundPI);
+            } else if (foundPI.getFiscalCode() != null && !foundPI.getFiscalCode().equals(pi.getFiscalCode())) {
+                throw new PaymentInstrumentOnDifferentUserException(hpan);
             }
         }
-
+        if (toSaveOrUpdate.size() > 0) {
+            paymentInstrumentDAO.saveAll(toSaveOrUpdate);
+        }
         return pi;
     }
 

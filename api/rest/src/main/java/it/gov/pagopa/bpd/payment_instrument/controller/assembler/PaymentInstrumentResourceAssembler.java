@@ -2,6 +2,7 @@ package it.gov.pagopa.bpd.payment_instrument.controller.assembler;
 
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.model.PaymentInstrument;
 import it.gov.pagopa.bpd.payment_instrument.controller.model.PaymentInstrumentResource;
+import it.gov.pagopa.bpd.payment_instrument.model.PaymentInstrumentServiceModel;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +18,17 @@ public class PaymentInstrumentResourceAssembler {
         if (paymentInstrument != null) {
             resource = new PaymentInstrumentResource();
             BeanUtils.copyProperties(paymentInstrument, resource);
+        }
+
+        return resource;
+    }
+
+    public PaymentInstrumentResource fromServiceToResource(PaymentInstrumentServiceModel paymentInstrumentServiceModel) {
+        PaymentInstrumentResource resource = null;
+
+        if (paymentInstrumentServiceModel != null) {
+            resource = new PaymentInstrumentResource();
+            BeanUtils.copyProperties(paymentInstrumentServiceModel, resource);
         }
 
         return resource;
