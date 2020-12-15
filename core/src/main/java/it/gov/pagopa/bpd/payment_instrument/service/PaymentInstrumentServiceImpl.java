@@ -62,31 +62,6 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
         return pi;
     }
 
-//    @Override
-//    public PaymentInstrument createOrUpdate(String hpan, PaymentInstrument pi) {
-//        final Optional<PaymentInstrument> foundPIOpt = paymentInstrumentDAO.findById(hpan);
-//        pi.setHpan(hpan);
-//        if (!foundPIOpt.isPresent()) {
-//            return paymentInstrumentDAO.save(pi);
-//        } else {
-//            PaymentInstrument foundPI = foundPIOpt.get();
-//            if (!foundPI.isEnabled()) {
-//                foundPI.setEnabled(true);
-//                foundPI.setHpan(hpan);
-//                foundPI.setActivationDate(pi.getActivationDate());
-//                foundPI.setFiscalCode(pi.getFiscalCode());
-//                foundPI.setStatus(PaymentInstrument.Status.ACTIVE);
-//                return paymentInstrumentDAO.save(pi);
-//            } else {
-//                if (foundPI.getFiscalCode() != null && !foundPI.getFiscalCode().equals(pi.getFiscalCode())) {
-//                    throw new PaymentInstrumentOnDifferentUserException(hpan);
-//                }
-//                pi = foundPI;
-//            }
-//        }
-//        return pi;
-//    }
-
 
     @Override
     public PaymentInstrumentServiceModel createOrUpdate(String hpan, PaymentInstrumentServiceModel pi) {

@@ -258,18 +258,6 @@ public class PaymentInstrumentServiceImplTest {
         verifyNoMoreInteractions(paymentInstrumentDAOMock);
     }
 
-//    @Test(expected = PaymentInstrumentNumbersExceededException.class)
-//    public void createOrUpdate_paymentInstrumentNumbersExceededError() {
-//        countResult = 5;
-//        final String hashPan = NOT_EXISTING_HASH_PAN;
-//        PaymentInstrument paymentInstrument = new PaymentInstrument();
-//
-//        PaymentInstrument result = paymentInstrumentService.createOrUpdate(hashPan, paymentInstrument);
-//
-//        verify(paymentInstrumentDAOMock, times(1)).findById(eq(hashPan));
-//        verify(paymentInstrumentDAOMock, times(1)).count(any(Specification.class));
-//        verifyNoMoreInteractions(paymentInstrumentDAOMock);
-//    }
 
     @Test
     public void deleteOK() {
