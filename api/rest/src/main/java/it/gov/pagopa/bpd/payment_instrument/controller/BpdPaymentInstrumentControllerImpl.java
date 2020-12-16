@@ -3,11 +3,14 @@ package it.gov.pagopa.bpd.payment_instrument.controller;
 import eu.sia.meda.core.controller.StatelessController;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.PaymentInstrumentConverter;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.model.PaymentInstrument;
+import it.gov.pagopa.bpd.payment_instrument.connector.jpa.model.PaymentInstrumentHistory;
 import it.gov.pagopa.bpd.payment_instrument.controller.assembler.PaymentInstrumentConverterResourceAssembler;
+import it.gov.pagopa.bpd.payment_instrument.controller.assembler.PaymentInstrumentHistoryResourceAssembler;
 import it.gov.pagopa.bpd.payment_instrument.controller.assembler.PaymentInstrumentResourceAssembler;
 import it.gov.pagopa.bpd.payment_instrument.controller.factory.ModelFactory;
 import it.gov.pagopa.bpd.payment_instrument.controller.model.PaymentInstrumentConverterResource;
 import it.gov.pagopa.bpd.payment_instrument.controller.model.PaymentInstrumentDTO;
+import it.gov.pagopa.bpd.payment_instrument.controller.model.PaymentInstrumentHistoryResource;
 import it.gov.pagopa.bpd.payment_instrument.controller.model.PaymentInstrumentResource;
 import it.gov.pagopa.bpd.payment_instrument.model.PaymentInstrumentServiceModel;
 import it.gov.pagopa.bpd.payment_instrument.service.PaymentInstrumentService;
@@ -26,6 +29,7 @@ class BpdPaymentInstrumentControllerImpl extends StatelessController implements 
     private final PaymentInstrumentService paymentInstrumentService;
     private final PaymentInstrumentResourceAssembler paymentInstrumentResourceAssembler;
     private final PaymentInstrumentConverterResourceAssembler paymentInstrumentConverterResourceAssembler;
+    private final PaymentInstrumentHistoryResourceAssembler paymentInstrumentHistoryResourceAssembler;
     private final ModelFactory<PaymentInstrumentDTO, PaymentInstrumentServiceModel> paymentInstrumentFactory;
 
 
@@ -33,10 +37,12 @@ class BpdPaymentInstrumentControllerImpl extends StatelessController implements 
     public BpdPaymentInstrumentControllerImpl(PaymentInstrumentService paymentInstrumentService,
                                               PaymentInstrumentResourceAssembler paymentInstrumentResourceAssembler,
                                               PaymentInstrumentConverterResourceAssembler paymentInstrumentConverterResourceAssembler,
+                                              PaymentInstrumentHistoryResourceAssembler paymentInstrumentHistoryResourceAssembler,
                                               ModelFactory<PaymentInstrumentDTO, PaymentInstrumentServiceModel> paymentInstrumentFactory) {
         this.paymentInstrumentService = paymentInstrumentService;
         this.paymentInstrumentResourceAssembler = paymentInstrumentResourceAssembler;
         this.paymentInstrumentConverterResourceAssembler = paymentInstrumentConverterResourceAssembler;
+        this.paymentInstrumentHistoryResourceAssembler = paymentInstrumentHistoryResourceAssembler;
         this.paymentInstrumentFactory = paymentInstrumentFactory;
     }
 
@@ -113,6 +119,12 @@ class BpdPaymentInstrumentControllerImpl extends StatelessController implements 
     public List<PaymentInstrumentConverterResource> getPaymentInstrumentNumber(String fiscalCode, String channel) {
         List<PaymentInstrumentConverter> pi = paymentInstrumentService.getPaymentInstrument(fiscalCode, channel);
         return paymentInstrumentConverterResourceAssembler.toResource(pi);
+    }
+
+    @Override
+    public List<PaymentInstrumentHistoryResource> getPaymentInstrumentHistoryDetails(String fiscalCode, String hpan) {
+        List<PaymentInstrumentHistory> pih = paymentInstrumentService.findHistory(fiscalCode, hpan);
+        return paymentInstrumentHistoryResourceAssembler.toResource(pih);
     }
 
 }

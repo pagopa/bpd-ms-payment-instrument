@@ -34,16 +34,16 @@ public interface PaymentInstrumentDAO extends CrudJpaDAO<PaymentInstrument, Stri
                                @Param("requestTimestamp") OffsetDateTime requestTimestamp,
                                @Param("updateDateTime") OffsetDateTime updateDateTime);
 
-    @Query(nativeQuery = true,
-            value = "select count(*) as count,  " +
-                    "bpi.channel_s as channel  " +
-                    "from bpd_payment_instrument bpi " +
-                    "where bpi.fiscal_code_s = :fiscalCode " +
-                    "and (:channel = '' or bpi.channel_s = :channel) " +
-                    "and bpi.enabled_b = true " +
-                    "group by channel_s"
+    @Query("select count(*) as count,  " +
+            "bpi.channel as channel  " +
+            "from PaymentInstrument bpi " +
+            "where bpi.fiscalCode = :fiscalCode " +
+            "and (:channel is null or bpi.channel = :channel) " +
+            "and bpi.enabled = true " +
+            "group by channel"
     )
-    List<PaymentInstrumentConverter> getPaymentInstrument(@Param("fiscalCode") String fiscalCode,
-                                                          @Param("channel") String channel);
+    List<PaymentInstrumentConverter> getPaymentInstrument(
+            @Param("fiscalCode") String fiscalCode,
+            @Param("channel") String channel);
 
 }
