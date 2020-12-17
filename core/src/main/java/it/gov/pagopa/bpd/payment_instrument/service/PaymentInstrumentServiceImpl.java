@@ -105,9 +105,14 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
 
     @Override
     public void delete(String hpan, String fiscalCode, OffsetDateTime cancellationDate) {
-        PaymentInstrument paymentInstrument = paymentInstrumentDAO.findById(hpan).orElseThrow(
-                () -> new PaymentInstrumentNotFoundException(hpan));
-        checkAndDelete(paymentInstrument, fiscalCode, cancellationDate);
+
+        List<PaymentInstrument> piList = paymentInstrumentDAO.findByHpanMasterOrHpan(hpan, hpan);
+        if (piList == null || piList.isEmpty()) {
+            throw new PaymentInstrumentNotFoundException(hpan);
+        }
+
+        piList.forEach(
+                paymentInstrument -> checkAndDelete(paymentInstrument, fiscalCode, null));
     }
 
     @Override

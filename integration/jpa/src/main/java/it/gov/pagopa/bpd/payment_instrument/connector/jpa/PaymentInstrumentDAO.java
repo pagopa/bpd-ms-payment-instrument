@@ -46,4 +46,5 @@ public interface PaymentInstrumentDAO extends CrudJpaDAO<PaymentInstrument, Stri
     List<PaymentInstrumentConverter> getPaymentInstrument(@Param("fiscalCode") String fiscalCode,
                                                           @Param("channel") String channel);
 
+    List<PaymentInstrument> findByHpanMasterOrHpan(String hpanMaster, String hpan);
 }
