@@ -80,6 +80,10 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
                 .collect(Collectors.toList());
         for (String id : notYetEnrolledIdList) {
             PaymentInstrument newPaymentInstrument = paymentInstrumentAssembler.toResource(pi, id);
+            //se id token, setto lo strumento padre
+            if (!hpan.equals(id)) {
+                newPaymentInstrument.setHpanMaster(hpan);
+            }
             toSaveOrUpdate.add(newPaymentInstrument);
         }
         for (PaymentInstrument foundPI : piList) {
