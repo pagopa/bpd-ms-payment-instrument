@@ -39,6 +39,9 @@ public class PaymentInstrument extends BaseEntity {
         ACTIVE, INACTIVE
     }
 
+    @Column(name = "hpan_master_s")
+    private String hpanMaster;
+
     @Override
     protected void onUpdate() {
         super.onUpdate();
