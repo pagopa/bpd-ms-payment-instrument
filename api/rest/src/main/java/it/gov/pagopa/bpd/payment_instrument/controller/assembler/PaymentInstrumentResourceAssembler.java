@@ -2,9 +2,13 @@ package it.gov.pagopa.bpd.payment_instrument.controller.assembler;
 
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.model.PaymentInstrument;
 import it.gov.pagopa.bpd.payment_instrument.controller.model.PaymentInstrumentResource;
+import it.gov.pagopa.bpd.payment_instrument.controller.model.TokenizedInstrument;
 import it.gov.pagopa.bpd.payment_instrument.model.PaymentInstrumentServiceModel;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Mapper between <PaymentInstrument> Entity class and <PaymentInstrumentResource> Resource class
@@ -12,12 +16,23 @@ import org.springframework.stereotype.Service;
 @Service
 public class PaymentInstrumentResourceAssembler {
 
-    public PaymentInstrumentResource toResource(PaymentInstrument paymentInstrument) {
+    public PaymentInstrumentResource toResource(List<PaymentInstrument> paymentInstrumentList) {
         PaymentInstrumentResource resource = null;
 
-        if (paymentInstrument != null) {
+        if (paymentInstrumentList != null && !paymentInstrumentList.isEmpty()) {
             resource = new PaymentInstrumentResource();
-            BeanUtils.copyProperties(paymentInstrument, resource);
+            List<TokenizedInstrument> tokenizedInstrumentList = new ArrayList<>();
+            for (PaymentInstrument paymentInstrument : paymentInstrumentList) {
+                if (paymentInstrument.getHpanMaster() == null) {
+                    BeanUtils.copyProperties(paymentInstrument, resource);
+                } else {
+                    TokenizedInstrument tokenizedInstrument = new TokenizedInstrument();
+                    BeanUtils.copyProperties(paymentInstrument, tokenizedInstrument);
+                    tokenizedInstrument.setHashToken(paymentInstrument.getHpan());
+                    tokenizedInstrumentList.add(tokenizedInstrument);
+                }
+            }
+            resource.setTokenizedInstruments(tokenizedInstrumentList);
         }
 
         return resource;

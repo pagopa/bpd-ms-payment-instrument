@@ -205,11 +205,11 @@ public class PaymentInstrumentServiceImplTest {
         final String hashPan = EXISTING_HASH_PAN;
         final String fiscalCode = EXISTING_FISCAL_CODE;
 
-        PaymentInstrument result = paymentInstrumentService.find(hashPan,fiscalCode);
+        List<PaymentInstrument> result = paymentInstrumentService.find(hashPan, fiscalCode);
 
         assertNotNull(result);
-        verify(paymentInstrumentDAOMock, only()).findById(eq(hashPan));
-        verify(paymentInstrumentDAOMock, times(1)).findById(eq(hashPan));
+        verify(paymentInstrumentDAOMock, only()).findByHpanMasterOrHpan(eq(hashPan), eq(hashPan));
+        verify(paymentInstrumentDAOMock, times(1)).findByHpanMasterOrHpan(eq(hashPan), eq(hashPan));
     }
 
 
