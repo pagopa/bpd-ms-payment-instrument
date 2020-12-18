@@ -4,18 +4,14 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModelProperty;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.model.PaymentInstrument;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 
 import java.time.OffsetDateTime;
-import java.util.List;
 
 @Data
-@EqualsAndHashCode(of = "hpan", callSuper = false)
-public class PaymentInstrumentResource {
-
-    @ApiModelProperty(value = "${swagger.paymentInstrument.hpan}", required = true)
+public class TokenizedInstrument {
+    @ApiModelProperty(value = "${swagger.paymentInstrument.hashToken}", required = true)
     @JsonProperty(required = true)
-    private String hpan;
+    private String hashToken;
     @ApiModelProperty(value = "${swagger.paymentInstrument.fiscalCode}", required = true)
     @JsonProperty(required = true)
     private String fiscalCode;
@@ -28,9 +24,4 @@ public class PaymentInstrumentResource {
     @ApiModelProperty(value = "${swagger.paymentInstrument.Status}", required = true)
     @JsonProperty(required = true)
     private PaymentInstrument.Status Status;
-    @ApiModelProperty(value = "${swagger.paymentInstrument.tokenizedInstruments}")
-    @JsonProperty()
-    private List<TokenizedInstrument> tokenizedInstruments;
-
-
 }

@@ -71,7 +71,7 @@ public interface BpdPaymentInstrumentController {
             @PathVariable("id")
             @NotBlank
                     String hpan,
-            @ApiParam(value = "${swagger.winningTransaction.fiscalCode}", required = false)
+            @ApiParam(value = "${swagger.paymentInstrument.fiscalCode}", required = false)
             @RequestParam(required = false)
             @Valid @Size(min = 16, max = 16) @Pattern(regexp = Constants.FISCAL_CODE_REGEX)
                     String fiscalCode,
