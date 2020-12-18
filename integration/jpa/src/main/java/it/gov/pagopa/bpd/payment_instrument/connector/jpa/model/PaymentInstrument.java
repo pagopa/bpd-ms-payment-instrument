@@ -42,7 +42,6 @@ public class PaymentInstrument extends BaseEntity {
     @Column(name = "hpan_master_s")
     private String hpanMaster;
 
-    //TODO rimuovere??
     @Override
     protected void onUpdate() {
         super.onUpdate();

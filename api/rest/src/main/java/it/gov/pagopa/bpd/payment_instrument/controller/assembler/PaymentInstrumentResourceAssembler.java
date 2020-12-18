@@ -21,11 +21,14 @@ public class PaymentInstrumentResourceAssembler {
 
         if (paymentInstrumentList != null && !paymentInstrumentList.isEmpty()) {
             resource = new PaymentInstrumentResource();
-            List<TokenizedInstrument> tokenizedInstrumentList = new ArrayList<>();
+            List<TokenizedInstrument> tokenizedInstrumentList = null;
             for (PaymentInstrument paymentInstrument : paymentInstrumentList) {
                 if (paymentInstrument.getHpanMaster() == null) {
                     BeanUtils.copyProperties(paymentInstrument, resource);
                 } else {
+                    if (tokenizedInstrumentList == null) {
+                        tokenizedInstrumentList = new ArrayList<>();
+                    }
                     TokenizedInstrument tokenizedInstrument = new TokenizedInstrument();
                     BeanUtils.copyProperties(paymentInstrument, tokenizedInstrument);
                     tokenizedInstrument.setHashToken(paymentInstrument.getHpan());
