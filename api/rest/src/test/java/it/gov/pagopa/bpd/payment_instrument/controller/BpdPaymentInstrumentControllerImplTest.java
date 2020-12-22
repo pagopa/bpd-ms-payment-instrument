@@ -70,10 +70,13 @@ public class BpdPaymentInstrumentControllerImplTest {
 
     @PostConstruct
     public void configureTest() {
+
+        List<PaymentInstrument> paymentInstrumentList = new ArrayList<>();
         PaymentInstrument paymentInstrument = new PaymentInstrument();
         paymentInstrument.setActivationDate(CURRENT_DATE_TIME);
         paymentInstrument.setStatus(PaymentInstrument.Status.ACTIVE);
         paymentInstrument.setFiscalCode("DHFIVD85M84D048L");
+        paymentInstrumentList.add(paymentInstrument);
         PaymentInstrumentHistory pih = new PaymentInstrumentHistory();
         pih.setFiscalCode("DHFIVD85M84D048L");
 
@@ -99,7 +102,7 @@ public class BpdPaymentInstrumentControllerImplTest {
         pihRes.add(resource);
 
 
-        doReturn(paymentInstrument)
+        doReturn(paymentInstrumentList)
                 .when(paymentInstrumentServiceMock).find(eq("hpan"), eq("DHFIVD85M84D048L"));
 
         doReturn(new PaymentInstrumentServiceModel())
@@ -132,8 +135,8 @@ public class BpdPaymentInstrumentControllerImplTest {
         PaymentInstrumentResource pageResult = objectMapper.readValue(result.getResponse().getContentAsString(),
                 PaymentInstrumentResource.class);
         assertNotNull(pageResult);
-        verify(paymentInstrumentServiceMock).find(eq("hpan"),eq("DHFIVD85M84D048L"));
-        verify(paymentInstrumentResourceAssemblerMock).toResource(any(PaymentInstrument.class));
+        verify(paymentInstrumentServiceMock).find(eq("hpan"), eq("DHFIVD85M84D048L"));
+        verify(paymentInstrumentResourceAssemblerMock).toResource(any());
     }
 
     @Test

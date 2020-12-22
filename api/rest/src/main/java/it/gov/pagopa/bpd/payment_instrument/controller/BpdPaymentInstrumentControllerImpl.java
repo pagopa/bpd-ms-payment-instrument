@@ -55,7 +55,7 @@ class BpdPaymentInstrumentControllerImpl extends StatelessController implements 
             logger.debug("fiscalCode = [" + fiscalCode + "]");
         }
 
-        final PaymentInstrument entity = paymentInstrumentService.find(hpan, fiscalCode);
+        final List<PaymentInstrument> entity = paymentInstrumentService.find(hpan, fiscalCode);
 
         return paymentInstrumentResourceAssembler.toResource(entity);
     }
