@@ -16,9 +16,6 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import javax.validation.*;
-import java.time.OffsetDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
 import java.util.Set;
 
 /**
@@ -71,54 +68,21 @@ class FilterTransactionCommandImpl extends BaseCommand<Boolean> implements Filte
     public Boolean doExecute() {
 
         Transaction transaction = transactionCommandModel.getPayload();
-        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy hh:mm:ss.SSSXXXXX");
 
         try {
 
-            OffsetDateTime execStart = OffsetDateTime.now();
             validateRequest(transaction);
-
-            OffsetDateTime checkActiveStart = OffsetDateTime.now();
             PaymentInstrumentHistory checkActive = paymentInstrumentService.checkActive(transaction.getHpan(), transaction.getTrxDate());
-            OffsetDateTime checkActiveEnd = OffsetDateTime.now();
-            log.info("Executed checkActive for transaction: {}, {}, {} " +
-                     "- Started at {}, Ended at {} - Total exec time: {}",
-                    transaction.getIdTrxAcquirer(),
-                    transaction.getAcquirerCode(),
-                    transaction.getTrxDate(),
-                    dateTimeFormatter.format(checkActiveStart),
-                    dateTimeFormatter.format(checkActiveEnd),
-                    ChronoUnit.MILLIS.between(checkActiveStart, checkActiveEnd));
 
             if (checkActive != null) {
-                OffsetDateTime pubStart = OffsetDateTime.now();
                 OutgoingTransaction outgoingTransaction = transactionMapper.map(transaction);
                 outgoingTransaction.setFiscalCode(checkActive.getFiscalCode());
                 pointTransactionProducerService.publishPointTransactionEvent(outgoingTransaction);
-                OffsetDateTime pubEnd = OffsetDateTime.now();
-                log.info("Executed publishing on BPD for transaction: {}, {}, {} " +
-                                "- Started at {}, Ended at {} - Total exec time: {}",
-                        outgoingTransaction.getIdTrxAcquirer(),
-                        outgoingTransaction.getAcquirerCode(),
-                        outgoingTransaction.getTrxDate(),
-                        dateTimeFormatter.format(pubStart),
-                        dateTimeFormatter.format(pubEnd),
-                        ChronoUnit.MILLIS.between(pubStart, pubEnd));
 
             } else {
                 log.info("Met a transaction for an inactive payment instrument on BPD. [{}, {}, {}]",
                         transaction.getIdTrxAcquirer(), transaction.getAcquirerCode(), transaction.getTrxDate());
             }
-
-            OffsetDateTime end_exec = OffsetDateTime.now();
-            log.info("Executed FilterTransactionCommand for transaction: {}, {}, {} " +
-                            "- Started at {}, Ended at {} - Total exec time: {}",
-                    transaction.getIdTrxAcquirer(),
-                    transaction.getAcquirerCode(),
-                    transaction.getTrxDate(),
-                    dateTimeFormatter.format(execStart),
-                    dateTimeFormatter.format(end_exec),
-                    ChronoUnit.MILLIS.between(execStart, end_exec));
 
             return true;
 

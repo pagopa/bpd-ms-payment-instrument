@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: bpdmspaymentinstrument
 spec:
-  replicas: 1  
+  replicas: 10
   selector:
     matchLabels:
       app: bpdmspaymentinstrument
@@ -45,3 +45,8 @@ spec:
         - hostnames:
             - u87cstarprod.servicebus.windows.net
           ip: 10.70.132.4
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
