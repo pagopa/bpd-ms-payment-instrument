@@ -179,6 +179,11 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
         return paymentInstrumentDAO.getPaymentInstrument(fiscalCode, channel);
     }
 
+    @Override
+    public List<PaymentInstrumentHistory> findHistory(String fiscalCode, String hpan) {
+        return paymentInstrumentHistoryDAO.find(fiscalCode, hpan);
+    }
+
     public static void main(String[] args) {
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
         final OffsetDateTime start = OffsetDateTime.parse("2020-10-14T18:28:17.37Z", dateTimeFormatter);

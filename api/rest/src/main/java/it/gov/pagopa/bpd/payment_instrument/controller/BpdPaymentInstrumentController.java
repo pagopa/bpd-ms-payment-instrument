@@ -8,6 +8,7 @@ import it.gov.pagopa.bpd.common.converter.UpperCaseConverter;
 import it.gov.pagopa.bpd.common.util.Constants;
 import it.gov.pagopa.bpd.payment_instrument.controller.model.PaymentInstrumentConverterResource;
 import it.gov.pagopa.bpd.payment_instrument.controller.model.PaymentInstrumentDTO;
+import it.gov.pagopa.bpd.payment_instrument.controller.model.PaymentInstrumentHistoryResource;
 import it.gov.pagopa.bpd.payment_instrument.controller.model.PaymentInstrumentResource;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -108,9 +109,22 @@ public interface BpdPaymentInstrumentController {
             @Valid @NotBlank @Size(min = 16, max = 16) @Pattern(regexp = Constants.FISCAL_CODE_REGEX)
                     String fiscalCode,
             @ApiParam(value = "${swagger.paymentInstrument.channel}", required = false)
-            @RequestParam(value = "channel", required = false, defaultValue = "")
+            @RequestParam(value = "channel", required = false)
             @Valid
                     String channel
+    );
+
+    @GetMapping(value = "/{fiscalCode}/history", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseStatus(HttpStatus.OK)
+    List<PaymentInstrumentHistoryResource> getPaymentInstrumentHistoryDetails(
+            @ApiParam(value = "${swagger.paymentInstrument.fiscalCode}", required = true)
+            @PathVariable("fiscalCode") @UpperCase
+            @Valid @NotBlank @Size(min = 16, max = 16) @Pattern(regexp = Constants.FISCAL_CODE_REGEX)
+                    String fiscalCode,
+            @ApiParam(value = "${swagger.paymentInstrument.hpan}", required = false)
+            @RequestParam(value = "hpan", required = false)
+            @Valid
+                    String hpan
     );
 
 
