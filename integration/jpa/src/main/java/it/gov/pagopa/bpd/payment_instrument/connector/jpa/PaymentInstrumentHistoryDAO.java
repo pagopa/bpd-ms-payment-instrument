@@ -24,4 +24,6 @@ public interface PaymentInstrumentHistoryDAO extends CrudJpaDAO<PaymentInstrumen
                     "or pih.deactivation_t is null)"
     )
     PaymentInstrumentHistory findActive(@Param("hpan") String hpan, @Param("accountingDate") LocalDate accountingDate);
+
+
 }

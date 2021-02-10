@@ -28,4 +28,6 @@ public interface PaymentInstrumentService {
     String getFiscalCode(String hpan);
 
     List<PaymentInstrumentConverter> getPaymentInstrument(String fiscalCode, String channel);
+
+    List<PaymentInstrumentHistory> findHistory(String fiscalCode, String hpan);
 }

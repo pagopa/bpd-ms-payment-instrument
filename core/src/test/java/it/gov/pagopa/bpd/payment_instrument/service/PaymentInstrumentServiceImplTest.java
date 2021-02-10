@@ -4,6 +4,7 @@ import it.gov.pagopa.bpd.payment_instrument.assembler.PaymentInstrumentAssembler
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.PaymentInstrumentConverter;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.PaymentInstrumentDAO;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.PaymentInstrumentHistoryDAO;
+import it.gov.pagopa.bpd.payment_instrument.connector.jpa.PaymentInstrumentReplicaDAO;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.model.PaymentInstrument;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.model.PaymentInstrumentHistory;
 import it.gov.pagopa.bpd.payment_instrument.exception.PaymentInstrumentDifferentChannelException;
@@ -57,6 +58,8 @@ public class PaymentInstrumentServiceImplTest {
     private PaymentInstrumentDAO paymentInstrumentDAOMock;
     @MockBean
     private PaymentInstrumentHistoryDAO paymentInstrumentHistoryDAOMock;
+    @MockBean
+    private PaymentInstrumentReplicaDAO paymentInstrumentReplicaDAOMock;
     @Autowired
     private PaymentInstrumentService paymentInstrumentService;
     @SpyBean
@@ -189,6 +192,18 @@ public class PaymentInstrumentServiceImplTest {
                             converter.add(item);
 
                             return converter;
+                        });
+
+        when(paymentInstrumentReplicaDAOMock.find(eq(EXISTING_FISCAL_CODE), eq(EXISTING_HASH_PAN)))
+                .thenAnswer((Answer<List<PaymentInstrumentHistory>>)
+                        invocation -> {
+                            List<PaymentInstrumentHistory> paymentInstrumentHistories = new ArrayList<>();
+                            PaymentInstrumentHistory pih = new PaymentInstrumentHistory();
+                            pih.setFiscalCode(EXISTING_FISCAL_CODE);
+                            pih.setHpan(EXISTING_HASH_PAN);
+                            pih.setActivationDate(OffsetDateTime.parse("2020-04-01T16:22:45.304Z"));
+                            paymentInstrumentHistories.add(pih);
+                            return paymentInstrumentHistories;
                         });
 
     }
@@ -380,5 +395,23 @@ public class PaymentInstrumentServiceImplTest {
         Assert.assertNotNull(converter);
         verify(paymentInstrumentDAOMock, times(1)).getPaymentInstrument(Mockito.any(), Mockito.any());
         BDDMockito.verifyZeroInteractions(paymentInstrumentDAOMock);
+    }
+
+    @Test
+    public void findHistory_OK() {
+        List<PaymentInstrumentHistory> pih = paymentInstrumentService.findHistory(
+                EXISTING_FISCAL_CODE, EXISTING_HASH_PAN);
+
+        Assert.assertNotNull(pih);
+        verify(paymentInstrumentReplicaDAOMock, times(1)).find(Mockito.any(), Mockito.any());
+    }
+
+    @Test
+    public void findHistory_KO() {
+        List<PaymentInstrumentHistory> pih = paymentInstrumentService.findHistory(
+                "wrongFiscalCode", "wrongHashPan");
+
+        verify(paymentInstrumentReplicaDAOMock, times(1)).find(Mockito.any(), Mockito.any());
+        BDDMockito.verifyZeroInteractions(paymentInstrumentReplicaDAOMock);
     }
 }
