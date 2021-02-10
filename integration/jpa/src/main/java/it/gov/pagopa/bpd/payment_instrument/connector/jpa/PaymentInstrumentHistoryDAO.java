@@ -8,7 +8,6 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
-import java.util.List;
 
 /**
  * Data Access Object to manage all CRUD operations to the database
@@ -26,10 +25,5 @@ public interface PaymentInstrumentHistoryDAO extends CrudJpaDAO<PaymentInstrumen
     )
     PaymentInstrumentHistory findActive(@Param("hpan") String hpan, @Param("accountingDate") LocalDate accountingDate);
 
-    @Query("select pih " +
-            "from PaymentInstrumentHistory pih " +
-            "where pih.fiscalCode = :fiscalCode " +
-            "and (:hpan is null or pih.hpan = :hpan)"
-    )
-    List<PaymentInstrumentHistory> find(@Param("fiscalCode") String fiscalCode, @Param("hpan") String hpan);
+
 }

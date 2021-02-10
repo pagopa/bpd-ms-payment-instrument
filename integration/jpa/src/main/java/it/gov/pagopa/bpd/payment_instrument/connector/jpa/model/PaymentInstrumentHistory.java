@@ -31,6 +31,6 @@ public class PaymentInstrumentHistory implements Serializable {
     @Column(name = "deactivation_t")
     private OffsetDateTime deactivationDate;
 
-    @Column(name = "fiscalCode_s")
+    @Column(name = "fiscal_code_s")
     private String fiscalCode;
 }
