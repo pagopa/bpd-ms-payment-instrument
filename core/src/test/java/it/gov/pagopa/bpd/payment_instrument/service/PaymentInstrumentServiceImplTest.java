@@ -98,6 +98,7 @@ public class PaymentInstrumentServiceImplTest {
                     if (EXISTING_HASH_PAN.equals(hashPan)) {
                         PaymentInstrument pi = new PaymentInstrument();
                         pi.setHpan(hashPan);
+                        pi.setHpanMaster(EXISTING_HASH_PAN);
                         pi.setFiscalCode(EXISTING_FISCAL_CODE);
                         pi.setEnabled(true);
                         result.add(pi);
@@ -193,6 +194,7 @@ public class PaymentInstrumentServiceImplTest {
 
                             return converter;
                         });
+
 
         when(paymentInstrumentReplicaDAOMock.find(eq(EXISTING_FISCAL_CODE), eq(EXISTING_HASH_PAN)))
                 .thenAnswer((Answer<List<PaymentInstrumentHistory>>)
