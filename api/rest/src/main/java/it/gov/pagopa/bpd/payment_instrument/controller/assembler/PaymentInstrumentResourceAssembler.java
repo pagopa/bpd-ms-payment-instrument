@@ -23,7 +23,7 @@ public class PaymentInstrumentResourceAssembler {
             resource = new PaymentInstrumentResource();
             List<TokenizedInstrument> tokenizedInstrumentList = null;
             for (PaymentInstrument paymentInstrument : paymentInstrumentList) {
-                if (paymentInstrument.getHpanMaster() == null) {
+                if (paymentInstrument.getHpan().equals(paymentInstrument.getHpanMaster())) {
                     BeanUtils.copyProperties(paymentInstrument, resource);
                 } else {
                     if (tokenizedInstrumentList == null) {
