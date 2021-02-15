@@ -76,6 +76,8 @@ public class BpdPaymentInstrumentControllerImplTest {
         paymentInstrument.setActivationDate(CURRENT_DATE_TIME);
         paymentInstrument.setStatus(PaymentInstrument.Status.ACTIVE);
         paymentInstrument.setFiscalCode("DHFIVD85M84D048L");
+        paymentInstrument.setHpan("hpan");
+        paymentInstrument.setHpanMaster(paymentInstrument.getHpan());
         paymentInstrumentList.add(paymentInstrument);
         PaymentInstrumentHistory pih = new PaymentInstrumentHistory();
         pih.setFiscalCode("DHFIVD85M84D048L");
@@ -97,7 +99,6 @@ public class BpdPaymentInstrumentControllerImplTest {
         List<PaymentInstrumentHistory> pihRes = new ArrayList<>();
         PaymentInstrumentHistory resource = new PaymentInstrumentHistory();
         resource.setFiscalCode("DHFIVD85M84D048L");
-        resource.setHpan("hpan");
         resource.setActivationDate(OffsetDateTime.now());
         pihRes.add(resource);
 
