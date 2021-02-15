@@ -59,8 +59,8 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
     public List<PaymentInstrument> find(String hpan, String fiscalCode) {
         List<PaymentInstrument> piList = paymentInstrumentDAO.findByHpanMasterOrHpan(hpan, hpan);
 
-        if (piList != null && !piList.isEmpty() && piList.stream().anyMatch(item -> item.getHpanMaster() == null)) {
-            PaymentInstrument hpanMaster = piList.stream().filter(item -> item.getHpanMaster() == null).findFirst().get();
+        if (piList != null && !piList.isEmpty() && piList.stream().anyMatch(item -> item.getHpan().equals(item.getHpanMaster()))) {
+            PaymentInstrument hpanMaster = piList.stream().filter(item -> item.getHpan().equals(item.getHpanMaster())).findFirst().get();
             if ((hpanMaster.isEnabled() || PaymentInstrument.Status.ACTIVE.equals(hpanMaster.getStatus()))
                     && fiscalCode != null && !fiscalCode.equals(hpanMaster.getFiscalCode())) {
                 throw new PaymentInstrumentOnDifferentUserException(hpan);
@@ -90,10 +90,7 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
                 .collect(Collectors.toList());
         for (String id : notYetEnrolledIdList) {
             PaymentInstrument newPaymentInstrument = paymentInstrumentAssembler.toResource(pi, id);
-            //se id token, setto lo strumento padre
-            if (!hpan.equals(id)) {
-                newPaymentInstrument.setHpanMaster(hpan);
-            }
+            newPaymentInstrument.setHpanMaster(hpan);
             toSaveOrUpdate.add(newPaymentInstrument);
         }
         for (PaymentInstrument foundPI : piList) {
