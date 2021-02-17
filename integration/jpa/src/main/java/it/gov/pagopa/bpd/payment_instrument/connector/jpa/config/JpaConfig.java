@@ -1,15 +1,12 @@
 package it.gov.pagopa.bpd.payment_instrument.connector.jpa.config;
 
-import com.zaxxer.hikari.HikariDataSource;
 import it.gov.pagopa.bpd.common.connector.jpa.CustomJpaRepository;
 import it.gov.pagopa.bpd.common.connector.jpa.ReadOnlyRepository;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.*;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
@@ -35,33 +32,6 @@ import java.util.Properties;
 )
 public class JpaConfig /* extends BaseJpaConfig */ {
 
-    @Value("${spring.datasource.url}")
-    private String url;
-
-    @Value("${spring.datasource.username}")
-    private String username;
-
-    @Value("${spring.datasource.password}")
-    private String password;
-
-    @Value("${spring.datasource.driver-class-name}")
-    private String driverClassName;
-
-    @Value("${spring.datasource.hikari.maximumPoolSize}")
-    private int connectionPoolSize;
-
-    @Value("${spring.datasource.hikari.schema}")
-    private String schema;
-
-    @Value("${spring.datasource.hikari.connectionTimeout}")
-    private long timeout;
-
-    @Value("${spring.datasource.hikari.readOnly}")
-    private boolean readOnly;
-
-    @Value("${spring.datasource.hikari.pool-name}")
-    private String poolName;
-
     @Value("${spring.jpa.database-platform}")
     private String hibernateDialect;
 
@@ -72,21 +42,17 @@ public class JpaConfig /* extends BaseJpaConfig */ {
     private String hibernateDdlAuto;
 
     @Bean(name = {"dataSource"})
-    public DataSource dataSource() throws Exception {
-        HikariDataSource ds = new HikariDataSource();
-        ds.setMaximumPoolSize(this.connectionPoolSize);
-        ds.setConnectionTimeout(this.timeout);
-        ds.setDriverClassName(this.driverClassName);
-        ds.setJdbcUrl(this.url);
-        ds.setUsername(this.username);
-        ds.setPassword(this.password);
-        ds.setPoolName(this.poolName);
-        if (StringUtils.isNotBlank(this.schema)) {
-            ds.setSchema(this.schema);
-        }
-        ds.setReadOnly(readOnly);
+    @Primary
+    @ConfigurationProperties(prefix = "spring.datasource.hikari")
+    public DataSource dataSource() {
+        return dataSourceProperties().initializeDataSourceBuilder().build();
+    }
 
-        return ds;
+    @Bean(name = {"dataSourceProperties"})
+    @Primary
+    @ConfigurationProperties("spring.datasource")
+    public DataSourceProperties dataSourceProperties() {
+        return new DataSourceProperties();
     }
 
     @Bean(name = {"entityManagerFactory"})
