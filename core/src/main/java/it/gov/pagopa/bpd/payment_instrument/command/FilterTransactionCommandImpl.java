@@ -75,6 +75,7 @@ class FilterTransactionCommandImpl extends BaseCommand<Boolean> implements Filte
             PaymentInstrumentHistory checkActive = paymentInstrumentService.checkActive(transaction.getHpan(), transaction.getTrxDate());
 
             if (checkActive != null) {
+
                 OutgoingTransaction outgoingTransaction = transactionMapper.map(transaction);
                 outgoingTransaction.setFiscalCode(checkActive.getFiscalCode());
                 pointTransactionProducerService.publishPointTransactionEvent(outgoingTransaction);

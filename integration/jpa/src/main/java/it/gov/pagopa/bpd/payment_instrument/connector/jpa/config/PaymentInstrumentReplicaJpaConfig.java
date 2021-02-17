@@ -1,11 +1,11 @@
 package it.gov.pagopa.bpd.payment_instrument.connector.jpa.config;
 
-import com.zaxxer.hikari.HikariDataSource;
 import it.gov.pagopa.bpd.common.connector.jpa.CustomJpaRepository;
 import it.gov.pagopa.bpd.common.connector.jpa.ReadOnlyRepository;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -34,33 +34,6 @@ import java.util.Properties;
         transactionManagerRef = "readTransactionManager"
 )
 public class PaymentInstrumentReplicaJpaConfig /* extends BaseJpaConfig */ {
-    @Value("${spring.replica.datasource.url}")
-    private String url;
-
-    @Value("${spring.replica.datasource.username}")
-    private String username;
-
-    @Value("${spring.replica.datasource.password}")
-    private String password;
-
-    @Value("${spring.replica.datasource.driver-class-name}")
-    private String driverClassName;
-
-    @Value("${spring.replica.datasource.hikari.maximumPoolSize}")
-    private int connectionPoolSize;
-
-    @Value("${spring.replica.datasource.hikari.schema}")
-    private String schema;
-
-    @Value("${spring.replica.datasource.hikari.connectionTimeout}")
-    private long timeout;
-
-    @Value("${spring.replica.datasource.hikari.readOnly}")
-    private boolean readOnly;
-
-    @Value("${spring.replica.datasource.hikari.pool-name}")
-    private String poolName;
-
     @Value("${spring.replica.jpa.database-platform}")
     private String hibernateDialect;
 
@@ -70,24 +43,16 @@ public class PaymentInstrumentReplicaJpaConfig /* extends BaseJpaConfig */ {
     @Value("${spring.replica.jpa.hibernate.ddl-auto}")
     private String hibernateDdlAuto;
 
-    @Bean(
-            name = {"readDataSource"}
-    )
-    public DataSource readDataSource() throws Exception {
-        HikariDataSource ds = new HikariDataSource();
-        ds.setMaximumPoolSize(this.connectionPoolSize);
-        ds.setConnectionTimeout(this.timeout);
-        ds.setDriverClassName(this.driverClassName);
-        ds.setJdbcUrl(this.url);
-        ds.setUsername(this.username);
-        ds.setPassword(this.password);
-        ds.setPoolName(this.poolName);
-        if (StringUtils.isNotBlank(this.schema)) {
-            ds.setSchema(this.schema);
-        }
-        ds.setReadOnly(readOnly);
+    @Bean(name = {"readDataSource"})
+    @ConfigurationProperties(prefix = "spring.replica.datasource.hikari")
+    public DataSource readDataSource() {
+        return readDataSourceProperties().initializeDataSourceBuilder().build();
+    }
 
-        return ds;
+    @Bean(name = {"readDataSourceProperties"})
+    @ConfigurationProperties("spring.replica.datasource")
+    public DataSourceProperties readDataSourceProperties() {
+        return new DataSourceProperties();
     }
 
     @Bean(
