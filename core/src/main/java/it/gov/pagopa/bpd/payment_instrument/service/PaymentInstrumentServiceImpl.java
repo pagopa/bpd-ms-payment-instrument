@@ -12,6 +12,7 @@ import it.gov.pagopa.bpd.payment_instrument.exception.PaymentInstrumentDifferent
 import it.gov.pagopa.bpd.payment_instrument.exception.PaymentInstrumentNotFoundException;
 import it.gov.pagopa.bpd.payment_instrument.exception.PaymentInstrumentOnDifferentUserException;
 import it.gov.pagopa.bpd.payment_instrument.model.PaymentInstrumentServiceModel;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -40,15 +41,15 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
 
 
     @Autowired
-    public PaymentInstrumentServiceImpl(PaymentInstrumentDAO paymentInstrumentDAO,
-                                        PaymentInstrumentHistoryDAO paymentInstrumentHistoryDAO,
+    public PaymentInstrumentServiceImpl(ObjectProvider<PaymentInstrumentDAO> paymentInstrumentDAO,
+                                        ObjectProvider<PaymentInstrumentHistoryDAO> paymentInstrumentHistoryDAO,
                                         PaymentInstrumentAssembler paymentInstrumentAssembler,
-                                        PaymentInstrumentReplicaDAO paymentInstrumentReplicaDAO,
+                                        ObjectProvider<PaymentInstrumentReplicaDAO> paymentInstrumentReplicaDAO,
                                         @Value("${core.PaymentInstrumentService.appIOChannel}") String appIOChannel) {
-        this.paymentInstrumentDAO = paymentInstrumentDAO;
-        this.paymentInstrumentHistoryDAO = paymentInstrumentHistoryDAO;
+        this.paymentInstrumentDAO = paymentInstrumentDAO.getIfAvailable();
+        this.paymentInstrumentHistoryDAO = paymentInstrumentHistoryDAO.getIfAvailable();
         this.paymentInstrumentAssembler = paymentInstrumentAssembler;
-        this.paymentInstrumentReplicaDAO = paymentInstrumentReplicaDAO;
+        this.paymentInstrumentReplicaDAO = paymentInstrumentReplicaDAO.getIfAvailable();
         this.appIOChannel = appIOChannel;
     }
 
