@@ -7,10 +7,12 @@ import it.gov.pagopa.bpd.payment_instrument.connector.jpa.PaymentInstrumentConve
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.model.PaymentInstrument;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.model.PaymentInstrumentHistory;
 import it.gov.pagopa.bpd.payment_instrument.controller.assembler.PaymentInstrumentConverterResourceAssembler;
+import it.gov.pagopa.bpd.payment_instrument.controller.assembler.PaymentInstrumentHistoryResourceAssembler;
 import it.gov.pagopa.bpd.payment_instrument.controller.assembler.PaymentInstrumentResourceAssembler;
 import it.gov.pagopa.bpd.payment_instrument.controller.factory.PaymentInstrumentFactory;
 import it.gov.pagopa.bpd.payment_instrument.controller.model.PaymentInstrumentConverterResource;
 import it.gov.pagopa.bpd.payment_instrument.controller.model.PaymentInstrumentDTO;
+import it.gov.pagopa.bpd.payment_instrument.controller.model.PaymentInstrumentHistoryResource;
 import it.gov.pagopa.bpd.payment_instrument.controller.model.PaymentInstrumentResource;
 import it.gov.pagopa.bpd.payment_instrument.service.PaymentInstrumentService;
 import org.junit.Assert;
@@ -61,14 +63,21 @@ public class BpdPaymentInstrumentControllerImplTest {
     @SpyBean
     private PaymentInstrumentConverterResourceAssembler paymentInstrumentConverterResourceAssemblerMock;
     @SpyBean
+    private PaymentInstrumentHistoryResourceAssembler paymentInstrumentHistoryResourceAssemblerMock;
+    @SpyBean
     private PaymentInstrumentFactory paymentInstrumentFactoryMock;
 
     @PostConstruct
     public void configureTest() {
+
+//        List<PaymentInstrument> paymentInstrumentList = new ArrayList<>();
         PaymentInstrument paymentInstrument = new PaymentInstrument();
         paymentInstrument.setActivationDate(CURRENT_DATE_TIME);
         paymentInstrument.setStatus(PaymentInstrument.Status.ACTIVE);
         paymentInstrument.setFiscalCode("DHFIVD85M84D048L");
+        paymentInstrument.setHpan("hpan");
+        paymentInstrument.setHpanMaster(paymentInstrument.getHpan());
+//        paymentInstrumentList.add(paymentInstrument);
         PaymentInstrumentHistory pih = new PaymentInstrumentHistory();
         pih.setFiscalCode("DHFIVD85M84D048L");
 
@@ -86,12 +95,18 @@ public class BpdPaymentInstrumentControllerImplTest {
         };
         converterResources.add(converter);
 
+        List<PaymentInstrumentHistory> pihRes = new ArrayList<>();
+        PaymentInstrumentHistory resource = new PaymentInstrumentHistory();
+        resource.setFiscalCode("DHFIVD85M84D048L");
+        resource.setActivationDate(OffsetDateTime.now());
+        pihRes.add(resource);
+
 
         doReturn(paymentInstrument)
                 .when(paymentInstrumentServiceMock).find(eq("hpan"), eq("DHFIVD85M84D048L"));
 
         doReturn(new PaymentInstrument())
-                .when(paymentInstrumentServiceMock).createOrUpdate(eq("hpan"), eq(paymentInstrument));
+                .when(paymentInstrumentServiceMock).createOrUpdate(eq("hpan"), (PaymentInstrument) any());
 
         doReturn(pih)
                 .when(paymentInstrumentServiceMock).checkActive(eq("hpan"), any());
@@ -104,11 +119,14 @@ public class BpdPaymentInstrumentControllerImplTest {
 
         doReturn(converterResources)
                 .when(paymentInstrumentServiceMock).getPaymentInstrument(eq("fiscalCode"), eq("channel"));
+
+        doReturn(pihRes)
+                .when(paymentInstrumentServiceMock).findHistory(eq("DHFIVD85M84D048L"), eq("hpan"));
     }
 
     @Test
     public void find() throws Exception {
-        MvcResult result = (MvcResult) mvc.perform(MockMvcRequestBuilders
+        MvcResult result = mvc.perform(MockMvcRequestBuilders
                 .get("/bpd/payment-instruments/hpan?fiscalCode=DHFIVD85M84D048L")
                 .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)
                 .accept(MediaType.APPLICATION_JSON_UTF8_VALUE))
@@ -117,8 +135,8 @@ public class BpdPaymentInstrumentControllerImplTest {
         PaymentInstrumentResource pageResult = objectMapper.readValue(result.getResponse().getContentAsString(),
                 PaymentInstrumentResource.class);
         assertNotNull(pageResult);
-        verify(paymentInstrumentServiceMock).find(eq("hpan"),eq("DHFIVD85M84D048L"));
-        verify(paymentInstrumentResourceAssemblerMock).toResource(any(PaymentInstrument.class));
+        verify(paymentInstrumentServiceMock).find(eq("hpan"), eq("DHFIVD85M84D048L"));
+        verify(paymentInstrumentResourceAssemblerMock).toResource((PaymentInstrument) any());
     }
 
     @Test
@@ -126,7 +144,7 @@ public class BpdPaymentInstrumentControllerImplTest {
         PaymentInstrumentDTO paymentInstrument = new PaymentInstrumentDTO();
         paymentInstrument.setFiscalCode("DHFIVD85M84D048L");
         paymentInstrument.setActivationDate(CURRENT_DATE_TIME);
-        MvcResult result = (MvcResult) mvc.perform(MockMvcRequestBuilders.put("/bpd/payment-instruments/hpan")
+        MvcResult result = mvc.perform(MockMvcRequestBuilders.put("/bpd/payment-instruments/hpan")
                 .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)
                 .accept(MediaType.APPLICATION_JSON_UTF8_VALUE)
                 .content(objectMapper.writeValueAsString(paymentInstrument)))
@@ -135,7 +153,7 @@ public class BpdPaymentInstrumentControllerImplTest {
         PaymentInstrumentResource pageResult = objectMapper.readValue(result.getResponse().getContentAsString(),
                 PaymentInstrumentResource.class);
         assertNotNull(pageResult);
-        verify(paymentInstrumentServiceMock).createOrUpdate(eq("hpan"), any());
+        verify(paymentInstrumentServiceMock).createOrUpdate(eq("hpan"), (PaymentInstrument) any());
         verify(paymentInstrumentFactoryMock).createModel(eq(paymentInstrument));
         verify(paymentInstrumentResourceAssemblerMock).toResource(any(PaymentInstrument.class));
     }
@@ -182,7 +200,7 @@ public class BpdPaymentInstrumentControllerImplTest {
         PaymentInstrumentConverterResource converter = new PaymentInstrumentConverterResource();
         converter.setChannel("channel");
         converter.setCount(1L);
-        MvcResult result = (MvcResult) mvc.perform(MockMvcRequestBuilders
+        MvcResult result = mvc.perform(MockMvcRequestBuilders
                 .get("/bpd/payment-instruments/number/fiscalCode?channel=channel")
                 .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)
                 .accept(MediaType.APPLICATION_JSON_UTF8_VALUE))
@@ -196,5 +214,28 @@ public class BpdPaymentInstrumentControllerImplTest {
 
         Assert.assertNotNull(resource);
         verify(paymentInstrumentServiceMock).getPaymentInstrument(any(), any());
+    }
+
+    @Test
+    public void getPaymentInstrumentHistoryDetails() throws Exception {
+        PaymentInstrumentHistoryResource instrumentHistoryResource = new PaymentInstrumentHistoryResource();
+        instrumentHistoryResource.setFiscalCode("DHFIVD85M84D048L");
+        instrumentHistoryResource.setHpan("hpan");
+        instrumentHistoryResource.setActivationDate(OffsetDateTime.now());
+        MvcResult result = mvc.perform(MockMvcRequestBuilders
+                .get("/bpd/payment-instruments/DHFIVD85M84D048L/history?hpan=hpan")
+                .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)
+                .accept(MediaType.APPLICATION_JSON_UTF8_VALUE))
+                .andExpect(MockMvcResultMatchers.status().is2xxSuccessful())
+                .andReturn();
+
+        String contentString = result.getResponse().getContentAsString();
+        List<PaymentInstrumentHistoryResource> resource = objectMapper.readValue(
+                contentString, new TypeReference<List<PaymentInstrumentHistoryResource>>() {
+                });
+
+        Assert.assertNotNull(resource);
+        verify(paymentInstrumentServiceMock).findHistory(any(), any());
+        verify(paymentInstrumentHistoryResourceAssemblerMock).toResource(any());
     }
 }

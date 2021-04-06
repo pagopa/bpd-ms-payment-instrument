@@ -39,12 +39,8 @@ public class PaymentInstrument extends BaseEntity {
         ACTIVE, INACTIVE
     }
 
-    @Override
-    protected void onUpdate() {
-        super.onUpdate();
-        activationDate = OffsetDateTime.now();
-    }
-
+    @Column(name = "hpan_master_s")
+    private String hpanMaster;
 
 }
 
