@@ -16,6 +16,15 @@ import java.util.List;
 @Service
 public class PaymentInstrumentResourceAssembler {
 
+    public PaymentInstrumentResource toResource(PaymentInstrument paymentInstrument) {
+        PaymentInstrumentResource resource = null;
+        if (paymentInstrument != null) {
+            resource = new PaymentInstrumentResource();
+            BeanUtils.copyProperties(paymentInstrument, resource);
+        }
+        return resource;
+    }
+
     public PaymentInstrumentResource toResource(List<PaymentInstrument> paymentInstrumentList) {
         PaymentInstrumentResource resource = null;
 

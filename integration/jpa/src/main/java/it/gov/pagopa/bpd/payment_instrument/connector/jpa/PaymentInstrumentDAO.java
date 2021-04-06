@@ -18,6 +18,7 @@ public interface PaymentInstrumentDAO extends CrudJpaDAO<PaymentInstrument, Stri
 
     List<PaymentInstrument> findByFiscalCode(String fiscalCode);
 
+    @Deprecated
     List<PaymentInstrument> findByHpanIn(List<String> idList);
 //    List<PaymentInstrument>  saveAll(Iterable<PaymentInstrument> paymentInstrumentList);
 
@@ -42,6 +43,7 @@ public interface PaymentInstrumentDAO extends CrudJpaDAO<PaymentInstrument, Stri
             "and bpi.enabled = true " +
             "group by channel"
     )
+    @Deprecated
     List<PaymentInstrumentConverter> getPaymentInstrument(
             @Param("fiscalCode") String fiscalCode,
             @Param("channel") String channel);

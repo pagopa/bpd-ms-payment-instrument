@@ -2,18 +2,26 @@ package it.gov.pagopa.bpd.payment_instrument.connector.jpa;
 
 
 import it.gov.pagopa.bpd.common.connector.jpa.CrudJpaDAO;
+import it.gov.pagopa.bpd.common.connector.jpa.ReadOnlyRepository;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.model.PaymentInstrumentHistory;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
+import java.util.List;
 
 /**
  * Data Access Object to manage all CRUD operations to the database
  */
-@Repository
-public interface PaymentInstrumentHistoryDAO extends CrudJpaDAO<PaymentInstrumentHistory, String> {
+@ReadOnlyRepository
+public interface PaymentInstrumentHistoryReplicaDAO extends CrudJpaDAO<PaymentInstrumentHistory, String> {
+
+    @Query("select pih " +
+            "from PaymentInstrumentHistory pih " +
+            "where pih.fiscalCode = :fiscalCode " +
+            "and (:hpan is null or pih.hpan = :hpan)"
+    )
+    List<PaymentInstrumentHistory> find(@Param("fiscalCode") String fiscalCode, @Param("hpan") String hpan);
 
     @Query(nativeQuery = true,
             value = "select * " +

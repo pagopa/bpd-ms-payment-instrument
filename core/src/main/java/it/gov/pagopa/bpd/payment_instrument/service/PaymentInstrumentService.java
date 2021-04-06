@@ -13,9 +13,15 @@ import java.util.List;
  */
 public interface PaymentInstrumentService {
 
-    List<PaymentInstrument> find(String hpan, String fiscalCode);
+    //    List<PaymentInstrument> find(String hpan, String fiscalCode);
+    PaymentInstrument find(String hpan, String fiscalCode);
+
+    @Deprecated
+    PaymentInstrument createOrUpdate(String hpan, PaymentInstrument pi);
+
 
     PaymentInstrumentServiceModel createOrUpdate(String hpan, PaymentInstrumentServiceModel pi);
+
 
     void delete(String hpan, String fiscalCode, OffsetDateTime cancellationDate);
 
@@ -27,6 +33,7 @@ public interface PaymentInstrumentService {
 
     String getFiscalCode(String hpan);
 
+    @Deprecated
     List<PaymentInstrumentConverter> getPaymentInstrument(String fiscalCode, String channel);
 
     List<PaymentInstrumentHistory> findHistory(String fiscalCode, String hpan);

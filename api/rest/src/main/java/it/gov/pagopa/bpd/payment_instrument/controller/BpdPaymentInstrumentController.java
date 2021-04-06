@@ -103,6 +103,7 @@ public interface BpdPaymentInstrumentController {
 
     @GetMapping(value = "/number/{fiscalCode}", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseStatus(HttpStatus.OK)
+    @Deprecated
     List<PaymentInstrumentConverterResource> getPaymentInstrumentNumber(
             @ApiParam(value = "${swagger.paymentInstrument.fiscalCode}", required = true)
             @PathVariable("fiscalCode") @UpperCase
