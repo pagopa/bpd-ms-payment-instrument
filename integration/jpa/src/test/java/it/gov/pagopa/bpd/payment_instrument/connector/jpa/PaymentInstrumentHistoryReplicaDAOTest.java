@@ -10,17 +10,17 @@ import org.springframework.test.context.junit4.SpringRunner;
 import java.util.List;
 
 @RunWith(SpringRunner.class)
-public class PaymentInstrumentReplicaDAOTest {
+public class PaymentInstrumentHistoryReplicaDAOTest {
 
     private static final String EXISTING_HASH_PAN = "existing-hpan";
     private static final String EXISTING_FISCAL_CODE = "existing-fiscal-code";
 
     @MockBean
-    private PaymentInstrumentReplicaDAO paymentInstrumentReplicaDAOMock;
+    private PaymentInstrumentHistoryReplicaDAO paymentInstrumentHistoryReplicaDAOMock;
 
     @Test
     public void find_ok() {
-        List<PaymentInstrumentHistory> entity = paymentInstrumentReplicaDAOMock.find(
+        List<PaymentInstrumentHistory> entity = paymentInstrumentHistoryReplicaDAOMock.find(
                 EXISTING_FISCAL_CODE, EXISTING_HASH_PAN);
 
         Assert.assertNotNull(entity);

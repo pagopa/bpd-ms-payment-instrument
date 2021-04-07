@@ -3,8 +3,7 @@ package it.gov.pagopa.bpd.payment_instrument.service;
 import it.gov.pagopa.bpd.payment_instrument.assembler.PaymentInstrumentAssembler;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.PaymentInstrumentConverter;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.PaymentInstrumentDAO;
-import it.gov.pagopa.bpd.payment_instrument.connector.jpa.PaymentInstrumentHistoryDAO;
-import it.gov.pagopa.bpd.payment_instrument.connector.jpa.PaymentInstrumentReplicaDAO;
+import it.gov.pagopa.bpd.payment_instrument.connector.jpa.PaymentInstrumentHistoryReplicaDAO;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.model.PaymentInstrument;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.model.PaymentInstrumentHistory;
 import it.gov.pagopa.bpd.payment_instrument.exception.PaymentInstrumentDifferentChannelException;
@@ -57,9 +56,7 @@ public class PaymentInstrumentServiceImplTest {
     @MockBean
     private PaymentInstrumentDAO paymentInstrumentDAOMock;
     @MockBean
-    private PaymentInstrumentHistoryDAO paymentInstrumentHistoryDAOMock;
-    @MockBean
-    private PaymentInstrumentReplicaDAO paymentInstrumentReplicaDAOMock;
+    private PaymentInstrumentHistoryReplicaDAO paymentInstrumentHistoryReplicaDAOMock;
     @Autowired
     private PaymentInstrumentService paymentInstrumentService;
     @SpyBean
@@ -146,7 +143,7 @@ public class PaymentInstrumentServiceImplTest {
         when(paymentInstrumentDAOMock.save(any(PaymentInstrument.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0, PaymentInstrument.class));
 
-        when(paymentInstrumentHistoryDAOMock.findActive(eq(EXISTING_HASH_PAN), any()))
+        when(paymentInstrumentHistoryReplicaDAOMock.findActive(eq(EXISTING_HASH_PAN), any()))
                 .thenAnswer(invocation -> {
                     PaymentInstrumentHistory pih = new PaymentInstrumentHistory();
                     pih.setFiscalCode(EXISTING_FISCAL_CODE);
@@ -196,7 +193,7 @@ public class PaymentInstrumentServiceImplTest {
                         });
 
 
-        when(paymentInstrumentReplicaDAOMock.find(eq(EXISTING_FISCAL_CODE), eq(EXISTING_HASH_PAN)))
+        when(paymentInstrumentHistoryReplicaDAOMock.find(eq(EXISTING_FISCAL_CODE), eq(EXISTING_HASH_PAN)))
                 .thenAnswer((Answer<List<PaymentInstrumentHistory>>)
                         invocation -> {
                             List<PaymentInstrumentHistory> paymentInstrumentHistories = new ArrayList<>();
@@ -405,7 +402,7 @@ public class PaymentInstrumentServiceImplTest {
                 EXISTING_FISCAL_CODE, EXISTING_HASH_PAN);
 
         Assert.assertNotNull(pih);
-        verify(paymentInstrumentReplicaDAOMock, times(1)).find(Mockito.any(), Mockito.any());
+        verify(paymentInstrumentHistoryReplicaDAOMock, times(1)).find(Mockito.any(), Mockito.any());
     }
 
     @Test
@@ -413,7 +410,7 @@ public class PaymentInstrumentServiceImplTest {
         List<PaymentInstrumentHistory> pih = paymentInstrumentService.findHistory(
                 "wrongFiscalCode", "wrongHashPan");
 
-        verify(paymentInstrumentReplicaDAOMock, times(1)).find(Mockito.any(), Mockito.any());
-        BDDMockito.verifyZeroInteractions(paymentInstrumentReplicaDAOMock);
+        verify(paymentInstrumentHistoryReplicaDAOMock, times(1)).find(Mockito.any(), Mockito.any());
+        BDDMockito.verifyZeroInteractions(paymentInstrumentHistoryReplicaDAOMock);
     }
 }

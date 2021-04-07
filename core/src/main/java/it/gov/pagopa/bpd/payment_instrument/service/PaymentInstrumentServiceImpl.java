@@ -4,8 +4,7 @@ import eu.sia.meda.service.BaseService;
 import it.gov.pagopa.bpd.payment_instrument.assembler.PaymentInstrumentAssembler;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.PaymentInstrumentConverter;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.PaymentInstrumentDAO;
-import it.gov.pagopa.bpd.payment_instrument.connector.jpa.PaymentInstrumentHistoryDAO;
-import it.gov.pagopa.bpd.payment_instrument.connector.jpa.PaymentInstrumentReplicaDAO;
+import it.gov.pagopa.bpd.payment_instrument.connector.jpa.PaymentInstrumentHistoryReplicaDAO;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.model.PaymentInstrument;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.model.PaymentInstrumentHistory;
 import it.gov.pagopa.bpd.payment_instrument.exception.PaymentInstrumentDifferentChannelException;
@@ -31,9 +30,8 @@ import java.util.stream.Collectors;
 class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrumentService {
 
     private final PaymentInstrumentDAO paymentInstrumentDAO;
-    private final PaymentInstrumentHistoryDAO paymentInstrumentHistoryDAO;
+    private final PaymentInstrumentHistoryReplicaDAO paymentInstrumentHistoryReplicaDAO;
     private final PaymentInstrumentAssembler paymentInstrumentAssembler;
-    private final PaymentInstrumentReplicaDAO paymentInstrumentReplicaDAO;
 
     @Value(value = "${numMaxPaymentInstr}")
     private int numMaxPaymentInstr;
@@ -42,14 +40,12 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
 
     @Autowired
     public PaymentInstrumentServiceImpl(ObjectProvider<PaymentInstrumentDAO> paymentInstrumentDAO,
-                                        ObjectProvider<PaymentInstrumentHistoryDAO> paymentInstrumentHistoryDAO,
+                                        ObjectProvider<PaymentInstrumentHistoryReplicaDAO> paymentInstrumentHistoryDAO,
                                         PaymentInstrumentAssembler paymentInstrumentAssembler,
-                                        ObjectProvider<PaymentInstrumentReplicaDAO> paymentInstrumentReplicaDAO,
                                         @Value("${core.PaymentInstrumentService.appIOChannel}") String appIOChannel) {
         this.paymentInstrumentDAO = paymentInstrumentDAO.getIfAvailable();
-        this.paymentInstrumentHistoryDAO = paymentInstrumentHistoryDAO.getIfAvailable();
+        this.paymentInstrumentHistoryReplicaDAO = paymentInstrumentHistoryDAO.getIfAvailable();
         this.paymentInstrumentAssembler = paymentInstrumentAssembler;
-        this.paymentInstrumentReplicaDAO = paymentInstrumentReplicaDAO.getIfAvailable();
         this.appIOChannel = appIOChannel;
     }
 
@@ -164,7 +160,7 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
 
     @Override
     public PaymentInstrumentHistory checkActive(String hpan, OffsetDateTime accountingDate) {
-        return paymentInstrumentHistoryDAO.findActive(hpan, accountingDate.toLocalDate());
+        return paymentInstrumentHistoryReplicaDAO.findActive(hpan, accountingDate.toLocalDate());
     }
 
     @Override
@@ -180,13 +176,14 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
     }
 
     @Override
+    @Deprecated
     public List<PaymentInstrumentConverter> getPaymentInstrument(String fiscalCode, String channel) {
         return paymentInstrumentDAO.getPaymentInstrument(fiscalCode, channel);
     }
 
     @Override
     public List<PaymentInstrumentHistory> findHistory(String fiscalCode, String hpan) {
-        return paymentInstrumentReplicaDAO.find(fiscalCode, hpan);
+        return paymentInstrumentHistoryReplicaDAO.find(fiscalCode, hpan);
     }
 
 }

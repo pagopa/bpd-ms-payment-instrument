@@ -116,6 +116,7 @@ class BpdPaymentInstrumentControllerImpl extends StatelessController implements 
 
 
     @Override
+    @Deprecated
     public List<PaymentInstrumentConverterResource> getPaymentInstrumentNumber(String fiscalCode, String channel) {
         List<PaymentInstrumentConverter> pi = paymentInstrumentService.getPaymentInstrument(fiscalCode, channel);
         return paymentInstrumentConverterResourceAssembler.toResource(pi);
