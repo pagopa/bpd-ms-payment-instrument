@@ -12,6 +12,7 @@ import it.gov.pagopa.bpd.payment_instrument.controller.model.PaymentInstrumentCo
 import it.gov.pagopa.bpd.payment_instrument.controller.model.PaymentInstrumentDTO;
 import it.gov.pagopa.bpd.payment_instrument.controller.model.PaymentInstrumentHistoryResource;
 import it.gov.pagopa.bpd.payment_instrument.controller.model.PaymentInstrumentResource;
+import it.gov.pagopa.bpd.payment_instrument.model.PaymentInstrumentServiceModel;
 import it.gov.pagopa.bpd.payment_instrument.service.PaymentInstrumentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
@@ -29,7 +30,7 @@ class BpdPaymentInstrumentControllerImpl extends StatelessController implements 
     private final PaymentInstrumentResourceAssembler paymentInstrumentResourceAssembler;
     private final PaymentInstrumentConverterResourceAssembler paymentInstrumentConverterResourceAssembler;
     private final PaymentInstrumentHistoryResourceAssembler paymentInstrumentHistoryResourceAssembler;
-    private final ModelFactory<PaymentInstrumentDTO, PaymentInstrument> paymentInstrumentFactory;
+    private final ModelFactory<PaymentInstrumentDTO, PaymentInstrumentServiceModel> paymentInstrumentFactory;
 
 
     @Autowired
@@ -37,7 +38,7 @@ class BpdPaymentInstrumentControllerImpl extends StatelessController implements 
                                               PaymentInstrumentResourceAssembler paymentInstrumentResourceAssembler,
                                               PaymentInstrumentConverterResourceAssembler paymentInstrumentConverterResourceAssembler,
                                               PaymentInstrumentHistoryResourceAssembler paymentInstrumentHistoryResourceAssembler,
-                                              ModelFactory<PaymentInstrumentDTO, PaymentInstrument> paymentInstrumentFactory) {
+                                              ModelFactory<PaymentInstrumentDTO, PaymentInstrumentServiceModel> paymentInstrumentFactory) {
         this.paymentInstrumentService = paymentInstrumentService;
         this.paymentInstrumentResourceAssembler = paymentInstrumentResourceAssembler;
         this.paymentInstrumentConverterResourceAssembler = paymentInstrumentConverterResourceAssembler;
@@ -54,23 +55,11 @@ class BpdPaymentInstrumentControllerImpl extends StatelessController implements 
             logger.debug("fiscalCode = [" + fiscalCode + "]");
         }
 
-        final PaymentInstrument entity = paymentInstrumentService.find(hpan, fiscalCode);
+        final List<PaymentInstrument> entity = paymentInstrumentService.find(hpan, fiscalCode);
 
         return paymentInstrumentResourceAssembler.toResource(entity);
     }
 
-
-//    @Override
-//    public PaymentInstrumentResource update(String hpan, PaymentInstrumentDTO paymentInstrument) {
-//        if (logger.isDebugEnabled()) {
-//            logger.debug("BpdPaymentInstrumentControllerImpl.createOrUpdate");
-//            logger.debug("hpan = [" + hpan + "], paymentInstrument = [" + paymentInstrument + "]");
-//        }
-//
-//        final PaymentInstrumentServiceModel serviceModel = paymentInstrumentFactory.createModel(paymentInstrument);
-//
-//        return paymentInstrumentResourceAssembler.fromServiceToResource(paymentInstrumentService.createOrUpdate(hpan, serviceModel));
-//    }
 
     @Override
     public PaymentInstrumentResource update(String hpan, PaymentInstrumentDTO paymentInstrument) {
@@ -78,9 +67,10 @@ class BpdPaymentInstrumentControllerImpl extends StatelessController implements 
             logger.debug("BpdPaymentInstrumentControllerImpl.createOrUpdate");
             logger.debug("hpan = [" + hpan + "], paymentInstrument = [" + paymentInstrument + "]");
         }
-        final PaymentInstrument entity = paymentInstrumentFactory.createModel(paymentInstrument);
-        PaymentInstrument paymentInstrumentEntity = paymentInstrumentService.createOrUpdate(hpan, entity);
-        return paymentInstrumentResourceAssembler.toResource(paymentInstrumentEntity);
+
+        final PaymentInstrumentServiceModel serviceModel = paymentInstrumentFactory.createModel(paymentInstrument);
+
+        return paymentInstrumentResourceAssembler.fromServiceToResource(paymentInstrumentService.createOrUpdate(hpan, serviceModel));
     }
 
 

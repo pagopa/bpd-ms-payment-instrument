@@ -13,15 +13,9 @@ import java.util.List;
  */
 public interface PaymentInstrumentService {
 
-    //    List<PaymentInstrument> find(String hpan, String fiscalCode);
-    PaymentInstrument find(String hpan, String fiscalCode);
-
-    @Deprecated
-    PaymentInstrument createOrUpdate(String hpan, PaymentInstrument pi);
-
+    List<PaymentInstrument> find(String hpan, String fiscalCode);
 
     PaymentInstrumentServiceModel createOrUpdate(String hpan, PaymentInstrumentServiceModel pi);
-
 
     void delete(String hpan, String fiscalCode, OffsetDateTime cancellationDate);
 

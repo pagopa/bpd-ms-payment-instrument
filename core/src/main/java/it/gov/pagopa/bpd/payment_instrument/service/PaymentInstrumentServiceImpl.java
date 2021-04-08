@@ -17,7 +17,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.OffsetDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -47,66 +50,25 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
     }
 
 
-//    @Override
-//    public List<PaymentInstrument> find(String hpan, String fiscalCode) {
-//        List<PaymentInstrument> piList = paymentInstrumentDAO.findByHpanMasterOrHpan(hpan, hpan);
-//
-//        if (piList != null && !piList.isEmpty() && piList.stream().anyMatch(item -> item.getHpan().equals(item.getHpanMaster()))) {
-//            PaymentInstrument hpanMaster = piList.stream().filter(item -> item.getHpan().equals(item.getHpanMaster())).findFirst().get();
-//            if ((hpanMaster.isEnabled() || PaymentInstrument.Status.ACTIVE.equals(hpanMaster.getStatus()))
-//                    && fiscalCode != null && !fiscalCode.equals(hpanMaster.getFiscalCode())) {
-//                throw new PaymentInstrumentOnDifferentUserException(hpan);
-//            }
-//        } else {
-//            throw new PaymentInstrumentNotFoundException(hpan);
-//        }
-//
-//        return piList;
-//    }
-
     @Override
-    public PaymentInstrument find(String hpan, String fiscalCode) {
-        PaymentInstrument pi = paymentInstrumentDAO.findById(hpan).orElseThrow(() -> new PaymentInstrumentNotFoundException(hpan));
-        if ((pi.isEnabled() || PaymentInstrument.Status.ACTIVE.equals(pi.getStatus()))
-                && fiscalCode != null && !fiscalCode.equals(pi.getFiscalCode())) {
-            throw new PaymentInstrumentOnDifferentUserException(hpan);
-        }
-        return pi;
-    }
+    public List<PaymentInstrument> find(String hpan, String fiscalCode) {
+        List<PaymentInstrument> piList = paymentInstrumentDAO.findByHpanMasterOrHpan(hpan, hpan);
 
-    @Override
-    public PaymentInstrument createOrUpdate(String hpan, PaymentInstrument pi) {
-        final Optional<PaymentInstrument> foundPIOpt = paymentInstrumentDAO.findById(hpan);
-        pi.setHpan(hpan);
-        if (!foundPIOpt.isPresent()) {
-//            final long count = paymentInstrumentDAO.count((root, query, criteriaBuilder) ->
-//                    criteriaBuilder.equal(root.get("fiscalCode"), pi.getFiscalCode()));
-//            if (count >= numMaxPaymentInstr) {
-//                throw new PaymentInstrumentNumbersExceededException(
-//                        PaymentInstrument.class, numMaxPaymentInstr);
-//            }
-            return paymentInstrumentDAO.save(pi);
-        } else {
-            PaymentInstrument foundPI = foundPIOpt.get();
-            if (!foundPI.isEnabled()) {
-                foundPI.setEnabled(true);
-                foundPI.setHpan(hpan);
-                foundPI.setActivationDate(pi.getActivationDate());
-                foundPI.setFiscalCode(pi.getFiscalCode());
-                foundPI.setStatus(PaymentInstrument.Status.ACTIVE);
-                return paymentInstrumentDAO.save(pi);
-            } else {
-                if (foundPI.getFiscalCode() != null && !foundPI.getFiscalCode().equals(pi.getFiscalCode())) {
-                    throw new PaymentInstrumentOnDifferentUserException(hpan);
-                }
-                pi = foundPI;
+        if (piList != null && !piList.isEmpty() && piList.stream().anyMatch(item -> item.getHpan().equals(item.getHpanMaster()))) {
+            PaymentInstrument hpanMaster = piList.stream().filter(item -> item.getHpan().equals(item.getHpanMaster())).findFirst().get();
+            if ((hpanMaster.isEnabled() || PaymentInstrument.Status.ACTIVE.equals(hpanMaster.getStatus()))
+                    && fiscalCode != null && !fiscalCode.equals(hpanMaster.getFiscalCode())) {
+                throw new PaymentInstrumentOnDifferentUserException(hpan);
             }
+        } else {
+            throw new PaymentInstrumentNotFoundException(hpan);
         }
-        return pi;
+
+        return piList;
     }
 
+
     @Override
-    @Deprecated
     public PaymentInstrumentServiceModel createOrUpdate(String hpan, PaymentInstrumentServiceModel pi) {
         List<String> idList = new ArrayList<>();
         idList.add(hpan);
@@ -147,23 +109,16 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
         return pi;
     }
 
-//    @Override
-//    public void delete(String hpan, String fiscalCode, OffsetDateTime cancellationDate) {
-//
-//        List<PaymentInstrument> piList = paymentInstrumentDAO.findByHpanMasterOrHpan(hpan, hpan);
-//        if (piList == null || piList.isEmpty()) {
-//            throw new PaymentInstrumentNotFoundException(hpan);
-//        }
-//
-//        piList.forEach(
-//                paymentInstrument -> checkAndDelete(paymentInstrument, fiscalCode, null));
-//    }
-
     @Override
     public void delete(String hpan, String fiscalCode, OffsetDateTime cancellationDate) {
-        PaymentInstrument paymentInstrument = paymentInstrumentDAO.findById(hpan).orElseThrow(
-                () -> new PaymentInstrumentNotFoundException(hpan));
-        checkAndDelete(paymentInstrument, fiscalCode, cancellationDate);
+
+        List<PaymentInstrument> piList = paymentInstrumentDAO.findByHpanMasterOrHpan(hpan, hpan);
+        if (piList == null || piList.isEmpty()) {
+            throw new PaymentInstrumentNotFoundException(hpan);
+        }
+
+        piList.forEach(
+                paymentInstrument -> checkAndDelete(paymentInstrument, fiscalCode, null));
     }
 
     @Override

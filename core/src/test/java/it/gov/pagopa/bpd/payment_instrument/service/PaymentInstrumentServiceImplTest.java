@@ -219,11 +219,11 @@ public class PaymentInstrumentServiceImplTest {
         final String hashPan = EXISTING_HASH_PAN;
         final String fiscalCode = EXISTING_FISCAL_CODE;
 
-        PaymentInstrument result = paymentInstrumentService.find(hashPan, fiscalCode);
+        List<PaymentInstrument> result = paymentInstrumentService.find(hashPan, fiscalCode);
 
         assertNotNull(result);
-        verify(paymentInstrumentDAOMock, only()).findById(eq(hashPan));
-        verify(paymentInstrumentDAOMock, times(1)).findById(eq(hashPan));
+        verify(paymentInstrumentDAOMock, only()).findByHpanMasterOrHpan(eq(hashPan), eq(hashPan));
+        verify(paymentInstrumentDAOMock, times(1)).findByHpanMasterOrHpan(eq(hashPan), eq(hashPan));
     }
 
 
@@ -301,7 +301,7 @@ public class PaymentInstrumentServiceImplTest {
 
         paymentInstrumentService.delete(hashPan, null, null);
 
-        verify(paymentInstrumentDAOMock, times(1)).findById(eq(hashPan));
+        verify(paymentInstrumentDAOMock, times(1)).findByHpanMasterOrHpan(eq(hashPan), eq(hashPan));
         verify(paymentInstrumentDAOMock).save(any(PaymentInstrument.class));
         verifyNoMoreInteractions(paymentInstrumentDAOMock);
     }
@@ -312,7 +312,7 @@ public class PaymentInstrumentServiceImplTest {
 
         paymentInstrumentService.delete(hashPan, EXISTING_FISCAL_CODE, OffsetDateTime.now());
 
-        verify(paymentInstrumentDAOMock, times(1)).findById(eq(hashPan));
+        verify(paymentInstrumentDAOMock, times(1)).findByHpanMasterOrHpan(eq(hashPan), eq(hashPan));
         verify(paymentInstrumentDAOMock).save(any(PaymentInstrument.class));
         verifyNoMoreInteractions(paymentInstrumentDAOMock);
     }
@@ -324,7 +324,7 @@ public class PaymentInstrumentServiceImplTest {
         try {
             paymentInstrumentService.delete(hashPan, EXISTING_FISCAL_CODE_ERROR, OffsetDateTime.now());
         } finally {
-            verify(paymentInstrumentDAOMock, times(1)).findById(eq(hashPan));
+            verify(paymentInstrumentDAOMock, times(1)).findByHpanMasterOrHpan(eq(hashPan), eq(hashPan));
             verifyNoMoreInteractions(paymentInstrumentDAOMock);
         }
     }
@@ -338,8 +338,8 @@ public class PaymentInstrumentServiceImplTest {
             paymentInstrumentService.delete(hashPan, null, null);
 
         } finally {
-            verify(paymentInstrumentDAOMock, only()).findById(eq(hashPan));
-            verify(paymentInstrumentDAOMock, times(1)).findById(eq(hashPan));
+            verify(paymentInstrumentDAOMock, only()).findByHpanMasterOrHpan(eq(hashPan), eq(hashPan));
+            verify(paymentInstrumentDAOMock, times(1)).findByHpanMasterOrHpan(eq(hashPan), eq(hashPan));
         }
     }
 
