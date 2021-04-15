@@ -35,4 +35,7 @@ public class PaymentInstrumentDTO {
     @JsonProperty()
     private List<String> tokenPanList;
 
+    @ApiModelProperty(value = "${swagger.paymentInstrument.par}")
+    private String par;
+
 }

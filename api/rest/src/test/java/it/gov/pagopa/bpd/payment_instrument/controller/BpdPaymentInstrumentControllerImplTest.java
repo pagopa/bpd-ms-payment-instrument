@@ -103,7 +103,7 @@ public class BpdPaymentInstrumentControllerImplTest {
         pihRes.add(resource);
 
 
-        doReturn(paymentInstrumentList)
+        doReturn(paymentInstrument)
                 .when(paymentInstrumentServiceMock).find(eq("hpan"), eq("DHFIVD85M84D048L"));
 
         doReturn(new PaymentInstrumentServiceModel())
@@ -127,7 +127,7 @@ public class BpdPaymentInstrumentControllerImplTest {
 
     @Test
     public void find() throws Exception {
-        MvcResult result = (MvcResult) mvc.perform(MockMvcRequestBuilders
+        MvcResult result = mvc.perform(MockMvcRequestBuilders
                 .get("/bpd/payment-instruments/hpan?fiscalCode=DHFIVD85M84D048L")
                 .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)
                 .accept(MediaType.APPLICATION_JSON_UTF8_VALUE))
@@ -145,7 +145,7 @@ public class BpdPaymentInstrumentControllerImplTest {
         PaymentInstrumentDTO paymentInstrument = new PaymentInstrumentDTO();
         paymentInstrument.setFiscalCode("DHFIVD85M84D048L");
         paymentInstrument.setActivationDate(CURRENT_DATE_TIME);
-        MvcResult result = (MvcResult) mvc.perform(MockMvcRequestBuilders.put("/bpd/payment-instruments/hpan")
+        MvcResult result = mvc.perform(MockMvcRequestBuilders.put("/bpd/payment-instruments/hpan")
                 .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)
                 .accept(MediaType.APPLICATION_JSON_UTF8_VALUE)
                 .content(objectMapper.writeValueAsString(paymentInstrument)))
@@ -201,7 +201,7 @@ public class BpdPaymentInstrumentControllerImplTest {
         PaymentInstrumentConverterResource converter = new PaymentInstrumentConverterResource();
         converter.setChannel("channel");
         converter.setCount(1L);
-        MvcResult result = (MvcResult) mvc.perform(MockMvcRequestBuilders
+        MvcResult result = mvc.perform(MockMvcRequestBuilders
                 .get("/bpd/payment-instruments/number/fiscalCode?channel=channel")
                 .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)
                 .accept(MediaType.APPLICATION_JSON_UTF8_VALUE))
@@ -223,7 +223,7 @@ public class BpdPaymentInstrumentControllerImplTest {
         instrumentHistoryResource.setFiscalCode("DHFIVD85M84D048L");
         instrumentHistoryResource.setHpan("hpan");
         instrumentHistoryResource.setActivationDate(OffsetDateTime.now());
-        MvcResult result = (MvcResult) mvc.perform(MockMvcRequestBuilders
+        MvcResult result = mvc.perform(MockMvcRequestBuilders
                 .get("/bpd/payment-instruments/DHFIVD85M84D048L/history?hpan=hpan")
                 .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)
                 .accept(MediaType.APPLICATION_JSON_UTF8_VALUE))
