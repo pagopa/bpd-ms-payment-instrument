@@ -42,6 +42,9 @@ public class PaymentInstrument extends BaseEntity {
     @Column(name = "hpan_master_s")
     private String hpanMaster;
 
+    @Column(name = "par_s")
+    private String par;
+
 }
 
 

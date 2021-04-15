@@ -103,7 +103,7 @@ public class BpdPaymentInstrumentControllerImplTest {
         pihRes.add(resource);
 
 
-        doReturn(paymentInstrumentList)
+        doReturn(paymentInstrument)
                 .when(paymentInstrumentServiceMock).find(eq("hpan"), eq("DHFIVD85M84D048L"));
 
         doReturn(new PaymentInstrumentServiceModel())
