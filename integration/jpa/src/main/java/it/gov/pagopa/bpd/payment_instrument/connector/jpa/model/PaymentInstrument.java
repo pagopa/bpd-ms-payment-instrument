@@ -42,6 +42,17 @@ public class PaymentInstrument extends BaseEntity {
     @Column(name = "hpan_master_s")
     private String hpanMaster;
 
+    @Override
+    protected void onUpdate() {
+        super.onUpdate();
+        this.setUpdateUser(this.fiscalCode);
+    }
+
+    @Override
+    protected void onCreate() {
+        super.onCreate();
+        this.setInsertUser(this.fiscalCode);
+    }
 }
 
 
