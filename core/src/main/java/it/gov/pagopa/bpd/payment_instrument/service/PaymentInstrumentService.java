@@ -13,7 +13,8 @@ import java.util.List;
  */
 public interface PaymentInstrumentService {
 
-    List<PaymentInstrument> find(String hpan, String fiscalCode);
+
+    PaymentInstrument find(String hpan, String fiscalCode);
 
     PaymentInstrumentServiceModel createOrUpdate(String hpan, PaymentInstrumentServiceModel pi);
 

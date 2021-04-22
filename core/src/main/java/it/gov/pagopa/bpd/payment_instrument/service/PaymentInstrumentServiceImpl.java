@@ -51,22 +51,14 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
 
 
     @Override
-    public List<PaymentInstrument> find(String hpan, String fiscalCode) {
-        List<PaymentInstrument> piList = paymentInstrumentDAO.findByHpanMasterOrHpan(hpan, hpan);
-
-        if (piList != null && !piList.isEmpty() && piList.stream().anyMatch(item -> item.getHpan().equals(item.getHpanMaster()))) {
-            PaymentInstrument hpanMaster = piList.stream().filter(item -> item.getHpan().equals(item.getHpanMaster())).findFirst().get();
-            if ((hpanMaster.isEnabled() || PaymentInstrument.Status.ACTIVE.equals(hpanMaster.getStatus()))
-                    && fiscalCode != null && !fiscalCode.equals(hpanMaster.getFiscalCode())) {
-                throw new PaymentInstrumentOnDifferentUserException(hpan);
-            }
-        } else {
-            throw new PaymentInstrumentNotFoundException(hpan);
+    public PaymentInstrument find(String hpan, String fiscalCode) {
+        PaymentInstrument pi = paymentInstrumentDAO.findById(hpan).orElseThrow(() -> new PaymentInstrumentNotFoundException(hpan));
+        if ((pi.isEnabled() || PaymentInstrument.Status.ACTIVE.equals(pi.getStatus()))
+                && fiscalCode != null && !fiscalCode.equals(pi.getFiscalCode())) {
+            throw new PaymentInstrumentOnDifferentUserException(hpan);
         }
-
-        return piList;
+        return pi;
     }
-
 
     @Override
     public PaymentInstrumentServiceModel createOrUpdate(String hpan, PaymentInstrumentServiceModel pi) {
@@ -98,6 +90,7 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
                         : OffsetDateTime.now());
                 foundPI.setFiscalCode(pi.getFiscalCode());
                 foundPI.setStatus(PaymentInstrument.Status.ACTIVE);
+                foundPI.setPar(pi.getPar());
                 toSaveOrUpdate.add(foundPI);
             } else if (foundPI.getFiscalCode() != null && !foundPI.getFiscalCode().equals(pi.getFiscalCode())) {
                 throw new PaymentInstrumentOnDifferentUserException(hpan);
