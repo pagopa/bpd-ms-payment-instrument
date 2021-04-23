@@ -35,6 +35,7 @@ class FilterTransactionCommandImpl extends BaseCommand<Boolean> implements Filte
     private PointTransactionPublisherService pointTransactionProducerService;
     private PaymentInstrumentService paymentInstrumentService;
     private TransactionMapper transactionMapper;
+    private final boolean isToUpdate = false;
 
 
     public FilterTransactionCommandImpl(TransactionCommandModel transactionCommandModel) {
