@@ -82,4 +82,8 @@ public class OutgoingTransaction {
     String fiscalCode;
 
     String par;
+
+    @NotNull
+    @NotBlank
+    Boolean isToUpdate;
 }
