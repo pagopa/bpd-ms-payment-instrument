@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: bpdmspaymentinstrument
 spec:
-  replicas: 10
+  replicas: 8
   selector:
     matchLabels:
       app: bpdmspaymentinstrument
