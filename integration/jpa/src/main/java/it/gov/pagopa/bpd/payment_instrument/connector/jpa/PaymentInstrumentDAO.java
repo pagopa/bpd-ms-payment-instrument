@@ -26,9 +26,10 @@ public interface PaymentInstrumentDAO extends CrudJpaDAO<PaymentInstrument, Stri
     @Modifying
     @Query("update PaymentInstrument " +
             "set enabled = true, " +
-            "updateDate = :updateDateTime," +
+            "updateDate = :updateDateTime, " +
             "updateUser = 'rollback_recesso', " +
-            "status = 'ACTIVE' " +
+            "status = 'ACTIVE', " +
+            "deactivationDate = null" +
             "where deactivationDate >= :requestTimestamp " +
             "and fiscal_code_s = :fiscalCode")
     void reactivateForRollback(@Param("fiscalCode") String fiscalCode,
