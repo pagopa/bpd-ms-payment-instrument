@@ -73,6 +73,7 @@ class FilterTransactionCommandImpl extends BaseCommand<Boolean> implements Filte
         try {
 
             validateRequest(transaction);
+
             PaymentInstrumentHistory checkActive = paymentInstrumentService.checkActive(transaction.getHpan(), transaction.getTrxDate());
 
             if (checkActive != null) {
@@ -82,8 +83,18 @@ class FilterTransactionCommandImpl extends BaseCommand<Boolean> implements Filte
                 pointTransactionProducerService.publishPointTransactionEvent(outgoingTransaction);
 
             } else {
-                log.info("Met a transaction for an inactive payment instrument on BPD. [{}, {}, {}]",
-                        transaction.getIdTrxAcquirer(), transaction.getAcquirerCode(), transaction.getTrxDate());
+                PaymentInstrumentHistory checkActivePar = paymentInstrumentService.checkActivePar(transaction.getPar(), transaction.getTrxDate());
+
+                if (checkActivePar != null) {
+
+                    OutgoingTransaction outgoingTransaction = transactionMapper.map(transaction);
+                    outgoingTransaction.setFiscalCode(checkActivePar.getFiscalCode());
+                    outgoingTransaction.setIsToUpdate(true);
+                    pointTransactionProducerService.publishPointTransactionEvent(outgoingTransaction);
+                } else {
+                    log.info("Met a transaction for an inactive payment instrument on BPD. [{}, {}, {}]",
+                            transaction.getIdTrxAcquirer(), transaction.getAcquirerCode(), transaction.getTrxDate());
+                }
             }
 
             return true;

@@ -76,6 +76,21 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
     }
 
     @Override
+    public PaymentInstrument findByPar(String par, String hpan) {
+        List<PaymentInstrument> piList = paymentInstrumentDAO.getFromPar(par);
+
+        if (piList != null && !piList.isEmpty()) {
+            Optional<PaymentInstrument> matchingObject = piList.stream().filter(p -> p.getHpanMaster() != null).findFirst();
+            if (matchingObject.isPresent()) {
+                return matchingObject.get();
+            }
+        } else {
+            throw new PaymentInstrumentNotFoundException(hpan);
+        }
+        return null;
+    }
+
+    @Override
     public PaymentInstrument createOrUpdate(String hpan, PaymentInstrument pi) {
         final Optional<PaymentInstrument> foundPIOpt = paymentInstrumentDAO.findById(hpan);
         pi.setHpan(hpan);
@@ -102,6 +117,8 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
                 foundPI.setFiscalCode(pi.getFiscalCode());
                 foundPI.setStatus(PaymentInstrument.Status.ACTIVE);
                 foundPI.setChannel(pi.getChannel());
+                foundPI.setPar(pi.getPar());
+                foundPI.setParActivationDate(pi.getParActivationDate());
 
                 try {
                     return paymentInstrumentDAO.save(foundPI);
@@ -114,6 +131,10 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
             } else {
                 if (foundPI.getFiscalCode() != null && !foundPI.getFiscalCode().equals(pi.getFiscalCode())) {
                     throw new PaymentInstrumentOnDifferentUserException(hpan);
+                } else if (!foundPI.getPar().equals(pi.getPar()) && foundPI.getParActivationDate() != pi.getParActivationDate()) {
+                    foundPI.setPar(pi.getPar());
+                    foundPI.setParActivationDate(pi.getParActivationDate());
+                    return paymentInstrumentDAO.save(foundPI);
                 }
                 pi = foundPI;
             }
@@ -234,6 +255,11 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
     @Override
     public PaymentInstrumentHistory checkActive(String hpan, OffsetDateTime accountingDate) {
         return paymentInstrumentHistoryReplicaDAO.findActive(hpan, accountingDate.toLocalDate());
+    }
+
+    @Override
+    public PaymentInstrumentHistory checkActivePar(String par, OffsetDateTime accountingDate) {
+        return paymentInstrumentHistoryReplicaDAO.findActivePar(par, accountingDate.toLocalDate());
     }
 
     @Override

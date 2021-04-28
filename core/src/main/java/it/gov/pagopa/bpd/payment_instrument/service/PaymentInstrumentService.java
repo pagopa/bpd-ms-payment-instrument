@@ -16,18 +16,20 @@ public interface PaymentInstrumentService {
     //    List<PaymentInstrument> find(String hpan, String fiscalCode);
     PaymentInstrument find(String hpan, String fiscalCode);
 
+    PaymentInstrument findByPar(String par, String hpan);
+
     @Deprecated
     PaymentInstrument createOrUpdate(String hpan, PaymentInstrument pi);
 
-
     PaymentInstrumentServiceModel createOrUpdate(String hpan, PaymentInstrumentServiceModel pi);
-
 
     void delete(String hpan, String fiscalCode, OffsetDateTime cancellationDate);
 
     void deleteByFiscalCode(String fiscalCode, String channel);
 
     PaymentInstrumentHistory checkActive(String hpan, OffsetDateTime accountingDate);
+
+    PaymentInstrumentHistory checkActivePar(String par, OffsetDateTime accountingDate);
 
     void reactivateForRollback(String fiscalCode, OffsetDateTime requestTimestamp);
 

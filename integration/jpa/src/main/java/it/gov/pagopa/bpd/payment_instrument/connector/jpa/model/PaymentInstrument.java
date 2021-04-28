@@ -47,6 +47,15 @@ public class PaymentInstrument extends BaseEntity implements Serializable, Persi
     @Column(name = "hpan_master_s")
     private String hpanMaster;
 
+    @Column(name = "par_s")
+    private String par;
+
+    @Column(name = "par_enrollment_t")
+    private OffsetDateTime parActivationDate;
+
+    @Column(name = "par_cancellation_t")
+    private OffsetDateTime parDeactivationDate;
+
     @Override
     protected void onUpdate() {
         super.onUpdate();
