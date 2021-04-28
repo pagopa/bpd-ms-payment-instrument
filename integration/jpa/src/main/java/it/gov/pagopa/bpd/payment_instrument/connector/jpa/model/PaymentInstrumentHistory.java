@@ -33,4 +33,16 @@ public class PaymentInstrumentHistory implements Serializable {
 
     @Column(name = "fiscal_code_s")
     private String fiscalCode;
+
+    @Column(name = "channel_s")
+    private String channel;
+
+    @Column(name = "par_s")
+    private String par;
+
+    @Column(name = "par_activation_t")
+    private OffsetDateTime parActivationDate;
+
+    @Column(name = "par_deactivation_t")
+    private OffsetDateTime parDeactivationDate;
 }

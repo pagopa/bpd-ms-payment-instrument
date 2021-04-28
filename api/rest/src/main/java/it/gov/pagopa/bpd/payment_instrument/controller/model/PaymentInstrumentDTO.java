@@ -29,7 +29,15 @@ public class PaymentInstrumentDTO {
     @JsonProperty(required = true)
     private OffsetDateTime activationDate;
 
+    @ApiModelProperty(value = "${swagger.paymentInstrument.channel}", required = false)
     private String channel;
+
+    @ApiModelProperty(value = "${swagger.paymentInstrument.par}", required = false)
+    private String par;
+
+    @ApiModelProperty(value = "${swagger.paymentInstrument.parActivationDate}", required = false)
+    @JsonProperty(required = false)
+    private OffsetDateTime parActivationDate;
 
     @ApiModelProperty(value = "${swagger.paymentInstrument.tokenPanList}")
     @JsonProperty()
