@@ -2,8 +2,11 @@ package it.gov.pagopa.bpd.payment_instrument.listener;
 
 import eu.sia.meda.eventlistener.BaseConsumerAwareEventListener;
 import it.gov.pagopa.bpd.payment_instrument.command.DeletePaymentInstrumentCommand;
+import it.gov.pagopa.bpd.payment_instrument.command.FilterTransactionCommand;
+import it.gov.pagopa.bpd.payment_instrument.listener.factory.DeletePaymentInstrumentErrorModelFactory;
 import it.gov.pagopa.bpd.payment_instrument.listener.factory.DeletePaymentInstrumentModelFactory;
 import it.gov.pagopa.bpd.payment_instrument.model.DeletePaymentInstrumentCommandModel;
+import it.gov.pagopa.bpd.payment_instrument.model.DeletePaymentInstrumentErrorServiceModel;
 import it.gov.pagopa.bpd.payment_instrument.service.PaymentInstrumentService;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -26,13 +29,18 @@ public class OnPaymentInstrumentToDeleteListener extends BaseConsumerAwareEventL
 
     private final PaymentInstrumentService paymentInstrumentService;
     private final DeletePaymentInstrumentModelFactory deletePaymentInstrumentModelFactory;
+    private final DeletePaymentInstrumentErrorModelFactory deletePaymentInstrumentErrorModelFactory;
     private final BeanFactory beanFactory;
 
 
     @Autowired
-    public OnPaymentInstrumentToDeleteListener(PaymentInstrumentService paymentInstrumentService, DeletePaymentInstrumentModelFactory deletePaymentInstrumentModelFactory, BeanFactory beanFactory) {
+    public OnPaymentInstrumentToDeleteListener(PaymentInstrumentService paymentInstrumentService,
+                                               DeletePaymentInstrumentModelFactory deletePaymentInstrumentModelFactory,
+                                               DeletePaymentInstrumentErrorModelFactory deletePaymentInstrumentErrorModelFactory,
+                                               BeanFactory beanFactory) {
         this.paymentInstrumentService = paymentInstrumentService;
         this.deletePaymentInstrumentModelFactory = deletePaymentInstrumentModelFactory;
+        this.deletePaymentInstrumentErrorModelFactory = deletePaymentInstrumentErrorModelFactory;
         this.beanFactory = beanFactory;
     }
 
@@ -51,6 +59,8 @@ public class OnPaymentInstrumentToDeleteListener extends BaseConsumerAwareEventL
     public void onReceived(byte[] payload, Headers headers) {
 
         DeletePaymentInstrumentCommandModel deletePaymentInstrumentCommandModel = null;
+        DeletePaymentInstrumentErrorServiceModel deletePaymentInstrumentErrorServiceModel = null;
+
 
         try {
             if (log.isDebugEnabled()) {
@@ -85,10 +95,14 @@ public class OnPaymentInstrumentToDeleteListener extends BaseConsumerAwareEventL
                 }
             }
 
-            if (deletePaymentInstrumentCommandModel != null && deletePaymentInstrumentCommandModel.getPayload() != null) {
-                payloadString = new String(payload, StandardCharsets.UTF_8);
-                error = String.format("Unexpected error during message processing: %s, %s",
-                        payloadString, e.getMessage());
+            error = String.format("Unexpected error during message processing: %s, %s",
+                    payloadString, e.getMessage());
+            deletePaymentInstrumentErrorServiceModel = deletePaymentInstrumentErrorModelFactory
+                    .createModel(Pair.of(payload, headers), error);
+
+            if (deletePaymentInstrumentErrorServiceModel != null &&
+                    deletePaymentInstrumentErrorServiceModel.getPayload() != null) {
+                paymentInstrumentService.createDeleteErrorRecord(deletePaymentInstrumentErrorServiceModel.getPayload());
 
             } else if (payload != null) {
                 error = String.format("Something gone wrong during the evaluation of the payload: %s, %s",
@@ -97,7 +111,6 @@ public class OnPaymentInstrumentToDeleteListener extends BaseConsumerAwareEventL
                     logger.error(error, e);
                 }
             }
-            throw new Exception();
         }
     }
 
