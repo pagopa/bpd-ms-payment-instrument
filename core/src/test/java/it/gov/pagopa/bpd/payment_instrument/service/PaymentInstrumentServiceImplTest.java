@@ -3,8 +3,10 @@ package it.gov.pagopa.bpd.payment_instrument.service;
 import it.gov.pagopa.bpd.payment_instrument.assembler.PaymentInstrumentAssembler;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.PaymentInstrumentConverter;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.PaymentInstrumentDAO;
+import it.gov.pagopa.bpd.payment_instrument.connector.jpa.PaymentInstrumentErrorDeleteDAO;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.PaymentInstrumentHistoryReplicaDAO;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.model.PaymentInstrument;
+import it.gov.pagopa.bpd.payment_instrument.connector.jpa.model.PaymentInstrumentErrorDelete;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.model.PaymentInstrumentHistory;
 import it.gov.pagopa.bpd.payment_instrument.exception.PaymentInstrumentDifferentChannelException;
 import it.gov.pagopa.bpd.payment_instrument.exception.PaymentInstrumentNotFoundException;
@@ -56,6 +58,8 @@ public class PaymentInstrumentServiceImplTest {
 
     @MockBean
     private PaymentInstrumentDAO paymentInstrumentDAOMock;
+    @MockBean
+    private PaymentInstrumentErrorDeleteDAO paymentInstrumentErrorDeleteDAOMock;
     @MockBean
     private PaymentInstrumentHistoryReplicaDAO paymentInstrumentHistoryReplicaDAOMock;
     @Autowired
@@ -219,6 +223,9 @@ public class PaymentInstrumentServiceImplTest {
                             piList.add(pi);
                             return piList;
                         });
+
+        when(paymentInstrumentErrorDeleteDAOMock.save(any(PaymentInstrumentErrorDelete.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0, PaymentInstrumentErrorDelete.class));
 
     }
 
@@ -458,4 +465,23 @@ public class PaymentInstrumentServiceImplTest {
 
         verify(paymentInstrumentDAOMock, times(1)).getFromPar("invalid_par");
     }
+
+    @Test
+    public void createDeleteErrorRecord_OK() {
+
+        PaymentInstrumentErrorDelete paymentInstrumentErrorDelete = new PaymentInstrumentErrorDelete();
+        paymentInstrumentErrorDelete.setId("ID1");
+        paymentInstrumentErrorDelete.setExceptionMessage("ExceptionMessage");
+        paymentInstrumentErrorDelete.setCancellationDate(OffsetDateTime.now().toString());
+        paymentInstrumentErrorDelete.setHpan("hpan");
+        paymentInstrumentErrorDelete.setFiscalCode("testFiscalCode");
+
+
+        PaymentInstrumentErrorDelete result = paymentInstrumentService
+                .createDeleteErrorRecord(paymentInstrumentErrorDelete);
+        assertNotNull(result);
+        assertEquals("testFiscalCode", result.getFiscalCode());
+        verify(paymentInstrumentErrorDeleteDAOMock, times(1)).save(any());
+    }
+
 }
