@@ -1,6 +1,7 @@
 package it.gov.pagopa.bpd.payment_instrument.command;
 
 import eu.sia.meda.core.command.BaseCommand;
+import it.gov.pagopa.bpd.payment_instrument.connector.jpa.model.PaymentInstrument;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.model.PaymentInstrumentHistory;
 import it.gov.pagopa.bpd.payment_instrument.model.TransactionCommandModel;
 import it.gov.pagopa.bpd.payment_instrument.publisher.model.OutgoingTransaction;
@@ -16,6 +17,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import javax.validation.*;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -74,13 +76,22 @@ class FilterTransactionCommandImpl extends BaseCommand<Boolean> implements Filte
 
             validateRequest(transaction);
 
-            PaymentInstrumentHistory checkActive = paymentInstrumentService.checkActive(transaction.getHpan(), transaction.getTrxDate());
+            Optional<PaymentInstrument> paymentInstrument = paymentInstrumentService.findByhpan(transaction.getHpan());
 
-            if (checkActive != null) {
+            if (paymentInstrument.isPresent() && (paymentInstrument.get().getHpan().equals(paymentInstrument.get().getHpanMaster())
+                    || paymentInstrument.get().getHpanMaster() == null)) {
 
-                OutgoingTransaction outgoingTransaction = transactionMapper.map(transaction);
-                outgoingTransaction.setFiscalCode(checkActive.getFiscalCode());
-                pointTransactionProducerService.publishPointTransactionEvent(outgoingTransaction);
+                PaymentInstrumentHistory checkActive = paymentInstrumentService.checkActive(transaction.getHpan(), transaction.getTrxDate());
+
+                if (checkActive != null) {
+
+                    OutgoingTransaction outgoingTransaction = transactionMapper.map(transaction);
+                    outgoingTransaction.setFiscalCode(checkActive.getFiscalCode());
+                    pointTransactionProducerService.publishPointTransactionEvent(outgoingTransaction);
+                } else {
+                    log.info("Met a transaction for an inactive payment instrument on BPD. [{}, {}, {}]",
+                            transaction.getIdTrxAcquirer(), transaction.getAcquirerCode(), transaction.getTrxDate());
+                }
 
             } else {
                 PaymentInstrumentHistory checkActivePar = paymentInstrumentService.checkActivePar(transaction.getPar(), transaction.getTrxDate());
@@ -89,8 +100,13 @@ class FilterTransactionCommandImpl extends BaseCommand<Boolean> implements Filte
 
                     OutgoingTransaction outgoingTransaction = transactionMapper.map(transaction);
                     outgoingTransaction.setFiscalCode(checkActivePar.getFiscalCode());
-                    outgoingTransaction.setIsToUpdate(true);
+
+                    if (paymentInstrument.isPresent()) {
+                        outgoingTransaction.setIsToUpdate(true);
+                    }
+
                     pointTransactionProducerService.publishPointTransactionEvent(outgoingTransaction);
+
                 } else {
                     log.info("Met a transaction for an inactive payment instrument on BPD. [{}, {}, {}]",
                             transaction.getIdTrxAcquirer(), transaction.getAcquirerCode(), transaction.getTrxDate());

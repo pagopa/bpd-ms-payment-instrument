@@ -6,8 +6,8 @@ import it.gov.pagopa.bpd.payment_instrument.model.PaymentInstrumentCommandModel;
 import it.gov.pagopa.bpd.payment_instrument.publisher.model.OutgoingPaymentInstrument;
 import it.gov.pagopa.bpd.payment_instrument.publisher.model.PaymentInstrumentUpdate;
 import it.gov.pagopa.bpd.payment_instrument.service.PaymentInstrumentService;
+import it.gov.pagopa.bpd.payment_instrument.service.TkmPublisherService;
 import it.gov.pagopa.bpd.payment_instrument.service.mapper.PaymentInstrumentMapper;
-import it.gov.pagopa.bpd.payment_instrument.service.mapper.TkmPublisherService;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,13 +21,13 @@ import java.util.Set;
 @Component
 @Scope(BeanDefinition.SCOPE_PROTOTYPE)
 @Slf4j
-public class FilterPaymentInstrumentCommandImpl extends BaseCommand<Boolean> implements FilterPaymentInstrumentCommand {
+class FilterPaymentInstrumentCommandImpl extends BaseCommand<Boolean> implements FilterPaymentInstrumentCommand {
 
     private static final ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
     private static final Validator validator = factory.getValidator();
 
     private PaymentInstrumentCommandModel paymentInstrumentCommandModel;
-    private TkmPublisherService tkmProducerService;
+    private TkmPublisherService tkmPublisherService;
     private PaymentInstrumentService paymentInstrumentService;
     private PaymentInstrumentMapper paymentInstrumentMapper;
 
@@ -38,11 +38,11 @@ public class FilterPaymentInstrumentCommandImpl extends BaseCommand<Boolean> imp
 
     public FilterPaymentInstrumentCommandImpl(
             PaymentInstrumentCommandModel paymentInstrumentCommandModel,
-            TkmPublisherService tkmProducerService,
+            TkmPublisherService tkmPublisherService,
             PaymentInstrumentService paymentInstrumentService,
             PaymentInstrumentMapper paymentInstrumentMapper) {
         this.paymentInstrumentCommandModel = paymentInstrumentCommandModel;
-        this.tkmProducerService = tkmProducerService;
+        this.tkmPublisherService = tkmPublisherService;
         this.paymentInstrumentService = paymentInstrumentService;
         this.paymentInstrumentMapper = paymentInstrumentMapper;
     }
@@ -70,18 +70,24 @@ public class FilterPaymentInstrumentCommandImpl extends BaseCommand<Boolean> imp
 
             validateRequest(pi);
 
-            PaymentInstrument paymentInstrument = paymentInstrumentService.findByPar(pi.getPar(), pi.getHpan());
+            PaymentInstrument paymentInstrument = paymentInstrumentService.findByPar(pi.getPar());
 
             if (paymentInstrument != null) {
 
-                paymentInstrument.setPar(pi.getPar());
-                paymentInstrument.setActivationDate(paymentInstrument.getParActivationDate());
+                if (paymentInstrument.getHpanMaster() != null && !paymentInstrument.getHpanMaster().equals("")) {
+                    paymentInstrument.setHpan(pi.getHpan());
+                    paymentInstrument.setActivationDate(paymentInstrument.getParActivationDate());
+                } else {
+                    paymentInstrument.setHpanMaster(paymentInstrument.getHpan());
+                    paymentInstrument.setHpan(pi.getHpan());
+                    paymentInstrument.setActivationDate(paymentInstrument.getParActivationDate());
+                }
 
                 paymentInstrumentService.createOrUpdate(pi.getHpan(), paymentInstrument);
 
                 OutgoingPaymentInstrument outgoingPaymentInstrument = paymentInstrumentMapper.map(pi);
                 outgoingPaymentInstrument.setHpanMaster(paymentInstrument.getHpanMaster());
-                tkmProducerService.publishTkmEvent(outgoingPaymentInstrument);
+                tkmPublisherService.publishTkmEvent(outgoingPaymentInstrument);
 
             } else {
                 log.info("Impossible to save payment instrument. [{}, {}]",
@@ -111,9 +117,8 @@ public class FilterPaymentInstrumentCommandImpl extends BaseCommand<Boolean> imp
 
 
     @Autowired
-    public void setTkmProducerService(
-            TkmPublisherService tkmProducerService) {
-        this.tkmProducerService = tkmProducerService;
+    public void setTkmPublisherService(TkmPublisherService tkmPublisherService) {
+        this.tkmPublisherService = tkmPublisherService;
     }
 
     @Autowired

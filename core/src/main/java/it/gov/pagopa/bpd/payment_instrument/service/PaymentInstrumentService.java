@@ -7,6 +7,7 @@ import it.gov.pagopa.bpd.payment_instrument.model.PaymentInstrumentServiceModel;
 
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * A service to manage the Business Logic related to PaymentInstrument
@@ -16,7 +17,9 @@ public interface PaymentInstrumentService {
     //    List<PaymentInstrument> find(String hpan, String fiscalCode);
     PaymentInstrument find(String hpan, String fiscalCode);
 
-    PaymentInstrument findByPar(String par, String hpan);
+    Optional<PaymentInstrument> findByhpan(String hpan);
+
+    PaymentInstrument findByPar(String par);
 
     @Deprecated
     PaymentInstrument createOrUpdate(String hpan, PaymentInstrument pi);

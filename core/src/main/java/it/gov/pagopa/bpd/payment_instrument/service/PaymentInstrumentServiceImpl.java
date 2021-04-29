@@ -75,18 +75,8 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
     }
 
     @Override
-    public PaymentInstrument findByPar(String par, String hpan) {
-        List<PaymentInstrument> piList = paymentInstrumentDAO.getFromPar(par);
-
-        if (piList != null && !piList.isEmpty()) {
-            Optional<PaymentInstrument> matchingObject = piList.stream().filter(p -> p.getHpanMaster() != null).findFirst();
-            if (matchingObject.isPresent()) {
-                return matchingObject.get();
-            }
-        } else {
-            throw new PaymentInstrumentNotFoundException(hpan);
-        }
-        return null;
+    public PaymentInstrument findByPar(String par) {
+        return paymentInstrumentDAO.getFromPar(par);
     }
 
     @Override
@@ -227,6 +217,11 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
     @Override
     public PaymentInstrumentHistory checkActive(String hpan, OffsetDateTime accountingDate) {
         return paymentInstrumentHistoryReplicaDAO.findActive(hpan, accountingDate.toLocalDate());
+    }
+
+    @Override
+    public Optional<PaymentInstrument> findByhpan(String hpan) {
+        return paymentInstrumentDAO.findById(hpan);
     }
 
     @Override

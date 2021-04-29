@@ -26,9 +26,10 @@ public interface PaymentInstrumentDAO extends CrudJpaDAO<PaymentInstrument, Stri
     @Modifying
     @Query("update PaymentInstrument " +
             "set enabled = true, " +
-            "updateDate = :updateDateTime," +
+            "updateDate = :updateDateTime, " +
             "updateUser = 'rollback_recesso', " +
-            "status = 'ACTIVE' " +
+            "status = 'ACTIVE', " +
+            "deactivationDate = null " +
             "where deactivationDate >= :requestTimestamp " +
             "and fiscal_code_s = :fiscalCode")
     void reactivateForRollback(@Param("fiscalCode") String fiscalCode,
@@ -50,8 +51,9 @@ public interface PaymentInstrumentDAO extends CrudJpaDAO<PaymentInstrument, Stri
 
     List<PaymentInstrument> findByHpanMasterOrHpan(String hpanMaster, String hpan);
 
-    @Query("select * from PaymentInstrument bpi " +
+    @Query("select bpi from PaymentInstrument bpi " +
             "where bpi.par = :par "
+//            "limit 1 "
     )
-    List<PaymentInstrument> getFromPar(@Param("par") String par);
+    PaymentInstrument getFromPar(@Param("par") String par);
 }

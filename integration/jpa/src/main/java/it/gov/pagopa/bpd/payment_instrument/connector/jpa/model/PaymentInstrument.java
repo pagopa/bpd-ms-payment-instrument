@@ -51,6 +51,18 @@ public class PaymentInstrument extends BaseEntity {
     @Column(name = "par_cancellation_t")
     private OffsetDateTime parDeactivationDate;
 
+    @Override
+    protected void onUpdate() {
+        super.onUpdate();
+        this.setUpdateUser(this.fiscalCode);
+    }
+
+    @Override
+    protected void onCreate() {
+        super.onCreate();
+        this.setInsertUser(this.fiscalCode);
+    }
+
 }
 
 

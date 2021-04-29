@@ -1,4 +1,4 @@
-package it.gov.pagopa.bpd.payment_instrument.service.mapper;
+package it.gov.pagopa.bpd.payment_instrument.service;
 
 import eu.sia.meda.event.transformer.SimpleEventRequestTransformer;
 import eu.sia.meda.event.transformer.SimpleEventResponseTransformer;
@@ -8,12 +8,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
- * Implementation of the TkmPublisherServiceImpl, defines the service used for the interaction
+ * Implementation of the TkmPublisherService, defines the service used for the interaction
  * with the TkmPublisherConnector
  */
 
 @Service
-public class TkmPublisherServiceImpl implements TkmPublisherService {
+class TkmPublisherServiceImpl implements TkmPublisherService {
 
     private final TkmPublisherConnector tkmPublisherConnector;
     private final SimpleEventRequestTransformer<OutgoingPaymentInstrument> simpleEventRequestTransformer;
@@ -29,7 +29,7 @@ public class TkmPublisherServiceImpl implements TkmPublisherService {
     }
 
     /**
-     * Calls the PointTransactionPublisherService, passing the transaction to be used as message payload
+     * Calls the TkmPublisherService, passing the transaction to be used as message payload
      *
      * @param outgoingPaymentInstrument OutgoingTransaction instance to be used as payload for the outbound channel used bu the related connector
      */
