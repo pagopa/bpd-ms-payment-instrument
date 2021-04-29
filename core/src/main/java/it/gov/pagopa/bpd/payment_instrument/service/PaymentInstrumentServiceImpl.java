@@ -77,7 +77,8 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
 
     @Override
     public PaymentInstrument findByPar(String par) {
-        return paymentInstrumentDAO.getFromPar(par);
+        List<PaymentInstrument> piList = paymentInstrumentDAO.getFromPar(par);
+        return piList.get(0);
     }
 
     @Override

@@ -53,7 +53,6 @@ public interface PaymentInstrumentDAO extends CrudJpaDAO<PaymentInstrument, Stri
 
     @Query("select bpi from PaymentInstrument bpi " +
             "where bpi.par = :par "
-//            "limit 1 "
     )
-    PaymentInstrument getFromPar(@Param("par") String par);
+    List<PaymentInstrument> getFromPar(@Param("par") String par);
 }
