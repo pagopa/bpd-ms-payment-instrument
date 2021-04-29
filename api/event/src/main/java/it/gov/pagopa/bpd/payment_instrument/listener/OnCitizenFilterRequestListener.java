@@ -2,7 +2,7 @@ package it.gov.pagopa.bpd.payment_instrument.listener;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.sia.meda.eventlistener.BaseConsumerAwareEventListener;
-import it.gov.pagopa.bpd.payment_instrument.command.FilterTransactionCommand;
+import it.gov.pagopa.bpd.payment_instrument.command.FilterPaymentInstrumentCommand;
 import it.gov.pagopa.bpd.payment_instrument.listener.factory.ModelFactory;
 import it.gov.pagopa.bpd.payment_instrument.model.PaymentInstrumentCommandModel;
 import lombok.SneakyThrows;
@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.kafka.common.header.Headers;
 import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
@@ -27,6 +28,7 @@ public class OnCitizenFilterRequestListener extends BaseConsumerAwareEventListen
     private final BeanFactory beanFactory;
     private final ObjectMapper objectMapper;
 
+    @Autowired
     public OnCitizenFilterRequestListener(
             ModelFactory<Pair<byte[], Headers>, PaymentInstrumentCommandModel> savePaymentInstrumentUpdateCommandModelFactory,
             BeanFactory beanFactory,
@@ -61,8 +63,8 @@ public class OnCitizenFilterRequestListener extends BaseConsumerAwareEventListen
 
             paymentInstrumentCommandModel = savePaymentInstrumentUpdateCommandModelFactory
                     .createModel(Pair.of(payload, headers));
-            FilterTransactionCommand command = beanFactory.getBean(
-                    FilterTransactionCommand.class, paymentInstrumentCommandModel);
+            FilterPaymentInstrumentCommand command = beanFactory.getBean(
+                    FilterPaymentInstrumentCommand.class, paymentInstrumentCommandModel);
 
             if (!command.execute()) {
                 throw new Exception("Failed to execute FilterPaymentInstrumentCommand");
