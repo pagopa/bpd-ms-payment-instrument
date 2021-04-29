@@ -3,6 +3,7 @@ package it.gov.pagopa.bpd.payment_instrument.command;
 import eu.sia.meda.core.command.BaseCommand;
 import it.gov.pagopa.bpd.payment_instrument.model.DeletePaymentInstrument;
 import it.gov.pagopa.bpd.payment_instrument.model.DeletePaymentInstrumentCommandModel;
+import it.gov.pagopa.bpd.payment_instrument.publisher.model.Transaction;
 import it.gov.pagopa.bpd.payment_instrument.service.PaymentInstrumentService;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -10,6 +11,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+
+import javax.validation.*;
+import java.util.Set;
 
 /**
  * Base implementation of the DeletePaymentInstrumentCommandInterface, extending Meda BaseCommand class, the command
@@ -23,6 +27,8 @@ class DeletePaymentInstrumentCommandImpl extends BaseCommand<Boolean> implements
 
     private DeletePaymentInstrumentCommandModel deletePaymentInstrumentCommandModel;
     private PaymentInstrumentService paymentInstrumentService;
+    private static final ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+    private static final Validator validator = factory.getValidator();
 
 
     public DeletePaymentInstrumentCommandImpl(DeletePaymentInstrumentCommandModel deletePaymentInstrumentCommandModel) {
@@ -52,14 +58,13 @@ class DeletePaymentInstrumentCommandImpl extends BaseCommand<Boolean> implements
         DeletePaymentInstrument deletePaymentInstrument = deletePaymentInstrumentCommandModel.getPayload();
 
         try {
-
-            if (logger.isDebugEnabled()) {
-                logger.debug("Deleting payment instrument: " +
+            validateRequest(deletePaymentInstrument);
+            if (logger.isInfoEnabled()) {
+                logger.info("Deleting payment instrument: " +
                         deletePaymentInstrument.getHpan() + ", " +
                         deletePaymentInstrument.getFiscalCode() + ", " +
                         deletePaymentInstrument.getCancellationDate());
             }
-
             paymentInstrumentService.delete(deletePaymentInstrument.getHpan()
                     ,deletePaymentInstrument.getFiscalCode(),deletePaymentInstrument.getCancellationDate());
 
@@ -95,5 +100,20 @@ class DeletePaymentInstrumentCommandImpl extends BaseCommand<Boolean> implements
     public void setPaymentInstrumentService(PaymentInstrumentService paymentInstrumentService) {
         this.paymentInstrumentService = paymentInstrumentService;
     }
+
+
+    /**
+     * Method to process a validation check for the parsed Transaction request
+     *
+     * @param request instance of Transaction, parsed from the inbound byte[] payload
+     * @throws ConstraintViolationException
+     */
+    private void validateRequest(DeletePaymentInstrument request) {
+        Set<ConstraintViolation<Object>> constraintViolations = validator.validate(request);
+        if (constraintViolations.size() > 0) {
+            throw new ConstraintViolationException(constraintViolations);
+        }
+    }
+
 
 }
