@@ -51,8 +51,9 @@ public interface PaymentInstrumentDAO extends CrudJpaDAO<PaymentInstrument, Stri
 
     List<PaymentInstrument> findByHpanMasterOrHpan(String hpanMaster, String hpan);
 
-    @Query("select * from PaymentInstrument bpi " +
+    @Query("select bpi from PaymentInstrument bpi " +
             "where bpi.par = :par "
+//            "limit 1 "
     )
-    List<PaymentInstrument> getFromPar(@Param("par") String par);
+    PaymentInstrument getFromPar(@Param("par") String par);
 }

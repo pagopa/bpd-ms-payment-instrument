@@ -1,4 +1,4 @@
-package it.gov.pagopa.bpd.payment_instrument.service.mapper;
+package it.gov.pagopa.bpd.payment_instrument.service;
 
 import it.gov.pagopa.bpd.payment_instrument.publisher.model.OutgoingPaymentInstrument;
 
