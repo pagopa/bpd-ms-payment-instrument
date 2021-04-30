@@ -4,12 +4,12 @@
     <parent>
         <artifactId>bpd-ms-payment-instrument-api</artifactId>
         <groupId>it.gov.pagopa.bpd.ms.payment_instrument</groupId>
-        <version>TK5</version>
+        <version>TK5-rc1</version>
     </parent>
 
     <groupId>it.gov.pagopa.bpd.ms.payment_instrument.api</groupId>
     <artifactId>bpd-ms-payment-instrument-api-rest</artifactId>
-    <version>TK5</version>
+    <version>TK5-rc1</version>
 
     <dependencies>
         <dependency>
