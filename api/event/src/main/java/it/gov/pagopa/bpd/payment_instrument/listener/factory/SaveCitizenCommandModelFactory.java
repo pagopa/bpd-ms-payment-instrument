@@ -7,10 +7,12 @@ import lombok.SneakyThrows;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.kafka.common.header.Headers;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
+@Component
 public class SaveCitizenCommandModelFactory implements
         ModelFactory<Pair<byte[], Headers>, PaymentInstrumentCommandModel> {
 
