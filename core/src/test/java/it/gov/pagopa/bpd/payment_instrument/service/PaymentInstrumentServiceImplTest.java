@@ -1,5 +1,6 @@
 package it.gov.pagopa.bpd.payment_instrument.service;
 
+import eu.sia.meda.exceptions.MedaDomainRuntimeException;
 import it.gov.pagopa.bpd.payment_instrument.assembler.PaymentInstrumentAssembler;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.PaymentInstrumentConverter;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.PaymentInstrumentDAO;
@@ -47,6 +48,7 @@ public class PaymentInstrumentServiceImplTest {
     private static final String EXISTING_FISCAL_CODE_ERROR = "existing-fiscal-code-error";
     private static final String EXISTING_HASH_PAN_INACTIVE = "existing-hpan-inactive";
     private static final String NOT_EXISTING_HASH_PAN = "not-existing-hpan";
+    private static final String EXISTING_PAR = "existing-par";
     private static final String APPIO_CHANNEL = "app-io-channel";
     private static final String ANOTHER_CHANNEL_1 = "another-channel_1";
     private static final String TOKEN = "token";
@@ -203,6 +205,20 @@ public class PaymentInstrumentServiceImplTest {
                             pih.setActivationDate(OffsetDateTime.parse("2020-04-01T16:22:45.304Z"));
                             paymentInstrumentHistories.add(pih);
                             return paymentInstrumentHistories;
+                        });
+
+        when(paymentInstrumentDAOMock.getFromPar(eq(EXISTING_PAR))).thenAnswer(
+                (Answer<List<PaymentInstrument>>)
+                        invocation -> {
+                            List<PaymentInstrument> piList = new ArrayList<>();
+                            PaymentInstrument pi = new PaymentInstrument();
+                            pi.setHpan(EXISTING_HASH_PAN);
+                            pi.setFiscalCode(EXISTING_FISCAL_CODE);
+                            pi.setPar(EXISTING_PAR);
+                            pi.setChannel(APPIO_CHANNEL);
+                            pi.setEnabled(true);
+                            piList.add(pi);
+                            return piList;
                         });
 
     }
@@ -412,5 +428,35 @@ public class PaymentInstrumentServiceImplTest {
 
         verify(paymentInstrumentHistoryReplicaDAOMock, times(1)).find(Mockito.any(), Mockito.any());
         BDDMockito.verifyZeroInteractions(paymentInstrumentHistoryReplicaDAOMock);
+    }
+
+    @Test
+    public void findByHpan_OK() {
+        PaymentInstrument pi = paymentInstrumentService.findByhpan(EXISTING_HASH_PAN);
+
+        assertNotNull(pi);
+        verify(paymentInstrumentDAOMock, times(1)).findById(EXISTING_HASH_PAN);
+    }
+
+    @Test(expected = MedaDomainRuntimeException.class)
+    public void findByHpan_KO() {
+        PaymentInstrument pi = paymentInstrumentService.findByhpan(NOT_EXISTING_HASH_PAN);
+
+        verify(paymentInstrumentDAOMock, times(1)).findById(NOT_EXISTING_HASH_PAN);
+    }
+
+    @Test
+    public void findByPar_OK() {
+        PaymentInstrument pi = paymentInstrumentService.findByPar(EXISTING_PAR);
+
+        assertNotNull(pi);
+        verify(paymentInstrumentDAOMock, times(1)).getFromPar(EXISTING_PAR);
+    }
+
+    @Test(expected = IndexOutOfBoundsException.class)
+    public void findByPar_KO() {
+        PaymentInstrument pi = paymentInstrumentService.findByPar("invalid_par");
+
+        verify(paymentInstrumentDAOMock, times(1)).getFromPar("invalid_par");
     }
 }

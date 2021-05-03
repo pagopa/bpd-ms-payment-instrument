@@ -17,7 +17,6 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import javax.validation.*;
-import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -76,10 +75,10 @@ class FilterTransactionCommandImpl extends BaseCommand<Boolean> implements Filte
 
             validateRequest(transaction);
 
-            Optional<PaymentInstrument> paymentInstrument = paymentInstrumentService.findByhpan(transaction.getHpan());
+            PaymentInstrument paymentInstrument = paymentInstrumentService.findByhpan(transaction.getHpan());
 
-            if (paymentInstrument.isPresent() && (paymentInstrument.get().getHpan().equals(paymentInstrument.get().getHpanMaster())
-                    || paymentInstrument.get().getHpanMaster() == null)) {
+            if (paymentInstrument != null && paymentInstrument.isEnabled() && (paymentInstrument.getHpan().equals(paymentInstrument.getHpanMaster())
+                    || paymentInstrument.getHpanMaster() == null)) {
 
                 PaymentInstrumentHistory checkActive = paymentInstrumentService.checkActive(transaction.getHpan(), transaction.getTrxDate());
 
@@ -101,7 +100,7 @@ class FilterTransactionCommandImpl extends BaseCommand<Boolean> implements Filte
                     OutgoingTransaction outgoingTransaction = transactionMapper.map(transaction);
                     outgoingTransaction.setFiscalCode(checkActivePar.getFiscalCode());
 
-                    if (paymentInstrument.isPresent()) {
+                    if (paymentInstrument != null && paymentInstrument.isEnabled()) {
                         outgoingTransaction.setIsToUpdate(true);
                     }
 
