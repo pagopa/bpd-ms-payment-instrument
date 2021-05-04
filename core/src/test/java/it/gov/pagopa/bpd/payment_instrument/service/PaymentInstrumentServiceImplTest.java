@@ -1,6 +1,5 @@
 package it.gov.pagopa.bpd.payment_instrument.service;
 
-import eu.sia.meda.exceptions.MedaDomainRuntimeException;
 import it.gov.pagopa.bpd.payment_instrument.assembler.PaymentInstrumentAssembler;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.PaymentInstrumentConverter;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.PaymentInstrumentDAO;
@@ -432,15 +431,15 @@ public class PaymentInstrumentServiceImplTest {
 
     @Test
     public void findByHpan_OK() {
-        PaymentInstrument pi = paymentInstrumentService.findByhpan(EXISTING_HASH_PAN);
+        Optional<PaymentInstrument> pi = paymentInstrumentService.findByhpan(EXISTING_HASH_PAN);
 
         assertNotNull(pi);
         verify(paymentInstrumentDAOMock, times(1)).findById(EXISTING_HASH_PAN);
     }
 
-    @Test(expected = MedaDomainRuntimeException.class)
+    @Test
     public void findByHpan_KO() {
-        PaymentInstrument pi = paymentInstrumentService.findByhpan(NOT_EXISTING_HASH_PAN);
+        Optional<PaymentInstrument> pi = paymentInstrumentService.findByhpan(NOT_EXISTING_HASH_PAN);
 
         verify(paymentInstrumentDAOMock, times(1)).findById(NOT_EXISTING_HASH_PAN);
     }

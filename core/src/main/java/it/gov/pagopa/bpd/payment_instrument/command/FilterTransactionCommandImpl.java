@@ -17,6 +17,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import javax.validation.*;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -36,7 +37,6 @@ class FilterTransactionCommandImpl extends BaseCommand<Boolean> implements Filte
     private PointTransactionPublisherService pointTransactionProducerService;
     private PaymentInstrumentService paymentInstrumentService;
     private TransactionMapper transactionMapper;
-    private final boolean isToUpdate = false;
 
 
     public FilterTransactionCommandImpl(TransactionCommandModel transactionCommandModel) {
@@ -75,10 +75,10 @@ class FilterTransactionCommandImpl extends BaseCommand<Boolean> implements Filte
 
             validateRequest(transaction);
 
-            PaymentInstrument paymentInstrument = paymentInstrumentService.findByhpan(transaction.getHpan());
+            Optional<PaymentInstrument> paymentInstrument = paymentInstrumentService.findByhpan(transaction.getHpan());
 
-            if (paymentInstrument != null && paymentInstrument.isEnabled() && (paymentInstrument.getHpan().equals(paymentInstrument.getHpanMaster())
-                    || paymentInstrument.getHpanMaster() == null)) {
+            if (paymentInstrument != null && paymentInstrument.isPresent() && (paymentInstrument.get().getHpan().equals(paymentInstrument.get().getHpanMaster())
+                    || paymentInstrument.get().getHpanMaster() == null)) {
 
                 PaymentInstrumentHistory checkActive = paymentInstrumentService.checkActive(transaction.getHpan(), transaction.getTrxDate());
 
@@ -86,6 +86,7 @@ class FilterTransactionCommandImpl extends BaseCommand<Boolean> implements Filte
 
                     OutgoingTransaction outgoingTransaction = transactionMapper.map(transaction);
                     outgoingTransaction.setFiscalCode(checkActive.getFiscalCode());
+                    outgoingTransaction.setIsToUpdate(false);
                     pointTransactionProducerService.publishPointTransactionEvent(outgoingTransaction);
                 } else {
                     log.info("Met a transaction for an inactive payment instrument on BPD. [{}, {}, {}]",
@@ -99,10 +100,13 @@ class FilterTransactionCommandImpl extends BaseCommand<Boolean> implements Filte
 
                     OutgoingTransaction outgoingTransaction = transactionMapper.map(transaction);
                     outgoingTransaction.setFiscalCode(checkActivePar.getFiscalCode());
+                    outgoingTransaction.setIsToUpdate(true);
 
-                    if (paymentInstrument != null && paymentInstrument.isEnabled()) {
-                        outgoingTransaction.setIsToUpdate(true);
-                    }
+//                    if (!paymentInstrument.isPresent()) {
+//                        outgoingTransaction.setIsToUpdate(true);
+//                    } else {
+//                        outgoingTransaction.setIsToUpdate(false);
+//                    }
 
                     pointTransactionProducerService.publishPointTransactionEvent(outgoingTransaction);
 
