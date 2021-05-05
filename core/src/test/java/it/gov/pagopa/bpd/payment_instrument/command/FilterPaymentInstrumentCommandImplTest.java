@@ -19,6 +19,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
 
+import java.io.ByteArrayOutputStream;
 import java.time.OffsetDateTime;
 
 public class FilterPaymentInstrumentCommandImplTest extends BaseTest {
@@ -31,6 +32,7 @@ public class FilterPaymentInstrumentCommandImplTest extends BaseTest {
     TkmPublisherService tkmPublisherServiceMock;
     @Spy
     PaymentInstrumentMapper paymentInstrumentMapperSpy;
+
 
     @Before
     public void initTest() {
@@ -49,6 +51,7 @@ public class FilterPaymentInstrumentCommandImplTest extends BaseTest {
         pi.setHpanMaster("hapanMaster");
         pi.setActivationDate(OffsetDateTime.now());
         OutgoingPaymentInstrument outgoingPaymentInstrument = paymentInstrumentMapperSpy.map(pin);
+        ByteArrayOutputStream piOut = new ByteArrayOutputStream();
         FilterPaymentInstrumentCommand filterPaymentInstrumentCommand = new FilterPaymentInstrumentCommandImpl(
                 PaymentInstrumentCommandModel.builder().payload(pin).build(),
                 tkmPublisherServiceMock,
@@ -63,8 +66,10 @@ public class FilterPaymentInstrumentCommandImplTest extends BaseTest {
                     .findByPar(Mockito.eq("par"));
             BDDMockito.doReturn(pi).when(paymentInstrumentServiceMock)
                     .createOrUpdate(Mockito.eq(pi.getHpan()), Mockito.eq(pi));
+            BDDMockito.doReturn(piOut).when(tkmPublisherServiceMock)
+                    .cryptOutgoingPaymentInstrument(Mockito.any());
             BDDMockito.doNothing().when(tkmPublisherServiceMock)
-                    .publishTkmEvent(Mockito.eq(outgoingPaymentInstrument));
+                    .publishTkmEvent(Mockito.any());
 
             Boolean isOk = filterPaymentInstrumentCommand.execute();
 
@@ -104,6 +109,7 @@ public class FilterPaymentInstrumentCommandImplTest extends BaseTest {
         pi.setHpan("hpan");
         pi.setHpanMaster("hapanMaster");
         pi.setActivationDate(OffsetDateTime.now());
+        ByteArrayOutputStream piOut = new ByteArrayOutputStream();
         OutgoingPaymentInstrument outgoingPaymentInstrument = paymentInstrumentMapperSpy.map(pin);
         FilterPaymentInstrumentCommand filterPaymentInstrumentCommand = new FilterPaymentInstrumentCommandImpl(
                 PaymentInstrumentCommandModel.builder().payload(pin).build(),
@@ -118,8 +124,10 @@ public class FilterPaymentInstrumentCommandImplTest extends BaseTest {
                     .findByPar(Mockito.eq("par"));
             BDDMockito.doReturn(null).when(paymentInstrumentServiceMock)
                     .createOrUpdate(Mockito.eq(pi.getHpan()), Mockito.eq(pi));
+            BDDMockito.doReturn(piOut).when(tkmPublisherServiceMock)
+                    .cryptOutgoingPaymentInstrument(Mockito.any());
             BDDMockito.doNothing().when(tkmPublisherServiceMock)
-                    .publishTkmEvent(Mockito.eq(outgoingPaymentInstrument));
+                    .publishTkmEvent(Mockito.any());
 
             Boolean isOk = filterPaymentInstrumentCommand.execute();
 

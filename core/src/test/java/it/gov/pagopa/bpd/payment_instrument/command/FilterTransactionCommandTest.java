@@ -22,6 +22,7 @@ import org.mockito.Spy;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
+import java.util.Optional;
 
 /**
  * Test class for the FilterTransactionCommand method
@@ -66,7 +67,7 @@ public class FilterTransactionCommandTest extends BaseTest {
 
         try {
 
-            BDDMockito.doReturn(pi).when(paymentInstrumentServiceMock)
+            BDDMockito.doReturn(Optional.of(pi)).when(paymentInstrumentServiceMock)
                     .findByhpan(Mockito.eq("hpan"));
             BDDMockito.doReturn(pih).when(paymentInstrumentServiceMock)
                     .checkActive(Mockito.eq(transaction.getHpan()), Mockito.eq(transaction.getTrxDate()));
@@ -132,7 +133,7 @@ public class FilterTransactionCommandTest extends BaseTest {
 
         try {
 
-            BDDMockito.doReturn(pi).when(paymentInstrumentServiceMock)
+            BDDMockito.doReturn(Optional.of(pi)).when(paymentInstrumentServiceMock)
                     .findByhpan(Mockito.eq("hpan"));
             BDDMockito.doReturn(null).when(paymentInstrumentServiceMock)
                     .checkActive(Mockito.eq(transaction.getHpan()), Mockito.eq(transaction.getTrxDate()));

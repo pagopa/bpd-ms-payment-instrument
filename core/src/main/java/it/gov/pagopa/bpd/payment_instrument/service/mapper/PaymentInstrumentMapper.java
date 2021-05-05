@@ -21,6 +21,7 @@ public class PaymentInstrumentMapper {
         if (pi != null) {
             outgoingPaymentInstrument = OutgoingPaymentInstrument.builder().build();
             BeanUtils.copyProperties(pi, outgoingPaymentInstrument);
+            outgoingPaymentInstrument.setHashToken(pi.getHpan());
         }
 
         return outgoingPaymentInstrument;

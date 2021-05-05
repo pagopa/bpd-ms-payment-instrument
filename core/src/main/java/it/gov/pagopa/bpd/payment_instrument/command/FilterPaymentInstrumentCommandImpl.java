@@ -16,6 +16,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import javax.validation.*;
+import java.io.ByteArrayOutputStream;
 import java.util.Set;
 
 @Component
@@ -32,7 +33,8 @@ class FilterPaymentInstrumentCommandImpl extends BaseCommand<Boolean> implements
     private PaymentInstrumentMapper paymentInstrumentMapper;
 
 
-    public FilterPaymentInstrumentCommandImpl(PaymentInstrumentCommandModel paymentInstrumentCommandModel) {
+    public FilterPaymentInstrumentCommandImpl(
+            PaymentInstrumentCommandModel paymentInstrumentCommandModel) {
         this.paymentInstrumentCommandModel = paymentInstrumentCommandModel;
     }
 
@@ -47,9 +49,10 @@ class FilterPaymentInstrumentCommandImpl extends BaseCommand<Boolean> implements
         this.paymentInstrumentMapper = paymentInstrumentMapper;
     }
 
-    public FilterPaymentInstrumentCommandImpl(PaymentInstrumentCommandModel build,
-                                              TkmPublisherService tkmPublisherServiceMock,
-                                              PaymentInstrumentService paymentInstrumentServiceMock) {
+    public FilterPaymentInstrumentCommandImpl(
+            PaymentInstrumentCommandModel build,
+            TkmPublisherService tkmPublisherServiceMock,
+            PaymentInstrumentService paymentInstrumentServiceMock) {
     }
 
     /**
@@ -87,7 +90,9 @@ class FilterPaymentInstrumentCommandImpl extends BaseCommand<Boolean> implements
 
                 OutgoingPaymentInstrument outgoingPaymentInstrument = paymentInstrumentMapper.map(pi);
                 outgoingPaymentInstrument.setHpanMaster(paymentInstrument.getHpanMaster());
-                tkmPublisherService.publishTkmEvent(outgoingPaymentInstrument);
+                outgoingPaymentInstrument.setFiscalCode(paymentInstrument.getFiscalCode());
+                ByteArrayOutputStream outPi = tkmPublisherService.cryptOutgoingPaymentInstrument(outgoingPaymentInstrument);
+                tkmPublisherService.publishTkmEvent(outPi);
 
             } else {
                 log.info("Impossible to save payment instrument. [{}, {}]",
@@ -144,4 +149,5 @@ class FilterPaymentInstrumentCommandImpl extends BaseCommand<Boolean> implements
             throw new ConstraintViolationException(constraintViolations);
         }
     }
+
 }

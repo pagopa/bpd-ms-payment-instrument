@@ -1,6 +1,11 @@
 package it.gov.pagopa.bpd.payment_instrument.service;
 
 import it.gov.pagopa.bpd.payment_instrument.publisher.model.OutgoingPaymentInstrument;
+import org.bouncycastle.openpgp.PGPException;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.security.NoSuchProviderException;
 
 /**
  * public interface for the TkmPublisherService
@@ -14,5 +19,8 @@ public interface TkmPublisherService {
      *
      * @param outgoingPaymentInstrument OutgoingPaymentInstrument instance to be published
      */
-    void publishTkmEvent(OutgoingPaymentInstrument outgoingPaymentInstrument);
+    void publishTkmEvent(ByteArrayOutputStream outgoingPaymentInstrument);
+
+    ByteArrayOutputStream cryptOutgoingPaymentInstrument(OutgoingPaymentInstrument outgoingPaymentInstrument) throws IOException, PGPException, NoSuchProviderException;
+
 }
