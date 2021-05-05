@@ -42,4 +42,6 @@ public interface PaymentInstrumentService {
     List<PaymentInstrumentConverter> getPaymentInstrument(String fiscalCode, String channel);
 
     List<PaymentInstrumentHistory> findHistory(String fiscalCode, String hpan);
+
+
 }

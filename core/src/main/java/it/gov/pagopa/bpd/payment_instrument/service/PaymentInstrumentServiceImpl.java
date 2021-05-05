@@ -250,12 +250,7 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
 
     @Override
     public Optional<PaymentInstrument> findByhpan(String hpan) {
-//        PaymentInstrument pi = paymentInstrumentDAO.findById(hpan).orElseThrow(
-//                () -> new PaymentInstrumentNotFoundException(hpan));
-//        if (pi.isPresent()){
         return paymentInstrumentDAO.findById(hpan);
-//        }
-//        return Optional.empty();
     }
 
     @Override
@@ -285,5 +280,6 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
     public List<PaymentInstrumentHistory> findHistory(String fiscalCode, String hpan) {
         return paymentInstrumentHistoryReplicaDAO.find(fiscalCode, hpan);
     }
+
 
 }

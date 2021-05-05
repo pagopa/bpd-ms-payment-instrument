@@ -3,11 +3,12 @@ package it.gov.pagopa.bpd.payment_instrument;
 import eu.sia.meda.event.BaseEventConnectorTest;
 import eu.sia.meda.util.TestUtils;
 import it.gov.pagopa.bpd.payment_instrument.publisher.TkmPublisherConnector;
-import it.gov.pagopa.bpd.payment_instrument.publisher.model.OutgoingPaymentInstrument;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.TestPropertySource;
+
+import java.io.ByteArrayOutputStream;
 
 @Import({TkmPublisherConnector.class})
 @TestPropertySource(
@@ -16,7 +17,7 @@ import org.springframework.test.context.TestPropertySource;
                 "connectors.eventConfigurations.items.TkmPublisherConnector.bootstrapServers=${spring.embedded.kafka.brokers}"
         })
 public class TkmPublisherConnectorTest extends
-        BaseEventConnectorTest<OutgoingPaymentInstrument, Boolean, OutgoingPaymentInstrument, Void, TkmPublisherConnector> {
+        BaseEventConnectorTest<ByteArrayOutputStream, Boolean, ByteArrayOutputStream, Void, TkmPublisherConnector> {
 
     @Value("${connectors.eventConfigurations.items.TkmPublisherConnector.topic}")
     private String topic;
@@ -30,8 +31,8 @@ public class TkmPublisherConnectorTest extends
     }
 
     @Override
-    protected OutgoingPaymentInstrument getRequestObject() {
-        return TestUtils.mockInstance(new OutgoingPaymentInstrument());
+    protected ByteArrayOutputStream getRequestObject() {
+        return TestUtils.mockInstance(new ByteArrayOutputStream());
     }
 
     @Override

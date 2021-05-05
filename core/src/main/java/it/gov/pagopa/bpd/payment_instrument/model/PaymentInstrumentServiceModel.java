@@ -8,7 +8,6 @@ import java.util.List;
 
 @Data
 @NoArgsConstructor
-//@Builder
 public class PaymentInstrumentServiceModel {
 
     private String fiscalCode;
