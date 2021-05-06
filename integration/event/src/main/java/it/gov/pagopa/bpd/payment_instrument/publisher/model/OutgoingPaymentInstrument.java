@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
+import java.util.List;
 
 @Data
 @Builder
@@ -15,13 +16,10 @@ import java.io.Serializable;
 @AllArgsConstructor
 public class OutgoingPaymentInstrument implements Serializable {
 
-    @NotNull
-    @NotBlank
-    String hashToken;
 
     @NotNull
     @NotBlank
-    String par;
+    String fiscalCode;
 
     @NotNull
     @NotBlank
@@ -29,5 +27,11 @@ public class OutgoingPaymentInstrument implements Serializable {
 
     @NotNull
     @NotBlank
-    String fiscalCode;
+    String par;
+
+    @NotNull
+    @NotBlank
+    List<String> hashToken;
+
+
 }
