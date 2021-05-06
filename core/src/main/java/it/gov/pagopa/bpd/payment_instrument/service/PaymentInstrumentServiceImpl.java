@@ -100,6 +100,7 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
                 foundPI.setActivationDate(pi.getActivationDate());
                 foundPI.setFiscalCode(pi.getFiscalCode());
                 foundPI.setStatus(PaymentInstrument.Status.ACTIVE);
+                foundPI.setChannel(pi.getChannel());
                 foundPI.setPar(pi.getPar());
                 foundPI.setParActivationDate(pi.getParActivationDate());
                 return paymentInstrumentDAO.save(foundPI);
@@ -148,6 +149,7 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
                         : OffsetDateTime.now());
                 foundPI.setFiscalCode(pi.getFiscalCode());
                 foundPI.setStatus(PaymentInstrument.Status.ACTIVE);
+                foundPI.setChannel(pi.getChannel());
                 toSaveOrUpdate.add(foundPI);
             } else if (foundPI.getFiscalCode() != null && !foundPI.getFiscalCode().equals(pi.getFiscalCode())) {
                 throw new PaymentInstrumentOnDifferentUserException(hpan);
@@ -252,6 +254,5 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
     public List<PaymentInstrumentHistory> findHistory(String fiscalCode, String hpan) {
         return paymentInstrumentHistoryReplicaDAO.find(fiscalCode, hpan);
     }
-
 
 }
