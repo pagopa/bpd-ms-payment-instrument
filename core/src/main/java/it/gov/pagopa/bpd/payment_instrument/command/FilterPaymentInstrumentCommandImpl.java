@@ -92,6 +92,7 @@ class FilterPaymentInstrumentCommandImpl extends BaseCommand<Boolean> implements
                 outgoingPaymentInstrument.setHpanMaster(paymentInstrument.getHpanMaster());
                 outgoingPaymentInstrument.setFiscalCode(paymentInstrument.getFiscalCode());
                 ByteArrayOutputStream outPi = tkmPublisherService.cryptOutgoingPaymentInstrument(outgoingPaymentInstrument);
+
                 tkmPublisherService.publishTkmEvent(outPi);
 
             } else {

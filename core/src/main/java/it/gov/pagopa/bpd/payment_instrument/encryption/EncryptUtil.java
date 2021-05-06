@@ -122,7 +122,7 @@ public class EncryptUtil {
         return out;
     }
 
-    public static OutputStream writeOutputPaymentInstrument(
+    public static void writeOutputPaymentInstrument(
             OutputStream out,
             char fileType,
             ByteArrayInputStream outgoingPaymentInstrument,
@@ -130,36 +130,19 @@ public class EncryptUtil {
             throws IOException {
         PGPLiteralDataGenerator lData = new PGPLiteralDataGenerator();
         OutputStream pOut = lData.open(out, fileType, "fileName", new Date(), buffer);
-        return pipeFileContents(outgoingPaymentInstrument, pOut, buffer.length);
+        pipeFileContents(outgoingPaymentInstrument, pOut, buffer.length);
     }
 
-    private static OutputStream pipeFileContents(ByteArrayInputStream outgoingPaymentInstrument, OutputStream pOut, int bufferSize)
+    private static void pipeFileContents(ByteArrayInputStream outgoingPaymentInstrument, OutputStream pOut, int bufferSize)
             throws IOException {
-//        byte[] buf = new byte[bufferSize];
 
-//        ByteArrayInputStream in = new ByteArrayInputStream(buf);
         try {
-//            int len;
-//            while ((len = in.read(buf)) > 0)
-//            {
-//                pOut.write(buf, 0, len);
-//            }
             IOUtils.copy(outgoingPaymentInstrument, pOut);
-
-//            pOut.close();
+        } catch (Exception e) {
+            System.err.println(e);
         } finally {
             pOut.close();
             outgoingPaymentInstrument.close();
-            return pOut;
-//            Arrays.fill(buf, (byte)0);
-//            try
-//            {
-//                in.close();
-//            }
-//            catch (IOException ignored)
-//            {
-//                // ignore...
-//            }
         }
     }
 

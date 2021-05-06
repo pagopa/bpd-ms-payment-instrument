@@ -5,6 +5,9 @@ import it.gov.pagopa.bpd.payment_instrument.publisher.model.PaymentInstrumentUpd
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
+
 
 /**
  * Class to be used to map a {@link PaymentInstrumentUpdate} from an* {@link OutgoingPaymentInstrument}
@@ -21,7 +24,9 @@ public class PaymentInstrumentMapper {
         if (pi != null) {
             outgoingPaymentInstrument = OutgoingPaymentInstrument.builder().build();
             BeanUtils.copyProperties(pi, outgoingPaymentInstrument);
-            outgoingPaymentInstrument.setHashToken(pi.getHpan());
+            List<String> panList = new ArrayList();
+            panList.add(pi.getHpan());
+            outgoingPaymentInstrument.setHashToken(panList);
         }
 
         return outgoingPaymentInstrument;
