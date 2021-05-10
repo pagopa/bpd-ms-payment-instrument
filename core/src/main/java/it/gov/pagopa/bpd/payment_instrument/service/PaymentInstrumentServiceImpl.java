@@ -13,11 +13,15 @@ import it.gov.pagopa.bpd.payment_instrument.exception.PaymentInstrumentDifferent
 import it.gov.pagopa.bpd.payment_instrument.exception.PaymentInstrumentNotFoundException;
 import it.gov.pagopa.bpd.payment_instrument.exception.PaymentInstrumentOnDifferentUserException;
 import it.gov.pagopa.bpd.payment_instrument.model.PaymentInstrumentServiceModel;
+import it.gov.pagopa.bpd.payment_instrument.model.TokenManagerData;
+import it.gov.pagopa.bpd.payment_instrument.model.TokenManagerDataCard;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.OffsetDateTime;
 import java.util.*;
@@ -27,6 +31,7 @@ import java.util.stream.Collectors;
  * @See PaymentInstrumentService
  */
 @Service
+@Slf4j
 class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrumentService {
 
     private final PaymentInstrumentDAO paymentInstrumentDAO;
@@ -290,4 +295,125 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
 
         return paymentInstrumentErrorDeleteDAO.save(errorRecord);
     }
+    @Override
+    @Transactional
+    public Boolean manageTokenData(TokenManagerData tokenManagerData, OffsetDateTime updateTime) {
+
+        for (TokenManagerDataCard card : tokenManagerData.getCards()) {
+            Optional<PaymentInstrument> paymentInstrumentOpt =
+                    paymentInstrumentDAO.findByHpan(card.getHpan());
+
+            if (!paymentInstrumentOpt.isPresent()) {
+                log.warn("Card not found during token data update for hpan");
+                return false;
+            }
+
+            PaymentInstrument paymentInstrument = paymentInstrumentOpt.get();
+
+            if (paymentInstrument.getLastTkmUpdate().compareTo(updateTime) > 0) {
+                log.warn("Card token data update rejected due to data being outdated");
+                return false;
+            }
+
+            if (!paymentInstrument.getFiscalCode().equals(tokenManagerData.getTaxCode())) {
+                log.warn("Card token data update rejected due to wrong fiscal code for hpan");
+                return false;
+            }
+
+            if (card.getPar() != null) {
+                if (paymentInstrument.getPar() == null) {
+                    paymentInstrument.setPar(card.getPar());
+                    paymentInstrument.setParActivationDate(OffsetDateTime.now());
+                }
+            } else if (paymentInstrument.getPar() == null) {
+                paymentInstrument.setParDeactivationDate(OffsetDateTime.now());
+            }
+
+            paymentInstrument.setLastTkmUpdate(updateTime);
+            paymentInstrumentDAO.update(paymentInstrument);
+
+            List<PaymentInstrument> tokensToInsert = new ArrayList<>();
+            List<PaymentInstrument> tokenToUpdate = new ArrayList<>();
+
+            List<PaymentInstrument> tokenInstruments = paymentInstrumentDAO
+                    .getTokensFromPar(paymentInstrument.getPar());
+
+            if (card.getHtokens() == null || card.getHtokens().isEmpty()) {
+
+                tokenInstruments.forEach(tokenInstrument -> {
+                    tokenInstrument.setEnabled(false);
+                    tokenInstrument.setStatus(PaymentInstrument.Status.INACTIVE);
+                    if (card.getPar() == null) {
+                        tokenInstrument.setDeactivationDate(
+                                paymentInstrument.getParDeactivationDate());
+                        tokenInstrument.setParDeactivationDate(
+                                paymentInstrument.getParDeactivationDate());
+                    } else {
+                        tokenInstrument.setDeactivationDate(OffsetDateTime.now());
+                    }
+                });
+
+                tokenToUpdate.addAll(tokenInstruments);
+
+            } else {
+
+                List<String> activeTokens = tokenInstruments.stream()
+                        .map(PaymentInstrument::getHpan)
+                        .collect(Collectors.toList());
+
+                List<String> htokensToInsert = new ArrayList<>(card.getHtokens());
+                htokensToInsert.removeAll(activeTokens);
+
+                tokensToInsert = htokensToInsert.stream().map(htokenToInsert -> {
+                    OffsetDateTime parDeactivationDate = paymentInstrument.getParDeactivationDate();
+                    PaymentInstrument tokenToInsert = new PaymentInstrument();
+                    tokenToInsert.setFiscalCode(paymentInstrument.getFiscalCode());
+                    tokenToInsert.setDeactivationDate(paymentInstrument.getDeactivationDate());
+                    tokenToInsert.setPar(paymentInstrument.getPar());
+                    tokenToInsert.setHpan(htokenToInsert);
+                    tokenToInsert.setParDeactivationDate(parDeactivationDate);
+                    tokenToInsert.setEnabled(parDeactivationDate == null);
+                    tokenToInsert.setStatus(parDeactivationDate == null ?
+                            PaymentInstrument.Status.ACTIVE :
+                            PaymentInstrument.Status.INACTIVE);
+                    tokenToInsert.setHpanMaster(paymentInstrument.getHpan());
+                    tokenToInsert.setActivationDate(paymentInstrument.getParActivationDate());
+                    tokenToInsert.setDeactivationDate(paymentInstrument.getParDeactivationDate());
+                    return tokenToInsert;
+                }).collect(Collectors.toList());
+
+                List<PaymentInstrument> tokensToDeactivate = tokenInstruments.stream()
+                        .filter(token -> !card.getHtokens().contains(token.getHpan()))
+                        .collect(Collectors.toList());
+
+                for (PaymentInstrument tokenToDeactivate : tokensToDeactivate) {
+                    if (!tokenToDeactivate.getHpanMaster().equals(card.getHpan())) {
+                        log.warn("Token not having the same master hpan");
+                    } else if (!tokenToDeactivate.getFiscalCode()
+                            .equals(tokenManagerData.getTaxCode())) {
+                        log.warn("Token not having the same master fiscal code");
+                    } else {
+                        tokenToDeactivate.setDeactivationDate(OffsetDateTime.now());
+                        tokenToDeactivate.setEnabled(false);
+                        tokenToDeactivate.setStatus(PaymentInstrument.Status.INACTIVE);
+                        tokenToUpdate.add(tokenToDeactivate);
+                    }
+                }
+
+            }
+
+
+            if (!tokensToInsert.isEmpty()) {
+                paymentInstrumentDAO.saveAll(tokensToInsert);
+            }
+
+            if (!tokenToUpdate.isEmpty()) {
+                paymentInstrumentDAO.saveAll(tokenToUpdate);
+            }
+
+        }
+
+        return true;
+    }
+
 }
