@@ -4,6 +4,7 @@ import it.gov.pagopa.bpd.payment_instrument.connector.jpa.PaymentInstrumentConve
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.model.PaymentInstrument;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.model.PaymentInstrumentHistory;
 import it.gov.pagopa.bpd.payment_instrument.model.PaymentInstrumentServiceModel;
+import it.gov.pagopa.bpd.payment_instrument.model.TokenManagerData;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -42,6 +43,8 @@ public interface PaymentInstrumentService {
     List<PaymentInstrumentConverter> getPaymentInstrument(String fiscalCode, String channel);
 
     List<PaymentInstrumentHistory> findHistory(String fiscalCode, String hpan);
+
+    Boolean manageTokenData(TokenManagerData tokenManagerData, OffsetDateTime updateDate);
 
 
 }
