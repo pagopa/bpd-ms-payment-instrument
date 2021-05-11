@@ -72,10 +72,7 @@ class UpsertPaymentInstrumentTokensCommandImpl extends BaseCommand<Boolean> impl
         try {
 
             validateRequest(tokenManagerData);
-
-            paymentInstrumentService.manageTokenData(tokenManagerData);
-
-            return true;
+            return paymentInstrumentService.manageTokenData(tokenManagerData);
 
         } catch (Exception e) {
 

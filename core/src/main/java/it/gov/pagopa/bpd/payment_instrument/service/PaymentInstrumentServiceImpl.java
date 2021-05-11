@@ -217,6 +217,7 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
             paymentInstrument.setUpdateUser(fiscalCode);
             paymentInstrument.setUpdateDate(OffsetDateTime.now());
             paymentInstrument.setEnabled(false);
+            paymentInstrument.setNew(false);
         }
         paymentInstrumentDAO.save(paymentInstrument);
     }
@@ -262,7 +263,7 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
 
     @Override
     @Transactional
-    public Boolean manageTokenData(TokenManagerData tokenManagerData, OffsetDateTime updateTime) {
+    public Boolean manageTokenData(TokenManagerData tokenManagerData) {
 
         for (TokenManagerDataCard card : tokenManagerData.getCards()) {
             Optional<PaymentInstrument> paymentInstrumentOpt =
@@ -275,7 +276,9 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
 
             PaymentInstrument paymentInstrument = paymentInstrumentOpt.get();
 
-            if (paymentInstrument.getLastTkmUpdate().compareTo(updateTime) > 0) {
+            if (card.getPar() == null && paymentInstrument.getLastTkmUpdate() != null &&
+                    paymentInstrument.getLastTkmUpdate().compareTo(
+                            tokenManagerData.getTimestamp()) > 0) {
                 log.warn("Card token data update rejected due to data being outdated");
                 return false;
             }
@@ -294,7 +297,7 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
                 paymentInstrument.setParDeactivationDate(OffsetDateTime.now());
             }
 
-            paymentInstrument.setLastTkmUpdate(updateTime);
+            paymentInstrument.setLastTkmUpdate(tokenManagerData.getTimestamp());
             paymentInstrumentDAO.update(paymentInstrument);
 
             List<PaymentInstrument> tokensToInsert = new ArrayList<>();
@@ -308,6 +311,7 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
                 tokenInstruments.forEach(tokenInstrument -> {
                     tokenInstrument.setEnabled(false);
                     tokenInstrument.setStatus(PaymentInstrument.Status.INACTIVE);
+                    tokenInstrument.setLastTkmUpdate(tokenInstrument.getLastTkmUpdate());
                     if (card.getPar() == null) {
                         tokenInstrument.setDeactivationDate(
                                 paymentInstrument.getParDeactivationDate());
@@ -344,29 +348,11 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
                     tokenToInsert.setHpanMaster(paymentInstrument.getHpan());
                     tokenToInsert.setActivationDate(paymentInstrument.getParActivationDate());
                     tokenToInsert.setDeactivationDate(paymentInstrument.getParDeactivationDate());
+                    tokenToInsert.setLastTkmUpdate(paymentInstrument.getLastTkmUpdate());
                     return tokenToInsert;
                 }).collect(Collectors.toList());
 
-                List<PaymentInstrument> tokensToDeactivate = tokenInstruments.stream()
-                        .filter(token -> !card.getHtokens().contains(token.getHpan()))
-                        .collect(Collectors.toList());
-
-                for (PaymentInstrument tokenToDeactivate : tokensToDeactivate) {
-                    if (!tokenToDeactivate.getHpanMaster().equals(card.getHpan())) {
-                        log.warn("Token not having the same master hpan");
-                    } else if (!tokenToDeactivate.getFiscalCode()
-                            .equals(tokenManagerData.getTaxCode())) {
-                        log.warn("Token not having the same master fiscal code");
-                    } else {
-                        tokenToDeactivate.setDeactivationDate(OffsetDateTime.now());
-                        tokenToDeactivate.setEnabled(false);
-                        tokenToDeactivate.setStatus(PaymentInstrument.Status.INACTIVE);
-                        tokenToUpdate.add(tokenToDeactivate);
-                    }
-                }
-
             }
-
 
             if (!tokensToInsert.isEmpty()) {
                 paymentInstrumentDAO.saveAll(tokensToInsert);

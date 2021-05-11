@@ -44,7 +44,7 @@ public interface PaymentInstrumentService {
 
     List<PaymentInstrumentHistory> findHistory(String fiscalCode, String hpan);
 
-    Boolean manageTokenData(TokenManagerData tokenManagerData, OffsetDateTime updateDate);
+    Boolean manageTokenData(TokenManagerData tokenManagerData);
 
 
 }

@@ -10,6 +10,8 @@ import it.gov.pagopa.bpd.payment_instrument.exception.PaymentInstrumentDifferent
 import it.gov.pagopa.bpd.payment_instrument.exception.PaymentInstrumentNotFoundException;
 import it.gov.pagopa.bpd.payment_instrument.exception.PaymentInstrumentOnDifferentUserException;
 import it.gov.pagopa.bpd.payment_instrument.model.PaymentInstrumentServiceModel;
+import it.gov.pagopa.bpd.payment_instrument.model.TokenManagerData;
+import it.gov.pagopa.bpd.payment_instrument.model.TokenManagerDataCard;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -459,6 +461,30 @@ public class PaymentInstrumentServiceImplTest {
         verify(paymentInstrumentDAOMock, times(1)).getFromPar("invalid_par");
     }
 
+
+    @Test
+    public void manageTokenData_OK_NoPar() {
+
+        TokenManagerDataCard tokenManagerDataCard =
+                TokenManagerDataCard.builder().hpan(EXISTING_HASH_PAN).build();
+        TokenManagerData tokenManagerData = TokenManagerData.builder()
+                .taxCode(EXISTING_FISCAL_CODE)
+                .cards(Collections.singletonList(tokenManagerDataCard))
+                .build();
+
+        PaymentInstrument paymentInstrument = new PaymentInstrument();
+        paymentInstrument.setHpan(EXISTING_HASH_PAN);
+        paymentInstrument.setPar(EXISTING_PAR);
+        paymentInstrument.setActivationDate(OffsetDateTime.now());
+        paymentInstrument.setFiscalCode(EXISTING_FISCAL_CODE);
+        BDDMockito.doReturn(Optional.of(paymentInstrument)).when(paymentInstrumentDAOMock)
+                .findByHpan(EXISTING_HASH_PAN);
+
+        Boolean result = paymentInstrumentService.manageTokenData(tokenManagerData);
+
+        Assert.assertTrue(result);
+
+    }
 
 
 }

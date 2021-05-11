@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 @Data
@@ -18,6 +19,9 @@ public class TokenManagerData {
     @NotNull
     @NotBlank
     private String taxCode;
+
+    @NotNull
+    private OffsetDateTime timestamp;
 
     @NotNull
     private List<TokenManagerDataCard> cards;
