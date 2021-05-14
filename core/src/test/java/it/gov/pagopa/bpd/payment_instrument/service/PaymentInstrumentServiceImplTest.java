@@ -490,9 +490,14 @@ public class PaymentInstrumentServiceImplTest {
     public void manageTokenData_OK_NoPar() {
 
         TokenManagerDataCard tokenManagerDataCard =
-                TokenManagerDataCard.builder().hpan(EXISTING_HASH_PAN).build();
+                TokenManagerDataCard.builder()
+                        .hpan(EXISTING_HASH_PAN)
+                        .action("INSERT_UPDATE")
+                        .htokens(Collections.emptyList())
+                        .build();
         TokenManagerData tokenManagerData = TokenManagerData.builder()
                 .taxCode(EXISTING_FISCAL_CODE)
+                .timestamp(OffsetDateTime.now())
                 .cards(Collections.singletonList(tokenManagerDataCard))
                 .build();
 
