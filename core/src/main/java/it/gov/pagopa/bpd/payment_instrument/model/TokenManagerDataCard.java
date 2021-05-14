@@ -20,6 +20,9 @@ public class TokenManagerDataCard {
     public String hpan;
 
     private String par;
-    private List<String> htokens;
+
+    private String action;
+
+    private List<TokenManagerDataToken> htokens;
 
 }
