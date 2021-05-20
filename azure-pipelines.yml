@@ -32,11 +32,11 @@ variables:
   imageRepository: 'bpdmspaymentinstrument'
 
   isToDeploy: $[and(ne(variables['Build.Reason'], 'PullRequest'), or(eq(variables['Build.SourceBranch'], 'refs/heads/master'), startsWith(variables['Build.SourceBranch'], 'refs/heads/release'), startsWith(variables['Build.SourceBranch'], 'refs/heads/hotfix')))]
-  isSIT: $[eq(variables['Build.SourceBranch'], 'refs/heads/release/st')]
+  isSIT: $[startsWith(variables['Build.SourceBranch'], 'refs/heads/release/st')]
   isUAT: $[or(eq(variables['Build.SourceBranch'], 'refs/heads/release/uat'), startsWith(variables['Build.SourceBranch'], 'refs/heads/hotfix'))]
   isPROD: $[eq(variables['Build.SourceBranch'], 'refs/heads/master')]
 
-  ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/release/st') }}:
+  ${{ if startsWith(variables['Build.SourceBranch'], 'refs/heads/release/st') }}:
     dockerRegistryServiceConnection: 'cstarregistry-connection'
     containerRegistry: 'cstarregistry.azurecr.io'
     deployment: deployment-sit
