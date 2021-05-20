@@ -39,7 +39,6 @@ class UpsertPaymentInstrumentTokensCommandImpl extends BaseCommand<Boolean> impl
 
     private TokenManagerCommandModel tokenManagerCommandModel;
     private PaymentInstrumentService paymentInstrumentService;
-    private TransactionMapper transactionMapper;
 
 
     public UpsertPaymentInstrumentTokensCommandImpl(TokenManagerCommandModel tokenManagerCommandModel) {
@@ -48,11 +47,9 @@ class UpsertPaymentInstrumentTokensCommandImpl extends BaseCommand<Boolean> impl
 
     public UpsertPaymentInstrumentTokensCommandImpl(
             TokenManagerCommandModel tokenManagerCommandModel,
-            PaymentInstrumentService paymentInstrumentService,
-            TransactionMapper transactionMapper) {
+            PaymentInstrumentService paymentInstrumentService) {
         this.tokenManagerCommandModel = tokenManagerCommandModel;
         this.paymentInstrumentService = paymentInstrumentService;
-        this.transactionMapper = transactionMapper;
     }
 
     /**
@@ -95,12 +92,6 @@ class UpsertPaymentInstrumentTokensCommandImpl extends BaseCommand<Boolean> impl
     public void setPaymentInstrumentService(PaymentInstrumentService paymentInstrumentService) {
         this.paymentInstrumentService = paymentInstrumentService;
     }
-
-    @Autowired
-    public void setTransactionMapper(TransactionMapper transactionMapper) {
-        this.transactionMapper = transactionMapper;
-    }
-
 
     /**
      * Method to process a validation check for the parsed Transaction request

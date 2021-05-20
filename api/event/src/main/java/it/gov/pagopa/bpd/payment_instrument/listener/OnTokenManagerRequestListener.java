@@ -3,6 +3,7 @@ package it.gov.pagopa.bpd.payment_instrument.listener;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.sia.meda.eventlistener.BaseConsumerAwareEventListener;
 import it.gov.pagopa.bpd.payment_instrument.command.FilterPaymentInstrumentCommand;
+import it.gov.pagopa.bpd.payment_instrument.command.UpsertPaymentInstrumentTokensCommand;
 import it.gov.pagopa.bpd.payment_instrument.listener.factory.ModelFactory;
 import it.gov.pagopa.bpd.payment_instrument.model.TokenManagerCommandModel;
 import lombok.SneakyThrows;
@@ -63,8 +64,8 @@ public class OnTokenManagerRequestListener extends BaseConsumerAwareEventListene
 
             tokenManagerCommandModel = tokenManagerCommandModelModelFactory
                     .createModel(Pair.of(payload, headers));
-            FilterPaymentInstrumentCommand command = beanFactory.getBean(
-                    FilterPaymentInstrumentCommand.class, tokenManagerCommandModel);
+            UpsertPaymentInstrumentTokensCommand command = beanFactory.getBean(
+                    UpsertPaymentInstrumentTokensCommand.class, tokenManagerCommandModel);
 
             if (!command.execute()) {
                 throw new Exception("Failed to execute UpsertPaymentInstrumentTokensCommand");
