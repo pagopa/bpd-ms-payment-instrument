@@ -296,16 +296,17 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
                         if ((paymentInstrument.getParDeactivationDate() == null ||
                                 paymentInstrument.getParDeactivationDate().compareTo(
                                         paymentInstrument.getActivationDate()) <= 0) &&
-                                paymentInstrument.getLastTkmUpdate().compareTo(
-                                        tokenManagerData.getTimestamp()) > 0
+                                (paymentInstrument.getLastTkmUpdate() == null ||
+                                        paymentInstrument.getLastTkmUpdate().compareTo(
+                                        tokenManagerData.getTimestamp()) <= 0)
                         ) {
                             paymentInstrument.setParDeactivationDate(OffsetDateTime.now());
                             toRevoke = true;
                         }
                     } else {
                         if (paymentInstrument.getLastTkmUpdate() != null &&
-                                paymentInstrument.getLastTkmUpdate().compareTo(
-                                        tokenManagerData.getTimestamp()) > 0 &&
+                                (paymentInstrument.getLastTkmUpdate().compareTo(
+                                        tokenManagerData.getTimestamp()) <= 0) &&
                                 paymentInstrument.getDeactivationDate() != null &&
                                 paymentInstrument.getDeactivationDate()
                                         .compareTo(paymentInstrument.getActivationDate()) > 0
@@ -331,8 +332,8 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
                 List<PaymentInstrument> tokenInstruments = paymentInstrumentDAO.findTokensToRevoke(
                         card.getHpan(), paymentInstrument.getPar(), tokenManagerData.getTaxCode());
                 tokenInstruments.forEach(tokenInstrument -> {
-                    if (tokenInstrument.isEnabled() && tokenInstrument.getLastTkmUpdate()
-                            .compareTo(tokenManagerData.getTimestamp()) <= 0) {
+                    if (tokenInstrument.isEnabled() && (tokenInstrument.getLastTkmUpdate() == null ||
+                            tokenInstrument.getLastTkmUpdate().compareTo(tokenManagerData.getTimestamp()) <= 0)) {
                         tokenInstrument.setEnabled(false);
                         tokenInstrument.setStatus(PaymentInstrument.Status.INACTIVE);
                         tokenInstrument.setLastTkmUpdate(tokenInstrument.getLastTkmUpdate());
@@ -344,85 +345,86 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
                         tokensToUpdate.add(tokenInstrument);
                     }
                 });
-            }
+            } else {
 
-            card.getHtokens().forEach(htokenData -> {
+                card.getHtokens().forEach(htokenData -> {
 
-                Optional<PaymentInstrument> tokenOpt =
-                        paymentInstrumentDAO.findToken(
-                                htokenData.getHtoken(), card.getPar(), tokenManagerData.getTaxCode());
-                OffsetDateTime parDeactivationDate = paymentInstrument.getParDeactivationDate();
+                    Optional<PaymentInstrument> tokenOpt =
+                            paymentInstrumentDAO.findToken(
+                                    htokenData.getHtoken(), card.getPar(), tokenManagerData.getTaxCode());
+                    OffsetDateTime parDeactivationDate = paymentInstrument.getParDeactivationDate();
 
-                if (tokenOpt.isPresent()) {
+                    if (tokenOpt.isPresent()) {
 
-                    PaymentInstrument tokenToUpdate = tokenOpt.get();
-                    if (htokenData.getHaction().equals("INSERT_UPDATE")) {
-                        if (tokenToUpdate.getLastTkmUpdate() == null ||
-                                tokenToUpdate.getLastTkmUpdate().compareTo(
-                                tokenManagerData.getTimestamp()) <= 0) {
-                            tokenToUpdate.setLastTkmUpdate(tokenManagerData.getTimestamp());
+                        PaymentInstrument tokenToUpdate = tokenOpt.get();
+                        if (htokenData.getHaction().equals("INSERT_UPDATE")) {
+                            if (tokenToUpdate.getLastTkmUpdate() == null ||
+                                    tokenToUpdate.getLastTkmUpdate().compareTo(
+                                            tokenManagerData.getTimestamp()) <= 0) {
+                                tokenToUpdate.setLastTkmUpdate(tokenManagerData.getTimestamp());
 
-                            if (!tokenToUpdate.isEnabled()) {
-                                tokenToUpdate.setEnabled(true);
-                                tokenToUpdate.setStatus(PaymentInstrument.Status.ACTIVE);
-                                tokenToUpdate.setActivationDate(tokenManagerData.getTimestamp());
+                                if (!tokenToUpdate.isEnabled()) {
+                                    tokenToUpdate.setEnabled(true);
+                                    tokenToUpdate.setStatus(PaymentInstrument.Status.ACTIVE);
+                                    tokenToUpdate.setActivationDate(tokenManagerData.getTimestamp());
+                                }
+
+                                tokenToUpdate.setParActivationDate(paymentInstrument.getParActivationDate());
+                                tokenToUpdate.setParDeactivationDate(paymentInstrument.getParDeactivationDate());
+
+                                tokenToUpdate.setNew(false);
+                                tokenToUpdate.setUpdatable(true);
+                                tokenToUpdate.setLastTkmUpdate(tokenManagerData.getTimestamp());
+                                tokensToUpdate.add(tokenToUpdate);
                             }
+                        } else {
+                            if (tokenToUpdate.getLastTkmUpdate() == null ||
+                                    tokenToUpdate.getLastTkmUpdate().compareTo(
+                                            tokenManagerData.getTimestamp()) <= 0) {
 
-                            tokenToUpdate.setParActivationDate(paymentInstrument.getParActivationDate());
-                            tokenToUpdate.setParDeactivationDate(paymentInstrument.getParDeactivationDate());
+                                tokenToUpdate.setLastTkmUpdate(tokenManagerData.getTimestamp());
 
-                            tokenToUpdate.setNew(false);
-                            tokenToUpdate.setUpdatable(true);
-                            tokenToUpdate.setLastTkmUpdate(tokenManagerData.getTimestamp());
-                            tokensToUpdate.add(tokenToUpdate);
+                                if (tokenToUpdate.isEnabled()) {
+                                    tokenToUpdate.setEnabled(false);
+                                    tokenToUpdate.setStatus(PaymentInstrument.Status.INACTIVE);
+                                    tokenToUpdate.setDeactivationDate(tokenManagerData.getTimestamp());
+                                }
+
+                                tokenToUpdate.setParActivationDate(paymentInstrument.getParActivationDate());
+                                tokenToUpdate.setDeactivationDate(paymentInstrument.getParDeactivationDate());
+
+                                tokenToUpdate.setNew(false);
+                                tokenToUpdate.setUpdatable(true);
+                                tokenToUpdate.setLastTkmUpdate(tokenManagerData.getTimestamp());
+                                tokensToUpdate.add(tokenToUpdate);
+                            }
                         }
+
                     } else {
-                        if (tokenToUpdate.getLastTkmUpdate() == null ||
-                            tokenToUpdate.getLastTkmUpdate().compareTo(
-                                tokenManagerData.getTimestamp()) <= 0) {
-
-                            tokenToUpdate.setLastTkmUpdate(tokenManagerData.getTimestamp());
-
-                            if (tokenToUpdate.isEnabled()) {
-                                tokenToUpdate.setEnabled(false);
-                                tokenToUpdate.setStatus(PaymentInstrument.Status.INACTIVE);
-                                tokenToUpdate.setDeactivationDate(tokenManagerData.getTimestamp());
-                            }
-
-                            tokenToUpdate.setParActivationDate(paymentInstrument.getParActivationDate());
-                            tokenToUpdate.setDeactivationDate(paymentInstrument.getParDeactivationDate());
-
-                            tokenToUpdate.setNew(false);
-                            tokenToUpdate.setUpdatable(true);
-                            tokenToUpdate.setLastTkmUpdate(tokenManagerData.getTimestamp());
-                            tokensToUpdate.add(tokenToUpdate);
-                        }
+                        PaymentInstrument tokenToInsert = new PaymentInstrument();
+                        tokenToInsert.setFiscalCode(paymentInstrument.getFiscalCode());
+                        tokenToInsert.setDeactivationDate(paymentInstrument.getDeactivationDate());
+                        tokenToInsert.setPar(paymentInstrument.getPar());
+                        tokenToInsert.setHpan(htokenData.getHtoken());
+                        tokenToInsert.setParActivationDate(paymentInstrument.getParActivationDate());
+                        tokenToInsert.setParDeactivationDate(parDeactivationDate);
+                        tokenToInsert.setEnabled(!htokenData.getHaction().equals("DELETE"));
+                        tokenToInsert.setStatus(!htokenData.getHaction().equals("DELETE") ?
+                                PaymentInstrument.Status.ACTIVE :
+                                PaymentInstrument.Status.INACTIVE);
+                        tokenToInsert.setHpanMaster(paymentInstrument.getHpan());
+                        tokenToInsert.setActivationDate(tokenManagerData.getTimestamp());
+                        tokenToInsert.setDeactivationDate(!htokenData.getHaction().equals("DELETE") ?
+                                null : tokenManagerData.getTimestamp());
+                        tokenToInsert.setLastTkmUpdate(paymentInstrument.getLastTkmUpdate());
+                        tokenToInsert.setNew(true);
+                        tokenToInsert.setUpdatable(false);
+                        tokenToInsert.setLastTkmUpdate(tokenManagerData.getTimestamp());
+                        tokensToInsert.add(tokenToInsert);
                     }
 
-                } else {
-                    PaymentInstrument tokenToInsert = new PaymentInstrument();
-                    tokenToInsert.setFiscalCode(paymentInstrument.getFiscalCode());
-                    tokenToInsert.setDeactivationDate(paymentInstrument.getDeactivationDate());
-                    tokenToInsert.setPar(paymentInstrument.getPar());
-                    tokenToInsert.setHpan(htokenData.getHtoken());
-                    tokenToInsert.setParActivationDate(paymentInstrument.getParActivationDate());
-                    tokenToInsert.setParDeactivationDate(parDeactivationDate);
-                    tokenToInsert.setEnabled(!htokenData.getHaction().equals("DELETE"));
-                    tokenToInsert.setStatus(!htokenData.getHaction().equals("DELETE") ?
-                            PaymentInstrument.Status.ACTIVE :
-                            PaymentInstrument.Status.INACTIVE);
-                    tokenToInsert.setHpanMaster(paymentInstrument.getHpan());
-                    tokenToInsert.setActivationDate(tokenManagerData.getTimestamp());
-                    tokenToInsert.setDeactivationDate(!htokenData.getHaction().equals("DELETE") ?
-                            null : tokenManagerData.getTimestamp());
-                    tokenToInsert.setLastTkmUpdate(paymentInstrument.getLastTkmUpdate());
-                    tokenToInsert.setNew(true);
-                    tokenToInsert.setUpdatable(false);
-                    tokenToInsert.setLastTkmUpdate(tokenManagerData.getTimestamp());
-                    tokensToInsert.add(tokenToInsert);
-                }
-
-            });
+                });
+            }
 
             if (!tokensToInsert.isEmpty()) {
                 paymentInstrumentDAO.saveAll(tokensToInsert);

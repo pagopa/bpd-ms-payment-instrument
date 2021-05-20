@@ -598,6 +598,87 @@ public class PaymentInstrumentServiceImplTest {
 
     }
 
+    @Test
+    public void manageTokenData_OK_Revoke() {
+
+
+        TokenManagerDataToken tokenToInsert =
+                TokenManagerDataToken.builder()
+                        .htoken("token1")
+                        .haction("INSERT_UPDATE")
+                        .build();
+
+        TokenManagerDataToken tokenToUpdate =
+                TokenManagerDataToken.builder()
+                        .htoken("token2")
+                        .haction("INSERT_UPDATE")
+                        .build();
+
+        TokenManagerDataToken tokenToRemove =
+                TokenManagerDataToken.builder()
+                        .htoken("token3")
+                        .haction("DELETE")
+                        .build();
+
+        TokenManagerDataCard tokenManagerDataCard =
+                TokenManagerDataCard.builder()
+                        .hpan(EXISTING_HASH_PAN)
+                        .par(EXISTING_PAR)
+                        .action("REVOKE")
+                        .htokens(Arrays.asList(tokenToInsert, tokenToUpdate, tokenToRemove))
+                        .build();
+
+        TokenManagerData tokenManagerData = TokenManagerData.builder()
+                .taxCode(EXISTING_FISCAL_CODE)
+                .timestamp(OffsetDateTime.now())
+                .cards(Collections.singletonList(tokenManagerDataCard))
+                .build();
+
+        PaymentInstrument paymentInstrument = new PaymentInstrument();
+        paymentInstrument.setHpan(EXISTING_HASH_PAN);
+        paymentInstrument.setPar(EXISTING_PAR);
+        paymentInstrument.setActivationDate(OffsetDateTime.now());
+        paymentInstrument.setFiscalCode(EXISTING_FISCAL_CODE);
+        BDDMockito.doReturn(Optional.of(paymentInstrument)).when(paymentInstrumentDAOMock)
+                .findByHpan(EXISTING_HASH_PAN);
+
+        PaymentInstrument tokenToInsertPI = new PaymentInstrument();
+        tokenToInsertPI.setHpan("token1");
+        tokenToInsertPI.setPar(EXISTING_PAR);
+        tokenToInsertPI.setActivationDate(OffsetDateTime.now());
+        tokenToInsertPI.setFiscalCode(EXISTING_FISCAL_CODE);
+
+        PaymentInstrument tokenToUpdatePI = new PaymentInstrument();
+        tokenToUpdatePI.setHpan("token2");
+        tokenToUpdatePI.setPar(EXISTING_PAR);
+        tokenToUpdatePI.setActivationDate(OffsetDateTime.now());
+        tokenToUpdatePI.setFiscalCode(EXISTING_FISCAL_CODE);
+
+        PaymentInstrument tokenToRemovePI = new PaymentInstrument();
+        tokenToRemovePI.setHpan("token3");
+        tokenToRemovePI.setPar(EXISTING_PAR);
+        tokenToRemovePI.setActivationDate(OffsetDateTime.now());
+        tokenToRemovePI.setFiscalCode(EXISTING_FISCAL_CODE);
+
+        List<PaymentInstrument> expectedTokenToUpdate = new ArrayList<>();
+        expectedTokenToUpdate.add(tokenToInsertPI);
+        expectedTokenToUpdate.add(tokenToUpdatePI);
+        expectedTokenToUpdate.add(tokenToRemovePI);
+
+        BDDMockito.doReturn(expectedTokenToUpdate).when(paymentInstrumentDAOMock).findTokensToRevoke(
+                Mockito.eq(EXISTING_HASH_PAN),Mockito.eq(EXISTING_PAR), Mockito.eq(EXISTING_FISCAL_CODE)
+        );
+
+        Boolean result = paymentInstrumentService.manageTokenData(tokenManagerData);
+
+        Assert.assertTrue(result);
+
+        BDDMockito.verify(paymentInstrumentDAOMock).findByHpan(Mockito.any());
+        BDDMockito.verify(paymentInstrumentDAOMock).update(Mockito.any());
+
+        BDDMockito.verify(paymentInstrumentDAOMock).saveAll(Mockito.eq(expectedTokenToUpdate));
+
+    }
 
     private PaymentInstrument returnExpectedTokenToInsert(
             PaymentInstrument paymentInstrument,
