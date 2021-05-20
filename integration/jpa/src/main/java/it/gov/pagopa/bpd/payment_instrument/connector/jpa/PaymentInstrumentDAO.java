@@ -64,7 +64,7 @@ public interface PaymentInstrumentDAO extends CrudJpaDAO<PaymentInstrument, Stri
     @Query("select bpi from PaymentInstrument bpi " +
             "where bpi.hpanMaster = :hpan and" +
             " bpi.par = :par and" +
-            " bpi.taxCode = :taxCode and" +
+            " bpi.fiscalCode = :taxCode and" +
             " (bpi.hpanMaster != bpi.hpan)"
     )
     List<PaymentInstrument> findTokensToRevoke(
@@ -76,7 +76,7 @@ public interface PaymentInstrumentDAO extends CrudJpaDAO<PaymentInstrument, Stri
     @Query("select bpi from PaymentInstrument bpi" +
             " where bpi.hpan = :htoken and" +
             " bpi.par = :par and" +
-            " bpi.taxCode = :taxCode"
+            " bpi.fiscalCode = :taxCode"
     )
     Optional<PaymentInstrument> findToken(
             @Param("htoken") String htoken,
