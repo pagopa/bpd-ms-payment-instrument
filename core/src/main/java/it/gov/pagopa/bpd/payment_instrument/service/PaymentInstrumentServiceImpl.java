@@ -338,7 +338,7 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
                 if (card.getAction().equals("REVOKE")) {
                     if ((paymentInstrument.getParDeactivationDate() == null ||
                             paymentInstrument.getParDeactivationDate().compareTo(
-                                    paymentInstrument.getActivationDate()) <= 0) &&
+                                    paymentInstrument.getParActivationDate()) <= 0) &&
                             (paymentInstrument.getLastTkmUpdate() == null ||
                                     paymentInstrument.getLastTkmUpdate().compareTo(
                                             tokenManagerData.getTimestamp()) <= 0)
@@ -350,11 +350,11 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
                     if (paymentInstrument.getLastTkmUpdate() != null &&
                             (paymentInstrument.getLastTkmUpdate().compareTo(
                                     tokenManagerData.getTimestamp()) <= 0) &&
-                            paymentInstrument.getDeactivationDate() != null &&
-                            paymentInstrument.getDeactivationDate()
-                                    .compareTo(paymentInstrument.getActivationDate()) > 0
+                            paymentInstrument.getParDeactivationDate() != null &&
+                            paymentInstrument.getParDeactivationDate()
+                                    .compareTo(paymentInstrument.getParActivationDate()) > 0
                     ) {
-                        paymentInstrument.setActivationDate(OffsetDateTime.now());
+                        paymentInstrument.setParActivationDate(OffsetDateTime.now());
                     }
                 }
             }
