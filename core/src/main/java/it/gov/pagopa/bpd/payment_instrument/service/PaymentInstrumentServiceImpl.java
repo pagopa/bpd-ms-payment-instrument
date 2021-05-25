@@ -17,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -96,6 +97,8 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
 //                throw new PaymentInstrumentNumbersExceededException(
 //                        PaymentInstrument.class, numMaxPaymentInstr);
 //            }
+            pi.setNew(true);
+            pi.setUpdatable(false);
             return paymentInstrumentDAO.save(pi);
         } else {
             PaymentInstrument foundPI = foundPIOpt.get();
@@ -108,6 +111,8 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
                 foundPI.setChannel(pi.getChannel());
                 foundPI.setPar(pi.getPar());
                 foundPI.setParActivationDate(pi.getParActivationDate());
+                foundPI.setUpdatable(true);
+                foundPI.setNew(false);
                 return paymentInstrumentDAO.save(foundPI);
             } else {
                 if (foundPI.getFiscalCode() != null && !foundPI.getFiscalCode().equals(pi.getFiscalCode())) {
@@ -115,6 +120,8 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
                 } else if (!foundPI.getPar().equals(pi.getPar()) && foundPI.getParActivationDate() != pi.getParActivationDate()) {
                     foundPI.setPar(pi.getPar());
                     foundPI.setParActivationDate(pi.getParActivationDate());
+                    foundPI.setNew(false);
+                    foundPI.setUpdatable(true);
                     return paymentInstrumentDAO.save(foundPI);
                 }
                 pi = foundPI;
@@ -126,27 +133,34 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
     @Override
     @Deprecated
     public PaymentInstrumentServiceModel createOrUpdate(String hpan, PaymentInstrumentServiceModel pi) {
+
         List<String> idList = new ArrayList<>();
         idList.add(hpan);
         if (pi.getTokenPanList() != null) {
             idList.addAll(pi.getTokenPanList());
         }
-        List<PaymentInstrument> toSaveOrUpdate = new ArrayList<>();
+        List<PaymentInstrument> toSaveUpdate = new ArrayList<>();
         List<PaymentInstrument> piList = paymentInstrumentDAO.findByHpanIn(idList);
+
         List<String> piListHpan = piList.stream()
                 .map(PaymentInstrument::getHpan)
                 .collect(Collectors.toList());
+
         List<String> notYetEnrolledIdList = idList.stream()
                 .filter(element -> !piListHpan.contains(element))
                 .collect(Collectors.toList());
+
         for (String id : notYetEnrolledIdList) {
             PaymentInstrument newPaymentInstrument = paymentInstrumentAssembler.toResource(pi, id);
             newPaymentInstrument.setHpanMaster(hpan);
             if (newPaymentInstrument.getActivationDate() == null) {
                 newPaymentInstrument.setActivationDate(OffsetDateTime.now());
             }
-            toSaveOrUpdate.add(newPaymentInstrument);
+            newPaymentInstrument.setNew(true);
+            newPaymentInstrument.setUpdatable(false);
+            toSaveUpdate.add(newPaymentInstrument);
         }
+
         for (PaymentInstrument foundPI : piList) {
             if (!foundPI.isEnabled()) {
                 foundPI.setEnabled(true);
@@ -154,16 +168,26 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
                         : OffsetDateTime.now());
                 foundPI.setFiscalCode(pi.getFiscalCode());
                 foundPI.setStatus(PaymentInstrument.Status.ACTIVE);
-                foundPI.setChannel(pi.getChannel());
-                toSaveOrUpdate.add(foundPI);
+                foundPI.setNew(false);
+                foundPI.setUpdatable(true);
+                toSaveUpdate.add(foundPI);
             } else if (foundPI.getFiscalCode() != null && !foundPI.getFiscalCode().equals(pi.getFiscalCode())) {
                 throw new PaymentInstrumentOnDifferentUserException(hpan);
             }
         }
-        if (toSaveOrUpdate.size() > 0) {
-            paymentInstrumentDAO.saveAll(toSaveOrUpdate);
+
+        if (toSaveUpdate.size() > 0) {
+            try {
+                paymentInstrumentDAO.saveAll(toSaveUpdate);
+            } catch (DataIntegrityViolationException e) {
+                logger.error("An attempted insert of a instrument using the channel: "
+                        + (pi.getChannel()  != null ? pi.getChannel() : "UKNOWN_CHANNEL" )+
+                        " was stopped due to data integrity violation");
+            }
         }
+
         return pi;
+
     }
 
 //    @Override
@@ -218,6 +242,7 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
             paymentInstrument.setUpdateDate(OffsetDateTime.now());
             paymentInstrument.setEnabled(false);
             paymentInstrument.setNew(false);
+            paymentInstrument.setUpdatable(true);
         }
         paymentInstrumentDAO.save(paymentInstrument);
     }
@@ -304,7 +329,7 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
                 if (card.getAction().equals("REVOKE")) {
                     if ((paymentInstrument.getParDeactivationDate() == null ||
                             paymentInstrument.getParDeactivationDate().compareTo(
-                                    paymentInstrument.getActivationDate()) <= 0) &&
+                                    paymentInstrument.getParActivationDate()) <= 0) &&
                             (paymentInstrument.getLastTkmUpdate() == null ||
                                     paymentInstrument.getLastTkmUpdate().compareTo(
                                             tokenManagerData.getTimestamp()) <= 0)
@@ -316,11 +341,11 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
                     if (paymentInstrument.getLastTkmUpdate() != null &&
                             (paymentInstrument.getLastTkmUpdate().compareTo(
                                     tokenManagerData.getTimestamp()) <= 0) &&
-                            paymentInstrument.getDeactivationDate() != null &&
-                            paymentInstrument.getDeactivationDate()
-                                    .compareTo(paymentInstrument.getActivationDate()) > 0
+                            paymentInstrument.getParDeactivationDate() != null &&
+                            paymentInstrument.getParDeactivationDate()
+                                    .compareTo(paymentInstrument.getParActivationDate()) > 0
                     ) {
-                        paymentInstrument.setActivationDate(OffsetDateTime.now());
+                        paymentInstrument.setParActivationDate(OffsetDateTime.now());
                     }
                 }
             }

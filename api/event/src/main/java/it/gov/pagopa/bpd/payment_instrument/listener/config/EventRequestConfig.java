@@ -11,6 +11,6 @@ import org.springframework.context.annotation.PropertySource;
 @PropertySource({
         "classpath:config/transactionRequestListener.properties",
         "classpath:config/citizenRequestListener.properties",
-        "classpath:config/tokenManagementListener.properties"
+        "classpath:config/tokenManagementRequestListener.properties"
 })
 public class EventRequestConfig {}

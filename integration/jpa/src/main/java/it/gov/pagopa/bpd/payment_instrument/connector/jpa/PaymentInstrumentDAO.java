@@ -5,10 +5,12 @@ import it.gov.pagopa.bpd.payment_instrument.connector.jpa.model.PaymentInstrumen
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.QueryHints;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.LockModeType;
+import javax.persistence.QueryHint;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -59,6 +61,8 @@ public interface PaymentInstrumentDAO extends CrudJpaDAO<PaymentInstrument, Stri
     )
     List<PaymentInstrument> getFromPar(@Param("par") String par);
 
+    //@Lock(LockModeType.PESSIMISTIC_READ)
+    //@QueryHints({@QueryHint(name = "javax.persistence.lock.timeout", value ="1000")})
     Optional<PaymentInstrument> findByHpan(String hpan);
 
     @Query("select bpi from PaymentInstrument bpi " +

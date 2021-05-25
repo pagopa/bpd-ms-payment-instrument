@@ -32,7 +32,7 @@ import java.util.Set;
 @Component
 @Scope(BeanDefinition.SCOPE_PROTOTYPE)
 @Slf4j
-class UpsertPaymentInstrumentTokensCommandImpl extends BaseCommand<Boolean> implements FilterTransactionCommand {
+class UpsertPaymentInstrumentTokensCommandImpl extends BaseCommand<Boolean> implements UpsertPaymentInstrumentTokensCommand {
 
     private static final ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
     private static final Validator validator = factory.getValidator();
