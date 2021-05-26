@@ -224,10 +224,11 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
             paymentInstrument.setUpdateUser(fiscalCode);
             paymentInstrument.setUpdateDate(OffsetDateTime.now());
             paymentInstrument.setEnabled(false);
-            paymentInstrument.setUpdatable(true);
-            paymentInstrument.setNew(false);
-            paymentInstrumentDAO.save(paymentInstrument);
         }
+
+        paymentInstrument.setUpdatable(true);
+        paymentInstrument.setNew(false);
+        paymentInstrumentDAO.save(paymentInstrument);
 
     }
 
