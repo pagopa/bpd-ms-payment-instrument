@@ -2,6 +2,7 @@ package it.gov.pagopa.bpd.payment_instrument.connector.jpa;
 
 
 import eu.sia.meda.layers.connector.query.CriteriaQuery;
+import eu.sia.meda.util.TestUtils;
 import it.gov.pagopa.bpd.common.connector.jpa.BaseCrudJpaDAOTest;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.model.PaymentInstrument;
 import lombok.Data;
@@ -35,6 +36,7 @@ public class PaymentInstrumentDAOTest extends BaseCrudJpaDAOTest<PaymentInstrume
     @Override
     protected void setId(PaymentInstrument entity, String id) {
         entity.setHpan(id);
+        entity.setUpdatable(true);
     }
 
     @Override
@@ -45,6 +47,14 @@ public class PaymentInstrumentDAOTest extends BaseCrudJpaDAOTest<PaymentInstrume
     @Override
     protected void alterEntityToUpdate(PaymentInstrument entity) {
         entity.setStatus(PaymentInstrument.Status.INACTIVE);
+        entity.setUpdatable(true);
+    }
+
+    @Override
+    protected void compare(PaymentInstrument entityToSave, PaymentInstrument saved) {
+        TestUtils.reflectionEqualsByName(entityToSave, saved,
+                "hpan", "insertUser", "updateDate", "updateUser", "enabled", "updatable", "new", "isNew"
+        );
     }
 
     @Override
@@ -56,4 +66,5 @@ public class PaymentInstrumentDAOTest extends BaseCrudJpaDAOTest<PaymentInstrume
     protected String getIdName() {
         return "hpan";
     }
+
 }
