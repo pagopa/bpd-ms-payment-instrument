@@ -11,6 +11,7 @@
     <artifactId>bpd-ms-payment-instrument-core</artifactId>
     <version>history_duplicate_fix_RC3</version>
 
+
     <dependencies>
         <dependency>
             <groupId>it.gov.pagopa.bpd.ms.payment_instrument.integration</groupId>
