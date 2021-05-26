@@ -3,7 +3,7 @@
     <parent>
         <artifactId>bpd-ms-payment-instrument-integration</artifactId>
         <groupId>it.gov.pagopa.bpd.ms.payment_instrument</groupId>
-        <version>history_duplicate_fix_RC3</version>
+        <version>history_duplicate_fix_RC4</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
