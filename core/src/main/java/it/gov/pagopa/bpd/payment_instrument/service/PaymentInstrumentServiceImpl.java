@@ -226,8 +226,9 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
             paymentInstrument.setEnabled(false);
             paymentInstrument.setUpdatable(true);
             paymentInstrument.setNew(false);
+            paymentInstrumentDAO.save(paymentInstrument);
         }
-        paymentInstrumentDAO.save(paymentInstrument);
+
     }
 
 
