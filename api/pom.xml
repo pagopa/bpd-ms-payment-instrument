@@ -4,12 +4,12 @@
     <parent>
         <artifactId>bpd-ms-payment-instrument</artifactId>
         <groupId>it.gov.pagopa.bpd.ms</groupId>
-        <version>history_duplicate_fix_RC4</version>
+        <version>history_duplicate_fix_RC5</version>
     </parent>
 
     <groupId>it.gov.pagopa.bpd.ms.payment_instrument</groupId>
     <artifactId>bpd-ms-payment-instrument-api</artifactId>
-    <version>history_duplicate_fix_RC4</version>
+    <version>history_duplicate_fix_RC5</version>
     <packaging>pom</packaging>
 
     <dependencies>
