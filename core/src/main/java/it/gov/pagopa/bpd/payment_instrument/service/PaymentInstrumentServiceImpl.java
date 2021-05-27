@@ -428,7 +428,7 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
                             }
 
                             tokenToUpdate.setParActivationDate(paymentInstrument.getParActivationDate());
-                            tokenToUpdate.setDeactivationDate(paymentInstrument.getParDeactivationDate());
+                            tokenToUpdate.setParDeactivationDate(paymentInstrument.getParDeactivationDate());
 
                             tokenToUpdate.setLastTkmUpdate(tokenManagerData.getTimestamp());
                             tokensToUpdate.add(tokenToUpdate);
@@ -438,7 +438,6 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
                 } else {
                     PaymentInstrument tokenToInsert = new PaymentInstrument();
                     tokenToInsert.setFiscalCode(paymentInstrument.getFiscalCode());
-                    tokenToInsert.setDeactivationDate(paymentInstrument.getDeactivationDate());
                     tokenToInsert.setPar(paymentInstrument.getPar());
                     tokenToInsert.setHpan(htokenData.getHtoken());
                     tokenToInsert.setParActivationDate(paymentInstrument.getParActivationDate());
