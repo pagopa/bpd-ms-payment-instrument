@@ -86,7 +86,15 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
 //                throw new PaymentInstrumentNumbersExceededException(
 //                        PaymentInstrument.class, numMaxPaymentInstr);
 //            }
-            return paymentInstrumentDAO.save(pi);
+            pi.setNew(true);
+            pi.setUpdatable(false);
+            try {
+                return paymentInstrumentDAO.save(pi);
+            } catch (DataIntegrityViolationException e) {
+                logger.error("An attempted insert of a instrument using the channel: "
+                        + (pi.getChannel()  != null ? pi.getChannel() : "UKNOWN_CHANNEL" )+
+                        " was stopped due to data integrity violation");
+            }
         } else {
             PaymentInstrument foundPI = foundPIOpt.get();
             if (!foundPI.isEnabled()) {
@@ -96,6 +104,8 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
                 foundPI.setFiscalCode(pi.getFiscalCode());
                 foundPI.setStatus(PaymentInstrument.Status.ACTIVE);
                 foundPI.setChannel(pi.getChannel());
+                foundPI.setUpdatable(true);
+                foundPI.setNew(false);
                 return paymentInstrumentDAO.save(foundPI);
             } else {
                 if (foundPI.getFiscalCode() != null && !foundPI.getFiscalCode().equals(pi.getFiscalCode())) {
@@ -214,10 +224,12 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
             paymentInstrument.setUpdateUser(fiscalCode);
             paymentInstrument.setUpdateDate(OffsetDateTime.now());
             paymentInstrument.setEnabled(false);
-            paymentInstrument.setUpdatable(true);
-            paymentInstrument.setNew(false);
         }
+
+        paymentInstrument.setUpdatable(true);
+        paymentInstrument.setNew(false);
         paymentInstrumentDAO.save(paymentInstrument);
+
     }
 
 
