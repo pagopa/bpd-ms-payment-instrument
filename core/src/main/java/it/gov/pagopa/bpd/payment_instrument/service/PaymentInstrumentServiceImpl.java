@@ -354,10 +354,11 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
         if (paymentInstrument.getLastTkmUpdate() == null || paymentInstrument
                 .getLastTkmUpdate().compareTo(tokenManagerData.getTimestamp()) < 0) {
             paymentInstrument.setLastTkmUpdate(tokenManagerData.getTimestamp());
+            paymentInstrument.setNew(false);
+            paymentInstrument.setUpdatable(true);
+            paymentInstrumentDAO.update(paymentInstrument);
         }
-        paymentInstrument.setNew(false);
-        paymentInstrument.setUpdatable(true);
-        paymentInstrumentDAO.update(paymentInstrument);
+
 
         List<PaymentInstrument> tokensToInsert = new ArrayList<>();
         List<PaymentInstrument> tokensToUpdate = new ArrayList<>();
@@ -425,7 +426,7 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
                             }
 
                             tokenToUpdate.setParActivationDate(paymentInstrument.getParActivationDate());
-                            tokenToUpdate.setDeactivationDate(paymentInstrument.getParDeactivationDate());
+                            tokenToUpdate.setParDeactivationDate(paymentInstrument.getParDeactivationDate());
 
                             tokenToUpdate.setNew(false);
                             tokenToUpdate.setUpdatable(true);
@@ -437,7 +438,6 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
                 } else {
                     PaymentInstrument tokenToInsert = new PaymentInstrument();
                     tokenToInsert.setFiscalCode(paymentInstrument.getFiscalCode());
-                    tokenToInsert.setDeactivationDate(paymentInstrument.getDeactivationDate());
                     tokenToInsert.setPar(paymentInstrument.getPar());
                     tokenToInsert.setHpan(htokenData.getHtoken());
                     tokenToInsert.setParActivationDate(paymentInstrument.getParActivationDate());
