@@ -372,7 +372,7 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
                     tokenInstrument.setEnabled(false);
                     tokenInstrument.setStatus(PaymentInstrument.Status.INACTIVE);
                     tokenInstrument.setLastTkmUpdate(tokenInstrument.getLastTkmUpdate());
-                    tokenInstrument.setDeactivationDate(tokenManagerData.getTimestamp());
+                    tokenInstrument.setDeactivationDate(OffsetDateTime.now());
                     tokenInstrument.setParDeactivationDate(
                             paymentInstrument.getParDeactivationDate());
                     tokenInstrument.setUpdatable(true);
@@ -401,7 +401,7 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
                             if (!tokenToUpdate.isEnabled()) {
                                 tokenToUpdate.setEnabled(true);
                                 tokenToUpdate.setStatus(PaymentInstrument.Status.ACTIVE);
-                                tokenToUpdate.setActivationDate(tokenManagerData.getTimestamp());
+                                tokenToUpdate.setActivationDate(OffsetDateTime.now());
                             }
 
                             tokenToUpdate.setParActivationDate(paymentInstrument.getParActivationDate());
@@ -422,7 +422,7 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
                             if (tokenToUpdate.isEnabled()) {
                                 tokenToUpdate.setEnabled(false);
                                 tokenToUpdate.setStatus(PaymentInstrument.Status.INACTIVE);
-                                tokenToUpdate.setDeactivationDate(tokenManagerData.getTimestamp());
+                                tokenToUpdate.setDeactivationDate(OffsetDateTime.now());
                             }
 
                             tokenToUpdate.setParActivationDate(paymentInstrument.getParActivationDate());
@@ -447,9 +447,9 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
                             PaymentInstrument.Status.ACTIVE :
                             PaymentInstrument.Status.INACTIVE);
                     tokenToInsert.setHpanMaster(paymentInstrument.getHpan());
-                    tokenToInsert.setActivationDate(tokenManagerData.getTimestamp());
+                    tokenToInsert.setActivationDate(OffsetDateTime.now());
                     tokenToInsert.setDeactivationDate(!htokenData.getHaction().equals("DELETE") ?
-                            null : tokenManagerData.getTimestamp());
+                            null : OffsetDateTime.now());
                     tokenToInsert.setLastTkmUpdate(paymentInstrument.getLastTkmUpdate());
                     tokenToInsert.setNew(true);
                     tokenToInsert.setUpdatable(false);
