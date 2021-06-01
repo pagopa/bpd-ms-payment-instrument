@@ -17,4 +17,6 @@ public class PaymentInstrumentServiceModel {
     private String channel;
 
     private List<String> tokenPanList;
+
+    private String par;
 }

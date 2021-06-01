@@ -15,6 +15,7 @@ public class PaymentInstrumentFactory implements ModelFactory<PaymentInstrumentD
         final PaymentInstrument result = new PaymentInstrument();
         BeanUtils.copyProperties(dto, result);
         result.setStatus(PaymentInstrument.Status.ACTIVE);
+        result.setPar(null);
         return result;
     }
 }

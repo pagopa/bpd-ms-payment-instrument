@@ -138,6 +138,7 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
                 foundPI.setFiscalCode(pi.getFiscalCode());
                 foundPI.setStatus(PaymentInstrument.Status.ACTIVE);
                 foundPI.setChannel(pi.getChannel());
+                foundPI.setPar(pi.getPar());
                 toSaveOrUpdate.add(foundPI);
             } else if (foundPI.getFiscalCode() != null && !foundPI.getFiscalCode().equals(pi.getFiscalCode())) {
                 throw new PaymentInstrumentOnDifferentUserException(hpan);
@@ -149,24 +150,26 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
         return pi;
     }
 
-//    @Override
-//    public void delete(String hpan, String fiscalCode, OffsetDateTime cancellationDate) {
-//
-//        List<PaymentInstrument> piList = paymentInstrumentDAO.findByHpanMasterOrHpan(hpan, hpan);
-//        if (piList == null || piList.isEmpty()) {
-//            throw new PaymentInstrumentNotFoundException(hpan);
-//        }
-//
-//        piList.forEach(
-//                paymentInstrument -> checkAndDelete(paymentInstrument, fiscalCode, null));
-//    }
-
     @Override
     public void delete(String hpan, String fiscalCode, OffsetDateTime cancellationDate) {
-        PaymentInstrument paymentInstrument = paymentInstrumentDAO.findById(hpan).orElseThrow(
-                () -> new PaymentInstrumentNotFoundException(hpan));
-        checkAndDelete(paymentInstrument, fiscalCode, cancellationDate);
+
+        List<PaymentInstrument> piList = paymentInstrumentDAO.findByHpanMasterOrHpan(hpan, hpan);
+        if (piList == null || piList.isEmpty()) {
+            throw new PaymentInstrumentNotFoundException(hpan);
+        }
+
+        piList.forEach(
+                paymentInstrument -> checkAndDelete(paymentInstrument, fiscalCode, null));
     }
+
+
+//    @Override
+//    public void delete(String hpan, String fiscalCode, OffsetDateTime cancellationDate) {
+//        PaymentInstrument paymentInstrument = paymentInstrumentDAO.findById(hpan).orElseThrow(
+//                () -> new PaymentInstrumentNotFoundException(hpan));
+//        checkAndDelete(paymentInstrument, fiscalCode, cancellationDate);
+//    }
+
 
     @Override
     public void deleteByFiscalCode(String fiscalCode, String channel) {
