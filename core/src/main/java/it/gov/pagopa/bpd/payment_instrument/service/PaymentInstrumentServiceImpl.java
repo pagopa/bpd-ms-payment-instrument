@@ -106,13 +106,15 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
                 foundPI.setChannel(pi.getChannel());
                 foundPI.setUpdatable(true);
                 foundPI.setNew(false);
-                try {
+
+              try {
                     return paymentInstrumentDAO.save(foundPI);
                 } catch (DataIntegrityViolationException e) {
                     logger.error("An attempted update of a instrument using the channel: "
                             + (pi.getChannel()  != null ? pi.getChannel() : "UKNOWN_CHANNEL" )+
                             " was stopped due to data integrity violation");
                 }
+
             } else {
                 if (foundPI.getFiscalCode() != null && !foundPI.getFiscalCode().equals(pi.getFiscalCode())) {
                     throw new PaymentInstrumentOnDifferentUserException(hpan);
