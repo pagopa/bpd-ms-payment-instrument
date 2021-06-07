@@ -14,6 +14,7 @@ import it.gov.pagopa.bpd.payment_instrument.model.PaymentInstrumentServiceModel;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.time.OffsetDateTime;
@@ -85,7 +86,15 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
 //                throw new PaymentInstrumentNumbersExceededException(
 //                        PaymentInstrument.class, numMaxPaymentInstr);
 //            }
-            return paymentInstrumentDAO.save(pi);
+            pi.setNew(true);
+            pi.setUpdatable(false);
+            try {
+                return paymentInstrumentDAO.save(pi);
+            } catch (DataIntegrityViolationException e) {
+                logger.error("An attempted insert of a instrument using the channel: "
+                        + (pi.getChannel()  != null ? pi.getChannel() : "UKNOWN_CHANNEL" )+
+                        " was stopped due to data integrity violation");
+            }
         } else {
             PaymentInstrument foundPI = foundPIOpt.get();
             if (!foundPI.isEnabled()) {
@@ -95,7 +104,17 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
                 foundPI.setFiscalCode(pi.getFiscalCode());
                 foundPI.setStatus(PaymentInstrument.Status.ACTIVE);
                 foundPI.setChannel(pi.getChannel());
-                return paymentInstrumentDAO.save(foundPI);
+                foundPI.setUpdatable(true);
+                foundPI.setNew(false);
+
+              try {
+                    return paymentInstrumentDAO.save(foundPI);
+                } catch (DataIntegrityViolationException e) {
+                    logger.error("An attempted update of a instrument using the channel: "
+                            + (pi.getChannel()  != null ? pi.getChannel() : "UKNOWN_CHANNEL" )+
+                            " was stopped due to data integrity violation");
+                }
+
             } else {
                 if (foundPI.getFiscalCode() != null && !foundPI.getFiscalCode().equals(pi.getFiscalCode())) {
                     throw new PaymentInstrumentOnDifferentUserException(hpan);
@@ -128,6 +147,8 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
             if (newPaymentInstrument.getActivationDate() == null) {
                 newPaymentInstrument.setActivationDate(OffsetDateTime.now());
             }
+            newPaymentInstrument.setNew(true);
+            newPaymentInstrument.setUpdatable(false);
             toSaveOrUpdate.add(newPaymentInstrument);
         }
         for (PaymentInstrument foundPI : piList) {
@@ -138,15 +159,26 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
                 foundPI.setFiscalCode(pi.getFiscalCode());
                 foundPI.setStatus(PaymentInstrument.Status.ACTIVE);
                 foundPI.setChannel(pi.getChannel());
+                foundPI.setNew(false);
+                foundPI.setUpdatable(true);
                 toSaveOrUpdate.add(foundPI);
             } else if (foundPI.getFiscalCode() != null && !foundPI.getFiscalCode().equals(pi.getFiscalCode())) {
                 throw new PaymentInstrumentOnDifferentUserException(hpan);
             }
         }
+
         if (toSaveOrUpdate.size() > 0) {
-            paymentInstrumentDAO.saveAll(toSaveOrUpdate);
+            try {
+                paymentInstrumentDAO.saveAll(toSaveOrUpdate);
+            } catch (DataIntegrityViolationException e) {
+                logger.error("An attempted insert of a instrument using the channel: "
+                        + (pi.getChannel()  != null ? pi.getChannel() : "UKNOWN_CHANNEL" )+
+                        " was stopped due to data integrity violation");
+            }
         }
+
         return pi;
+
     }
 
 //    @Override
@@ -201,7 +233,11 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
             paymentInstrument.setUpdateDate(OffsetDateTime.now());
             paymentInstrument.setEnabled(false);
         }
+
+        paymentInstrument.setUpdatable(true);
+        paymentInstrument.setNew(false);
         paymentInstrumentDAO.save(paymentInstrument);
+
     }
 
 
