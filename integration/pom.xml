@@ -10,6 +10,7 @@
     <groupId>it.gov.pagopa.bpd.ms.payment_instrument</groupId>
     <artifactId>bpd-ms-payment-instrument-integration</artifactId>
     <version>1.1.6_tst</version>
+
     <packaging>pom</packaging>
 
     <modules>
