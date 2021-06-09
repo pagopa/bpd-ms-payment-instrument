@@ -34,3 +34,7 @@ meda:
 logging:
   level:
     it.gov.pagopa.bpd.payment_instrument: ${LOG_LEVEL_BPD_PAYMENT_INSTRUMENT:DEBUG}
+    com.zaxxer.hikari.HikariConfig: ${LOG_LEVEL_BPD_PAYMENT_INSTRUMENT_DATASOURCE_POOL_CONFIG:OFF}
+    com.zaxxer.hikari.pool.HikariPool: ${LOG_LEVEL_BPD_PAYMENT_INSTRUMENT_DATASOURCE_POOL:OFF}
+    org.hibernate.stat: ${LOG_LEVEL_BPD_PAYMENT_INSTRUMENT_HIBERNATE_STAT:OFF}
+    org.hibernate.SQL:  ${LOG_LEVEL_BPD_PAYMENT_INSTRUMENT_HIBERNATE_SQL:OFF}
