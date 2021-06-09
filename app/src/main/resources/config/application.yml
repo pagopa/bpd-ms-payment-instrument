@@ -37,3 +37,4 @@ logging:
     com.zaxxer.hikari.HikariConfig: ${LOG_LEVEL_BPD_PAYMENT_INSTRUMENT_DATASOURCE_POOL_CONFIG:OFF}
     com.zaxxer.hikari.pool.HikariPool: ${LOG_LEVEL_BPD_PAYMENT_INSTRUMENT_DATASOURCE_POOL:OFF}
     org.hibernate: ${LOG_LEVEL_BPD_PAYMENT_INSTRUMENT_HIBERNATE:INFO}
+
