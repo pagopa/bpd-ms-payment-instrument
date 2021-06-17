@@ -101,6 +101,12 @@ class FilterTransactionCommandImpl extends BaseCommand<Boolean> implements Filte
                     OutgoingTransaction outgoingTransaction = transactionMapper.map(transaction);
                     outgoingTransaction.setFiscalCode(checkActivePar.getFiscalCode());
 
+                    if(paymentInstrument != null && paymentInstrument.isPresent()
+                            && (paymentInstrument.get().getHpanMaster()!=null
+                                && !paymentInstrument.get().getHpan().equals(paymentInstrument.get().getHpanMaster()))){
+                        outgoingTransaction.setHpanMaster(paymentInstrument.get().getHpanMaster());
+                    }
+
                     outgoingTransaction.setIsToUpdate(!paymentInstrument.isPresent());
 
                     pointTransactionProducerService.publishPointTransactionEvent(outgoingTransaction);

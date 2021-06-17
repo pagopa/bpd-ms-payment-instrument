@@ -86,4 +86,6 @@ public class OutgoingTransaction {
     @NotNull
     @NotBlank
     Boolean isToUpdate;
+
+    String hpanMaster;
 }
