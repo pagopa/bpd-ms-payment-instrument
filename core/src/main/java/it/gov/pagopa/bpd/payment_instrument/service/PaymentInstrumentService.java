@@ -24,7 +24,9 @@ public interface PaymentInstrumentService {
     @Deprecated
     PaymentInstrument createOrUpdate(String hpan, PaymentInstrument pi);
 
+
     PaymentInstrumentServiceModel createOrUpdate(String hpan, PaymentInstrumentServiceModel pi);
+
 
     void delete(String hpan, String fiscalCode, OffsetDateTime cancellationDate);
 
@@ -43,5 +45,5 @@ public interface PaymentInstrumentService {
 
     List<PaymentInstrumentHistory> findHistory(String fiscalCode, String hpan);
 
-
+    PaymentInstrumentErrorDelete createDeleteErrorRecord(PaymentInstrumentErrorDelete errorRecord);
 }

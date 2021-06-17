@@ -4,8 +4,10 @@ import eu.sia.meda.service.BaseService;
 import it.gov.pagopa.bpd.payment_instrument.assembler.PaymentInstrumentAssembler;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.PaymentInstrumentConverter;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.PaymentInstrumentDAO;
+import it.gov.pagopa.bpd.payment_instrument.connector.jpa.PaymentInstrumentErrorDeleteDAO;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.PaymentInstrumentHistoryReplicaDAO;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.model.PaymentInstrument;
+import it.gov.pagopa.bpd.payment_instrument.connector.jpa.model.PaymentInstrumentErrorDelete;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.model.PaymentInstrumentHistory;
 import it.gov.pagopa.bpd.payment_instrument.exception.PaymentInstrumentDifferentChannelException;
 import it.gov.pagopa.bpd.payment_instrument.exception.PaymentInstrumentNotFoundException;
@@ -29,6 +31,7 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
 
     private final PaymentInstrumentDAO paymentInstrumentDAO;
     private final PaymentInstrumentHistoryReplicaDAO paymentInstrumentHistoryReplicaDAO;
+    private final PaymentInstrumentErrorDeleteDAO paymentInstrumentErrorDeleteDAO;
     private final PaymentInstrumentAssembler paymentInstrumentAssembler;
 
     @Value(value = "${numMaxPaymentInstr}")
@@ -39,10 +42,11 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
     @Autowired
     public PaymentInstrumentServiceImpl(ObjectProvider<PaymentInstrumentDAO> paymentInstrumentDAO,
                                         ObjectProvider<PaymentInstrumentHistoryReplicaDAO> paymentInstrumentHistoryDAO,
-                                        PaymentInstrumentAssembler paymentInstrumentAssembler,
+                                        PaymentInstrumentErrorDeleteDAO paymentInstrumentErrorDeleteDAO, PaymentInstrumentAssembler paymentInstrumentAssembler,
                                         @Value("${core.PaymentInstrumentService.appIOChannel}") String appIOChannel) {
         this.paymentInstrumentDAO = paymentInstrumentDAO.getIfAvailable();
         this.paymentInstrumentHistoryReplicaDAO = paymentInstrumentHistoryDAO.getIfAvailable();
+        this.paymentInstrumentErrorDeleteDAO = paymentInstrumentErrorDeleteDAO;
         this.paymentInstrumentAssembler = paymentInstrumentAssembler;
         this.appIOChannel = appIOChannel;
     }
@@ -290,4 +294,9 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
         return paymentInstrumentHistoryReplicaDAO.find(fiscalCode, hpan);
     }
 
+    @Override
+    public PaymentInstrumentErrorDelete createDeleteErrorRecord(PaymentInstrumentErrorDelete errorRecord){
+
+        return paymentInstrumentErrorDeleteDAO.save(errorRecord);
+    }
 }
