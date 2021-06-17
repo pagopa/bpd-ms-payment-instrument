@@ -8,6 +8,8 @@ import org.springframework.context.annotation.PropertySource;
  */
 
 @Configuration
-@PropertySource("classpath:config/transactionRequestListener.properties")
-public class EventRequestConfig {
-}
+@PropertySource({
+        "classpath:config/transactionRequestListener.properties",
+        "classpath:config/tokenManagementRequestListener.properties"
+})
+public class EventRequestConfig {}

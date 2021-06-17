@@ -66,5 +66,4 @@ public class PaymentInstrumentDAOTest extends BaseCrudJpaDAOTest<PaymentInstrume
     protected String getIdName() {
         return "hpan";
     }
-
 }
