@@ -80,4 +80,12 @@ public class OutgoingTransaction {
     String bin;
 
     String fiscalCode;
+
+    String par;
+
+    @NotNull
+    @NotBlank
+    Boolean isToUpdate;
+
+    String hpanMaster;
 }

@@ -1,6 +1,7 @@
 package it.gov.pagopa.bpd.payment_instrument.command;
 
 import eu.sia.meda.core.command.BaseCommand;
+import it.gov.pagopa.bpd.payment_instrument.connector.jpa.model.PaymentInstrument;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.model.PaymentInstrumentHistory;
 import it.gov.pagopa.bpd.payment_instrument.model.TransactionCommandModel;
 import it.gov.pagopa.bpd.payment_instrument.publisher.model.OutgoingTransaction;
@@ -16,6 +17,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import javax.validation.*;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -72,17 +74,47 @@ class FilterTransactionCommandImpl extends BaseCommand<Boolean> implements Filte
         try {
 
             validateRequest(transaction);
-            PaymentInstrumentHistory checkActive = paymentInstrumentService.checkActive(transaction.getHpan(), transaction.getTrxDate());
 
-            if (checkActive != null) {
+            Optional<PaymentInstrument> paymentInstrument = paymentInstrumentService.findByhpan(transaction.getHpan());
 
-                OutgoingTransaction outgoingTransaction = transactionMapper.map(transaction);
-                outgoingTransaction.setFiscalCode(checkActive.getFiscalCode());
-                pointTransactionProducerService.publishPointTransactionEvent(outgoingTransaction);
+            if (paymentInstrument != null && paymentInstrument.isPresent() && (paymentInstrument.get().getHpan().equals(paymentInstrument.get().getHpanMaster())
+                    || paymentInstrument.get().getHpanMaster() == null)) {
+
+                PaymentInstrumentHistory checkActive = paymentInstrumentService.checkActive(transaction.getHpan(), transaction.getTrxDate());
+
+                if (checkActive != null) {
+
+                    OutgoingTransaction outgoingTransaction = transactionMapper.map(transaction);
+                    outgoingTransaction.setFiscalCode(checkActive.getFiscalCode());
+                    outgoingTransaction.setIsToUpdate(false);
+                    pointTransactionProducerService.publishPointTransactionEvent(outgoingTransaction);
+                } else {
+                    log.info("Met a transaction for an inactive payment instrument on BPD. [{}, {}, {}]",
+                            transaction.getIdTrxAcquirer(), transaction.getAcquirerCode(), transaction.getTrxDate());
+                }
 
             } else {
-                log.info("Met a transaction for an inactive payment instrument on BPD. [{}, {}, {}]",
-                        transaction.getIdTrxAcquirer(), transaction.getAcquirerCode(), transaction.getTrxDate());
+                PaymentInstrumentHistory checkActivePar = paymentInstrumentService.checkActivePar(transaction.getPar(), transaction.getTrxDate());
+
+                if (checkActivePar != null) {
+
+                    OutgoingTransaction outgoingTransaction = transactionMapper.map(transaction);
+                    outgoingTransaction.setFiscalCode(checkActivePar.getFiscalCode());
+
+                    if(paymentInstrument != null && paymentInstrument.isPresent()
+                            && (paymentInstrument.get().getHpanMaster()!=null
+                                && !paymentInstrument.get().getHpan().equals(paymentInstrument.get().getHpanMaster()))){
+                        outgoingTransaction.setHpanMaster(paymentInstrument.get().getHpanMaster());
+                    }
+
+                    outgoingTransaction.setIsToUpdate(!paymentInstrument.isPresent());
+
+                    pointTransactionProducerService.publishPointTransactionEvent(outgoingTransaction);
+
+                } else {
+                    log.info("Met a transaction for an inactive payment instrument on BPD. [{}, {}, {}]",
+                            transaction.getIdTrxAcquirer(), transaction.getAcquirerCode(), transaction.getTrxDate());
+                }
             }
 
             return true;

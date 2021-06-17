@@ -33,5 +33,15 @@ public interface PaymentInstrumentHistoryReplicaDAO extends CrudJpaDAO<PaymentIn
     )
     PaymentInstrumentHistory findActive(@Param("hpan") String hpan, @Param("accountingDate") LocalDate accountingDate);
 
+    @Query(nativeQuery = true,
+            value = "select * " +
+                    "from bpd_payment_instrument_history pih " +
+                    "where pih.par_s = :par " +
+                    "and date_trunc('day',pih.par_activation_t) < :accountingDate " +
+                    "and (:accountingDate <= date_trunc('day',pih.par_deactivation_t) " +
+                    "or pih.par_deactivation_t is null)"
+    )
+    PaymentInstrumentHistory findActivePar(@Param("par") String par, @Param("accountingDate") LocalDate accountingDate);
+
 
 }

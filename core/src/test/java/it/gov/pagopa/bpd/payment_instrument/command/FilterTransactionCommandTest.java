@@ -1,6 +1,7 @@
 package it.gov.pagopa.bpd.payment_instrument.command;
 
 import it.gov.pagopa.bpd.common.BaseTest;
+import it.gov.pagopa.bpd.payment_instrument.connector.jpa.model.PaymentInstrument;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.model.PaymentInstrumentHistory;
 import it.gov.pagopa.bpd.payment_instrument.model.TransactionCommandModel;
 import it.gov.pagopa.bpd.payment_instrument.publisher.model.OutgoingTransaction;
@@ -21,6 +22,7 @@ import org.mockito.Spy;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
+import java.util.Optional;
 
 /**
  * Test class for the FilterTransactionCommand method
@@ -51,6 +53,8 @@ public class FilterTransactionCommandTest extends BaseTest {
         PaymentInstrumentHistory pih = new PaymentInstrumentHistory();
         pih.setFiscalCode("fiscalCode");
         Transaction transaction = getRequestObject();
+        PaymentInstrument pi = new PaymentInstrument();
+        pi.setHpan("hpan");
         OutgoingTransaction outgoingTransaction = transactionMapperSpy.map(transaction);
         outgoingTransaction.setFiscalCode(pih.getFiscalCode());
         FilterTransactionCommand filterTransactionCommand = new FilterTransactionCommandImpl(
@@ -63,6 +67,8 @@ public class FilterTransactionCommandTest extends BaseTest {
 
         try {
 
+            BDDMockito.doReturn(Optional.of(pi)).when(paymentInstrumentServiceMock)
+                    .findByhpan(Mockito.eq("hpan"));
             BDDMockito.doReturn(pih).when(paymentInstrumentServiceMock)
                     .checkActive(Mockito.eq(transaction.getHpan()), Mockito.eq(transaction.getTrxDate()));
             BDDMockito.doNothing().when(pointTransactionProducerServiceMock)
@@ -116,6 +122,8 @@ public class FilterTransactionCommandTest extends BaseTest {
 
         Transaction transaction = getRequestObject();
         OutgoingTransaction outgoingTransaction = transactionMapperSpy.map(transaction);
+        PaymentInstrument pi = new PaymentInstrument();
+        pi.setHpan("hpan");
         FilterTransactionCommand filterTransactionCommand = new FilterTransactionCommandImpl(
                 TransactionCommandModel.builder().payload(transaction).build(),
                 pointTransactionProducerServiceMock,
@@ -125,6 +133,8 @@ public class FilterTransactionCommandTest extends BaseTest {
 
         try {
 
+            BDDMockito.doReturn(Optional.of(pi)).when(paymentInstrumentServiceMock)
+                    .findByhpan(Mockito.eq("hpan"));
             BDDMockito.doReturn(null).when(paymentInstrumentServiceMock)
                     .checkActive(Mockito.eq(transaction.getHpan()), Mockito.eq(transaction.getTrxDate()));
             BDDMockito.doNothing().when(pointTransactionProducerServiceMock)
