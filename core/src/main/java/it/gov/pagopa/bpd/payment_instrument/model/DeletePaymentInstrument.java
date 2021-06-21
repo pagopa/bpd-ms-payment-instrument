@@ -1,5 +1,6 @@
 package it.gov.pagopa.bpd.payment_instrument.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import it.gov.pagopa.bpd.common.util.Constants;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -25,10 +26,12 @@ public class DeletePaymentInstrument {
     @Size(max = 64)
     String hpan;
 
+    @JsonProperty("taxCode")
     @Valid @Size(min = 16, max = 16)
     @Pattern(regexp = Constants.FISCAL_CODE_REGEX)
     String fiscalCode;
 
+    @JsonProperty("timestamp")
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     OffsetDateTime cancellationDate;
 }
