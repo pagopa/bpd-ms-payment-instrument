@@ -62,7 +62,7 @@ variables:
     containerRegistry: '$(PROD_CONTAINER_REGISTRY_NAME)'
     deployment: deployment-prod
     selfHostedAgentPool: $(PROD_AGENT_POOL)
-    mavenGoals: 'deploy'
+    mavenGoals: 'package'
     settingsXmlsecureFileName: '$(SETTINGS_XML_RW_SECURE_FILE_NAME)'
 
 stages:
