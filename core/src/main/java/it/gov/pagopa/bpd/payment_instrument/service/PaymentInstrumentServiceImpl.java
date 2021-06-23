@@ -402,10 +402,10 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
                                         tokenManagerData.getTimestamp()) <= 0) {
                             tokenToUpdate.setLastTkmUpdate(tokenManagerData.getTimestamp());
 
-                            if (!tokenToUpdate.isEnabled()) {
+                            if (!tokenToUpdate.isEnabled() && paymentInstrument.isEnabled()) {
                                 tokenToUpdate.setEnabled(true);
                                 tokenToUpdate.setStatus(PaymentInstrument.Status.ACTIVE);
-                                tokenToUpdate.setActivationDate(tokenManagerData.getTimestamp());
+                                tokenToUpdate.setActivationDate(OffsetDateTime.now());
                             }
 
                             tokenToUpdate.setParActivationDate(paymentInstrument.getParActivationDate());
@@ -424,7 +424,7 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
                             if (tokenToUpdate.isEnabled()) {
                                 tokenToUpdate.setEnabled(false);
                                 tokenToUpdate.setStatus(PaymentInstrument.Status.INACTIVE);
-                                tokenToUpdate.setDeactivationDate(tokenManagerData.getTimestamp());
+                                tokenToUpdate.setDeactivationDate(OffsetDateTime.now());
                             }
 
                             tokenToUpdate.setParActivationDate(paymentInstrument.getParActivationDate());
@@ -436,20 +436,19 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
                     }
 
                 } else {
+                    boolean isEnabled = !htokenData.getHaction().equals("DELETE") && paymentInstrument.isEnabled();
                     PaymentInstrument tokenToInsert = new PaymentInstrument();
                     tokenToInsert.setFiscalCode(paymentInstrument.getFiscalCode());
                     tokenToInsert.setPar(paymentInstrument.getPar());
                     tokenToInsert.setHpan(htokenData.getHtoken());
                     tokenToInsert.setParActivationDate(paymentInstrument.getParActivationDate());
                     tokenToInsert.setParDeactivationDate(parDeactivationDate);
-                    tokenToInsert.setEnabled(!htokenData.getHaction().equals("DELETE"));
-                    tokenToInsert.setStatus(!htokenData.getHaction().equals("DELETE") ?
-                            PaymentInstrument.Status.ACTIVE :
-                            PaymentInstrument.Status.INACTIVE);
+                    tokenToInsert.setEnabled(isEnabled);
+                    tokenToInsert.setStatus(isEnabled ?
+                            PaymentInstrument.Status.ACTIVE : PaymentInstrument.Status.INACTIVE);
                     tokenToInsert.setHpanMaster(paymentInstrument.getHpan());
-                    tokenToInsert.setActivationDate(tokenManagerData.getTimestamp());
-                    tokenToInsert.setDeactivationDate(!htokenData.getHaction().equals("DELETE") ?
-                            null : tokenManagerData.getTimestamp());
+                    tokenToInsert.setActivationDate(OffsetDateTime.now());
+                    tokenToInsert.setDeactivationDate(isEnabled ? null : OffsetDateTime.now());
                     tokenToInsert.setLastTkmUpdate(paymentInstrument.getLastTkmUpdate());
                     tokenToInsert.setLastTkmUpdate(tokenManagerData.getTimestamp());
                     tokensToInsert.add(tokenToInsert);
