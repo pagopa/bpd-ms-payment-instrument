@@ -26,10 +26,10 @@ public class PaymentInstrumentErrorDelete extends BaseEntity {
     String hpan;
 
     @Column(name = "fiscal_code_s")
-    String fiscalCode;
+    String taxCode;
 
     @Column(name = "cancellation_date_s")
-    String cancellationDate;
+    String timestamp;
 
     @Column(name = "exception_message_s")
     String exceptionMessage;

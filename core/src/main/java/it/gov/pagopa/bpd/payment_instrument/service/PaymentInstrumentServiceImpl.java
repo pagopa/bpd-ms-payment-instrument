@@ -178,7 +178,7 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
     }
 
 //    @Override
-//    public void delete(String hpan, String fiscalCode, OffsetDateTime cancellationDate) {
+//    public void delete(String hpan, String fiscalCode, OffsetDateTime timestamp) {
 //
 //        List<PaymentInstrument> piList = paymentInstrumentDAO.findByHpanMasterOrHpan(hpan, hpan);
 //        if (piList == null || piList.isEmpty()) {
