@@ -386,7 +386,7 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
                                         tokenManagerData.getTimestamp()) <= 0) {
                             tokenToUpdate.setLastTkmUpdate(tokenManagerData.getTimestamp());
 
-                            if (!tokenToUpdate.isEnabled()) {
+                            if (!tokenToUpdate.isEnabled() && paymentInstrument.isEnabled()) {
                                 tokenToUpdate.setEnabled(true);
                                 tokenToUpdate.setStatus(PaymentInstrument.Status.ACTIVE);
                                 tokenToUpdate.setActivationDate(OffsetDateTime.now());
@@ -424,20 +424,19 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
                     }
 
                 } else {
+                    boolean isEnabled = !htokenData.getHaction().equals("DELETE") && paymentInstrument.isEnabled();
                     PaymentInstrument tokenToInsert = new PaymentInstrument();
                     tokenToInsert.setFiscalCode(paymentInstrument.getFiscalCode());
                     tokenToInsert.setPar(paymentInstrument.getPar());
                     tokenToInsert.setHpan(htokenData.getHtoken());
                     tokenToInsert.setParActivationDate(paymentInstrument.getParActivationDate());
                     tokenToInsert.setParDeactivationDate(parDeactivationDate);
-                    tokenToInsert.setEnabled(!htokenData.getHaction().equals("DELETE"));
-                    tokenToInsert.setStatus(!htokenData.getHaction().equals("DELETE") ?
-                            PaymentInstrument.Status.ACTIVE :
-                            PaymentInstrument.Status.INACTIVE);
+                    tokenToInsert.setEnabled(isEnabled);
+                    tokenToInsert.setStatus(isEnabled ?
+                            PaymentInstrument.Status.ACTIVE : PaymentInstrument.Status.INACTIVE);
                     tokenToInsert.setHpanMaster(paymentInstrument.getHpan());
                     tokenToInsert.setActivationDate(OffsetDateTime.now());
-                    tokenToInsert.setDeactivationDate(!htokenData.getHaction().equals("DELETE") ?
-                            null : OffsetDateTime.now());
+                    tokenToInsert.setDeactivationDate(isEnabled ? null : OffsetDateTime.now());
                     tokenToInsert.setLastTkmUpdate(paymentInstrument.getLastTkmUpdate());
                     tokenToInsert.setNew(true);
                     tokenToInsert.setUpdatable(false);
