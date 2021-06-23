@@ -44,7 +44,7 @@ public class PaymentInstrumentErrorDeleteDAOTest extends BaseCrudJpaDAOTest<Paym
 
     @Override
     protected void alterEntityToUpdate(PaymentInstrumentErrorDelete entity) {
-        entity.setFiscalCode("alterFiscalCode");
+        entity.setTaxCode("alterFiscalCode");
     }
 
     @Override
