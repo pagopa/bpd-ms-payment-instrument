@@ -77,16 +77,31 @@ class FilterTransactionCommandImpl extends BaseCommand<Boolean> implements Filte
 
             Optional<PaymentInstrument> paymentInstrument = paymentInstrumentService.findByhpan(transaction.getHpan());
 
-            if (paymentInstrument != null && paymentInstrument.isPresent() && (paymentInstrument.get().getHpan().equals(paymentInstrument.get().getHpanMaster())
-                    || paymentInstrument.get().getHpanMaster() == null)) {
+            if (paymentInstrument != null && paymentInstrument.isPresent()) {
 
-                PaymentInstrumentHistory checkActive = paymentInstrumentService.checkActive(transaction.getHpan(), transaction.getTrxDate());
+                PaymentInstrumentHistory checkActive = null;
+
+                if(paymentInstrument.get().getHpan().equals(paymentInstrument.get().getHpanMaster())
+                        || paymentInstrument.get().getHpanMaster() == null){
+                    checkActive = paymentInstrumentService.checkActive(transaction.getHpan(), transaction.getTrxDate());
+
+                }else if(transaction.getPar() != null || paymentInstrument.get().getPar() != null){
+
+                    checkActive = paymentInstrumentService.checkActiveHpanPar(transaction.getPar() != null ? transaction.getPar() : paymentInstrument.get().getPar(),
+                            transaction.getTrxDate(), transaction.getHpan());
+                }
 
                 if (checkActive != null) {
 
                     OutgoingTransaction outgoingTransaction = transactionMapper.map(transaction);
                     outgoingTransaction.setFiscalCode(checkActive.getFiscalCode());
                     outgoingTransaction.setIsToUpdate(false);
+
+                    if(paymentInstrument.get().getHpanMaster()!=null
+                            && !paymentInstrument.get().getHpan().equals(paymentInstrument.get().getHpanMaster())){
+                        outgoingTransaction.setHpanMaster(paymentInstrument.get().getHpanMaster());
+                    }
+
                     pointTransactionProducerService.publishPointTransactionEvent(outgoingTransaction);
                 } else {
                     log.info("Met a transaction for an inactive payment instrument on BPD. [{}, {}, {}]",
@@ -101,13 +116,9 @@ class FilterTransactionCommandImpl extends BaseCommand<Boolean> implements Filte
                     OutgoingTransaction outgoingTransaction = transactionMapper.map(transaction);
                     outgoingTransaction.setFiscalCode(checkActivePar.getFiscalCode());
 
-                    if(paymentInstrument != null && paymentInstrument.isPresent()
-                            && (paymentInstrument.get().getHpanMaster()!=null
-                                && !paymentInstrument.get().getHpan().equals(paymentInstrument.get().getHpanMaster()))){
-                        outgoingTransaction.setHpanMaster(paymentInstrument.get().getHpanMaster());
-                    }
+                    outgoingTransaction.setHpanMaster(checkActivePar.getHpan());
 
-                    outgoingTransaction.setIsToUpdate(!paymentInstrument.isPresent());
+                    outgoingTransaction.setIsToUpdate(true);
 
                     pointTransactionProducerService.publishPointTransactionEvent(outgoingTransaction);
 
