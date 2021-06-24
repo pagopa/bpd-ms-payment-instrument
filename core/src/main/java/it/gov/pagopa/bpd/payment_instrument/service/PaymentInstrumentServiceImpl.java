@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -230,6 +231,11 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
     @Override
     public PaymentInstrumentHistory checkActivePar(String par, OffsetDateTime accountingDate) {
         return paymentInstrumentHistoryReplicaDAO.findActivePar(par, accountingDate.toLocalDate());
+    }
+
+    @Override
+    public PaymentInstrumentHistory checkActiveHpanPar(String par, OffsetDateTime accountingDate, String hpan) {
+        return paymentInstrumentHistoryReplicaDAO.findActiveHpanPar(par, accountingDate.toLocalDate(), hpan);
     }
 
     @Override

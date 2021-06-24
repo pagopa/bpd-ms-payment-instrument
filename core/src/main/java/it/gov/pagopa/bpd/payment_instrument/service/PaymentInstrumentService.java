@@ -34,6 +34,8 @@ public interface PaymentInstrumentService {
 
     PaymentInstrumentHistory checkActivePar(String par, OffsetDateTime accountingDate);
 
+    PaymentInstrumentHistory checkActiveHpanPar(String par, OffsetDateTime accountingDate, String hpan);
+
     void reactivateForRollback(String fiscalCode, OffsetDateTime requestTimestamp);
 
     String getFiscalCode(String hpan);
