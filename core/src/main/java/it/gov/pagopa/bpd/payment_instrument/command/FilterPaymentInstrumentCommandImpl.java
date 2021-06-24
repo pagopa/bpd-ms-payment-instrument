@@ -71,6 +71,8 @@ class FilterPaymentInstrumentCommandImpl extends BaseCommand<Boolean> implements
 
         try {
 
+            log.debug("FilterPaymentInstrumentCommandImpl - execute for hpan {} and par {}", pi.getHpan(), pi.getPar());
+
             validateRequest(pi);
 
             PaymentInstrument paymentInstrument = paymentInstrumentService.findByPar(pi.getPar());
@@ -86,11 +88,14 @@ class FilterPaymentInstrumentCommandImpl extends BaseCommand<Boolean> implements
                     paymentInstrument.setActivationDate(paymentInstrument.getParActivationDate());
                 }
 
+                log.debug("FilterPaymentInstrumentCommandImpl - saving for hpan {} and par {}", pi.getHpan(), pi.getPar());
                 paymentInstrumentService.createOrUpdate(pi.getHpan(), paymentInstrument);
 
                 OutgoingPaymentInstrument outgoingPaymentInstrument = paymentInstrumentMapper.map(pi);
                 outgoingPaymentInstrument.setHpanMaster(paymentInstrument.getHpanMaster());
                 outgoingPaymentInstrument.setFiscalCode(paymentInstrument.getFiscalCode());
+
+                log.debug("FilterPaymentInstrumentCommandImpl - publish on topic for hpan {} and par {}", pi.getHpan(), pi.getPar());
                 ByteArrayOutputStream outPi = tkmPublisherService.cryptOutgoingPaymentInstrument(outgoingPaymentInstrument);
 
                 tkmPublisherService.publishTkmEvent(outPi);
