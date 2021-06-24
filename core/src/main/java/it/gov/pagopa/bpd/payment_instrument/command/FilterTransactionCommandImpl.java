@@ -94,9 +94,18 @@ class FilterTransactionCommandImpl extends BaseCommand<Boolean> implements Filte
                 }
 
             } else {
-                PaymentInstrumentHistory checkActivePar = paymentInstrumentService.checkActivePar(transaction.getPar(), transaction.getTrxDate());
+
+                log.debug("FilterTransactionCommandImpl - Payment instrument with master hpan: {} not present",
+                        transaction.getHpan());
+
+                PaymentInstrumentHistory checkActivePar = paymentInstrumentService.checkActivePar(
+                        transaction.getPar(), transaction.getTrxDate());
 
                 if (checkActivePar != null) {
+
+                    log.debug("FilterTransactionCommandImpl - Payment instrument with hpan: {} contains active par {}" +
+                                    " - isToUpdate {}",
+                            transaction.getHpan(), transaction.getPar(), !paymentInstrument.isPresent());
 
                     OutgoingTransaction outgoingTransaction = transactionMapper.map(transaction);
                     outgoingTransaction.setFiscalCode(checkActivePar.getFiscalCode());
