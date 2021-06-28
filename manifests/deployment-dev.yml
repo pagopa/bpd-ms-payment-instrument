@@ -21,6 +21,8 @@ spec:
             - secretRef:
                 name: postgres-credentials
             - secretRef:
+                name: application-insights
+            - secretRef:
                 name: bpdmspaymentinstrument
             - configMapRef:
                 name: eventhub-logging
