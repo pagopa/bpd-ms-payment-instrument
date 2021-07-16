@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bpdmspaymentinstrument
+spec:
+  replicas: 8
+  selector:
+    matchLabels:
+      app: bpdmspaymentinstrument
+  template:
+    metadata:
+      labels:
+        app: bpdmspaymentinstrument
+      annotations:
+        prometheus.io/path: /actuator/prometheus
+        prometheus.io/port: '8080'
+        prometheus.io/scrape: 'true'
+    spec:
+      containers:
+        - name: bpdmspaymentinstrument
+          image: cstarpacr.azurecr.io/bpdmspaymentinstrument
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - secretRef:
+                name: postgres-credentials
+            - secretRef:
+                name: bpdmspaymentinstrument
+            - secretRef:
+                name: application-insights
+            - configMapRef:
+                name: eventhub-logging
+            - configMapRef:
+                name: eventhub-common
+            - configMapRef:
+                name: bpdmspaymentinstrument
+            - configMapRef:
+                name: jvm
+          resources:
+            limits:
+              cpu: 800m
+              memory: 4Gi
+            requests:
+              cpu: 50m
+              memory: 256Mi
+          imagePullPolicy: Always
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
