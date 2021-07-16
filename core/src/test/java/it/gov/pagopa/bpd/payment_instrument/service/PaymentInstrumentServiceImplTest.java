@@ -31,7 +31,7 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import javax.annotation.PostConstruct;
-import java.time.OffsetDateTime;
+import java.time.*;
 import java.util.*;
 
 import static org.junit.Assert.*;
@@ -515,7 +515,7 @@ public class PaymentInstrumentServiceImplTest {
 
         TokenManagerData tokenManagerData = TokenManagerData.builder()
                 .taxCode(EXISTING_FISCAL_CODE)
-                .timestamp(OffsetDateTime.now())
+                .timestamp(LocalDateTime.now())
                 .cards(Collections.singletonList(tokenManagerDataCard))
                 .build();
 
@@ -574,7 +574,7 @@ public class PaymentInstrumentServiceImplTest {
 
         TokenManagerData tokenManagerData = TokenManagerData.builder()
                 .taxCode(EXISTING_FISCAL_CODE)
-                .timestamp(OffsetDateTime.now())
+                .timestamp(LocalDateTime.now())
                 .cards(Collections.singletonList(tokenManagerDataCard))
                 .build();
 
@@ -654,7 +654,7 @@ public class PaymentInstrumentServiceImplTest {
 
         TokenManagerData tokenManagerData = TokenManagerData.builder()
                 .taxCode(EXISTING_FISCAL_CODE)
-                .timestamp(OffsetDateTime.now())
+                .timestamp(LocalDateTime.now())
                 .cards(Collections.singletonList(tokenManagerDataCard))
                 .build();
 
@@ -720,9 +720,11 @@ public class PaymentInstrumentServiceImplTest {
                 PaymentInstrument.Status.ACTIVE :
                 PaymentInstrument.Status.INACTIVE);
         tokenToInsert.setHpanMaster(paymentInstrument.getHpan());
-        tokenToInsert.setActivationDate(tokenManagerData.getTimestamp());
+        tokenToInsert.setActivationDate(tokenManagerData.getTimestamp().atOffset(
+                ZoneId.systemDefault().getRules().getOffset(Instant.now())));
         tokenToInsert.setDeactivationDate(!htokenData.getHaction().equals("DELETE") ?
-                null : tokenManagerData.getTimestamp());
+                null : tokenManagerData.getTimestamp().atOffset(
+                ZoneId.systemDefault().getRules().getOffset(Instant.now())));
         tokenToInsert.setLastTkmUpdate(paymentInstrument.getLastTkmUpdate());
         tokenToInsert.setNew(true);
         tokenToInsert.setUpdatable(false);

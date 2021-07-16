@@ -22,6 +22,7 @@ import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.TestPropertySource;
 
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.Collections;
@@ -89,7 +90,7 @@ public class OnTokenManagerRequestListenerTest extends BaseEventListenerTest {
 
         return TokenManagerData.builder()
                 .taxCode("fiscalCode")
-                .timestamp(OffsetDateTime.now())
+                .timestamp(LocalDateTime.now())
                 .cards(Collections.singletonList(tokenManagerDataCard))
                 .build();
     }

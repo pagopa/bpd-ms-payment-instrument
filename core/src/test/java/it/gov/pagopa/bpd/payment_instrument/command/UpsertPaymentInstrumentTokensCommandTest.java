@@ -88,7 +88,7 @@ public class UpsertPaymentInstrumentTokensCommandTest extends BaseTest {
 
         return TokenManagerData.builder()
                 .taxCode("fiscalCode")
-                .timestamp(OffsetDateTime.now())
+                .timestamp(OffsetDateTime.now().toLocalDateTime())
                 .cards(Collections.singletonList(tokenManagerDataCard))
                 .build();
     }
