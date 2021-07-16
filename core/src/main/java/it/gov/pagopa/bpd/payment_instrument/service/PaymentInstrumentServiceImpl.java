@@ -346,12 +346,11 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
         boolean toRevoke = false;
 
         if (paymentInstrument.getPar() == null) {
+            paymentInstrument.setPar(card.getPar());
+            paymentInstrument.setParActivationDate(OffsetDateTime.now());
             if (card.getAction().equals("REVOKE")) {
                 log.warn("Attempting to revoke a card that does not have a PAR");
-                return;
-            } else {
-                paymentInstrument.setPar(card.getPar());
-                paymentInstrument.setParActivationDate(OffsetDateTime.now());
+                paymentInstrument.setParDeactivationDate(OffsetDateTime.now());
             }
         } else {
             if (paymentInstrument.getPar().equals(card.getPar())) {
