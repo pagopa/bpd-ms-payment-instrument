@@ -4,8 +4,10 @@ import it.gov.pagopa.bpd.common.connector.jpa.model.BaseEntity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import org.springframework.data.domain.Persistable;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.time.OffsetDateTime;
 
 @Entity
@@ -13,7 +15,13 @@ import java.time.OffsetDateTime;
 @NoArgsConstructor
 @EqualsAndHashCode(of = {"hpan"}, callSuper = false)
 @Table(name = "bpd_payment_instrument")
-public class PaymentInstrument extends BaseEntity {
+public class PaymentInstrument extends BaseEntity implements Serializable,Persistable<String> {
+
+    @Transient
+    private boolean isNew = true;
+
+    @Transient
+    private boolean updatable = false;
 
     @Id
     @Column(name = "hpan_s")
@@ -53,6 +61,32 @@ public class PaymentInstrument extends BaseEntity {
         super.onCreate();
         this.setInsertUser(this.fiscalCode);
     }
+
+    @Override
+    public String getId() {
+        return this.hpan;
+    }
+
+
+    @Override
+    public boolean isNew() {
+        if (!updatable) {
+            return true;
+        } else {
+            return isNew;
+        }
+    }
+
+    @PrePersist
+    @PostLoad
+    void markNotNew() {
+        this.isNew = false;
+    }
+
+    public void setUpdatable(boolean updatable) {
+        this.updatable = updatable;
+    }
+
 }
 
 
