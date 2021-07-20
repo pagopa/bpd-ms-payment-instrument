@@ -408,7 +408,7 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
                     tokensToUpdate.add(tokenInstrument);
                 }
             });
-        } else {
+        } else if (card.getHtokens() != null) {
 
             card.getHtokens().forEach(htokenData -> {
 
