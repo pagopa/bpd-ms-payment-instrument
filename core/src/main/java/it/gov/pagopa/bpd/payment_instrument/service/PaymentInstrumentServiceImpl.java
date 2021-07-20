@@ -2,12 +2,10 @@ package it.gov.pagopa.bpd.payment_instrument.service;
 
 import eu.sia.meda.service.BaseService;
 import it.gov.pagopa.bpd.payment_instrument.assembler.PaymentInstrumentAssembler;
-import it.gov.pagopa.bpd.payment_instrument.connector.jpa.PaymentInstrumentConverter;
-import it.gov.pagopa.bpd.payment_instrument.connector.jpa.PaymentInstrumentDAO;
-import it.gov.pagopa.bpd.payment_instrument.connector.jpa.PaymentInstrumentErrorDeleteDAO;
-import it.gov.pagopa.bpd.payment_instrument.connector.jpa.PaymentInstrumentHistoryReplicaDAO;
+import it.gov.pagopa.bpd.payment_instrument.connector.jpa.*;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.model.PaymentInstrument;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.model.PaymentInstrumentErrorDelete;
+import it.gov.pagopa.bpd.payment_instrument.connector.jpa.model.PaymentInstrumentErrorToken;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.model.PaymentInstrumentHistory;
 import it.gov.pagopa.bpd.payment_instrument.exception.PaymentInstrumentDifferentChannelException;
 import it.gov.pagopa.bpd.payment_instrument.exception.PaymentInstrumentNotFoundException;
@@ -21,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.*;
@@ -37,6 +36,7 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
     private final PaymentInstrumentDAO paymentInstrumentDAO;
     private final PaymentInstrumentHistoryReplicaDAO paymentInstrumentHistoryReplicaDAO;
     private final PaymentInstrumentErrorDeleteDAO paymentInstrumentErrorDeleteDAO;
+    private final PaymentInstrumentErrorTokenDAO paymentInstrumentErrorTokenDAO;
     private final PaymentInstrumentAssembler paymentInstrumentAssembler;
 
     @Value(value = "${numMaxPaymentInstr}")
@@ -47,6 +47,7 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
     @Autowired
     public PaymentInstrumentServiceImpl(ObjectProvider<PaymentInstrumentDAO> paymentInstrumentDAO,
                                         ObjectProvider<PaymentInstrumentHistoryReplicaDAO> paymentInstrumentHistoryDAO,
+                                        PaymentInstrumentErrorTokenDAO paymentInstrumentErrorTokenDAO,
                                         PaymentInstrumentErrorDeleteDAO paymentInstrumentErrorDeleteDAO, PaymentInstrumentAssembler paymentInstrumentAssembler,
                                         @Value("${core.PaymentInstrumentService.appIOChannel}") String appIOChannel) {
         this.paymentInstrumentDAO = paymentInstrumentDAO.getIfAvailable();
@@ -54,6 +55,7 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
         this.paymentInstrumentErrorDeleteDAO = paymentInstrumentErrorDeleteDAO;
         this.paymentInstrumentAssembler = paymentInstrumentAssembler;
         this.appIOChannel = appIOChannel;
+        this.paymentInstrumentErrorTokenDAO = paymentInstrumentErrorTokenDAO;
     }
 
 
@@ -312,6 +314,13 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
         return paymentInstrumentErrorDeleteDAO.save(errorRecord);
     }
 
+
+    @Override
+    public PaymentInstrumentErrorToken createTokenErrorRecord(PaymentInstrumentErrorToken errorRecord){
+        return paymentInstrumentErrorTokenDAO.save(errorRecord);
+    }
+
+
     @Override
     public Boolean manageTokenData(TokenManagerData tokenManagerData) {
 
@@ -322,7 +331,8 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
 
     }
 
-    @Transactional("transactionManagerPrimary")
+    @Transactional(transactionManager = "transactionManagerPrimary",
+            propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     private void managerTokenDataCard(TokenManagerData tokenManagerData, TokenManagerDataCard card) {
 
         Optional<PaymentInstrument> paymentInstrumentOpt =
@@ -338,10 +348,6 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
         OffsetDateTime timestamp = tokenManagerData.getTimestamp().atOffset(
                 ZoneId.systemDefault().getRules().getOffset(Instant.now()));
 
-        if (!paymentInstrument.getFiscalCode().equals(tokenManagerData.getTaxCode())) {
-            log.warn("Card token data update rejected due to wrong fiscal code for hpan");
-            return;
-        }
 
         boolean toRevoke = false;
 
@@ -399,7 +405,7 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
                         tokenInstrument.getLastTkmUpdate().compareTo(timestamp) <= 0)) {
                     tokenInstrument.setEnabled(false);
                     tokenInstrument.setStatus(PaymentInstrument.Status.INACTIVE);
-                    tokenInstrument.setLastTkmUpdate(tokenInstrument.getLastTkmUpdate());
+                    tokenInstrument.setLastTkmUpdate(paymentInstrument.getLastTkmUpdate());
                     tokenInstrument.setDeactivationDate(OffsetDateTime.now());
                     tokenInstrument.setParDeactivationDate(
                             paymentInstrument.getParDeactivationDate());
@@ -413,13 +419,23 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
             card.getHtokens().forEach(htokenData -> {
 
                 Optional<PaymentInstrument> tokenOpt =
-                        paymentInstrumentDAO.findToken(
-                                htokenData.getHtoken(), card.getPar(), tokenManagerData.getTaxCode());
+                        paymentInstrumentDAO.findToken(htokenData.getHtoken());
                 OffsetDateTime parDeactivationDate = paymentInstrument.getParDeactivationDate();
 
                 if (tokenOpt.isPresent()) {
 
                     PaymentInstrument tokenToUpdate = tokenOpt.get();
+
+                    if (!tokenToUpdate.getFiscalCode().equals(paymentInstrument.getFiscalCode())) {
+                        log.warn("attempting to update card token with different a taxCode from the master card");
+                        return;
+                    }
+
+                    if (!tokenToUpdate.getPar().equals(paymentInstrument.getPar())) {
+                        log.warn("attempting to update card token with different a par from the master card");
+                        return;
+                    }
+
                     if (htokenData.getHaction().equals("INSERT_UPDATE")) {
                         if (tokenToUpdate.getLastTkmUpdate() == null ||
                                 tokenToUpdate.getLastTkmUpdate().compareTo(

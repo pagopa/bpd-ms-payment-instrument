@@ -2,10 +2,12 @@ package it.gov.pagopa.bpd.payment_instrument.listener;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.sia.meda.eventlistener.BaseConsumerAwareEventListener;
-import it.gov.pagopa.bpd.payment_instrument.command.FilterPaymentInstrumentCommand;
 import it.gov.pagopa.bpd.payment_instrument.command.UpsertPaymentInstrumentTokensCommand;
+import it.gov.pagopa.bpd.payment_instrument.connector.jpa.model.PaymentInstrumentErrorToken;
 import it.gov.pagopa.bpd.payment_instrument.listener.factory.ModelFactory;
+import it.gov.pagopa.bpd.payment_instrument.listener.factory.TokenPaymentInstrumentErrorModelFactory;
 import it.gov.pagopa.bpd.payment_instrument.model.TokenManagerCommandModel;
+import it.gov.pagopa.bpd.payment_instrument.service.PaymentInstrumentService;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
@@ -25,18 +27,24 @@ import java.nio.charset.StandardCharsets;
 @Slf4j
 public class OnTokenManagerRequestListener extends BaseConsumerAwareEventListener {
 
+    private final TokenPaymentInstrumentErrorModelFactory tokenPaymentInstrumentErrorModelFactory;
+    private final PaymentInstrumentService paymentInstrumentService;
     private final ModelFactory<Pair<byte[], Headers>, TokenManagerCommandModel> tokenManagerCommandModelModelFactory;
     private final BeanFactory beanFactory;
     private final ObjectMapper objectMapper;
 
     @Autowired
     public OnTokenManagerRequestListener(
+            TokenPaymentInstrumentErrorModelFactory tokenPaymentInstrumentErrorModelFactory,
             ModelFactory<Pair<byte[], Headers>, TokenManagerCommandModel> tokenManagerCommandModelModelFactory,
             BeanFactory beanFactory,
-            ObjectMapper objectMapper) {
+            ObjectMapper objectMapper,
+            PaymentInstrumentService paymentInstrumentService) {
         this.tokenManagerCommandModelModelFactory = tokenManagerCommandModelModelFactory;
         this.beanFactory = beanFactory;
         this.objectMapper = objectMapper;
+        this.paymentInstrumentService = paymentInstrumentService;
+        this.tokenPaymentInstrumentErrorModelFactory = tokenPaymentInstrumentErrorModelFactory;
     }
 
 
@@ -89,16 +97,19 @@ public class OnTokenManagerRequestListener extends BaseConsumerAwareEventListene
                 }
             }
 
-            if (tokenManagerCommandModel != null && tokenManagerCommandModel.getPayload() != null) {
-                payloadString = new String(payload, StandardCharsets.UTF_8);
-                error = String.format("Unexpected error during payment instrument processing: %s, %s",
-                        payloadString, e.getMessage());
+            error = String.format("Unexpected error during message processing: %s, %s",
+                    payloadString, e.getMessage());
+
+            if (tokenManagerCommandModel != null &&
+                    tokenManagerCommandModel.getPayload() != null) {
+                PaymentInstrumentErrorToken paymentInstrumentErrorToken =
+                        tokenPaymentInstrumentErrorModelFactory.createModel(payloadString,error);
+                paymentInstrumentService.createTokenErrorRecord(paymentInstrumentErrorToken);
+
             } else if (payload != null) {
                 error = String.format("Something gone wrong during the evaluation of the payload: %s, %s",
                         payloadString, e.getMessage());
-                if (logger.isErrorEnabled()) {
-                    logger.error(error, e);
-                }
+                logger.error(error, e);
             }
 
         }

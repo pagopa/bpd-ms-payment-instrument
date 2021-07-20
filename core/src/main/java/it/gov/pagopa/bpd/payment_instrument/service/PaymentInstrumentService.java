@@ -3,6 +3,7 @@ package it.gov.pagopa.bpd.payment_instrument.service;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.PaymentInstrumentConverter;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.model.PaymentInstrument;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.model.PaymentInstrumentErrorDelete;
+import it.gov.pagopa.bpd.payment_instrument.connector.jpa.model.PaymentInstrumentErrorToken;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.model.PaymentInstrumentHistory;
 import it.gov.pagopa.bpd.payment_instrument.model.PaymentInstrumentServiceModel;
 import it.gov.pagopa.bpd.payment_instrument.model.TokenManagerData;
@@ -48,6 +49,8 @@ public interface PaymentInstrumentService {
     List<PaymentInstrumentHistory> findHistory(String fiscalCode, String hpan);
 
     PaymentInstrumentErrorDelete createDeleteErrorRecord(PaymentInstrumentErrorDelete errorRecord);
+
+    PaymentInstrumentErrorToken createTokenErrorRecord(PaymentInstrumentErrorToken errorRecord);
 
     Boolean manageTokenData(TokenManagerData tokenManagerData);
 

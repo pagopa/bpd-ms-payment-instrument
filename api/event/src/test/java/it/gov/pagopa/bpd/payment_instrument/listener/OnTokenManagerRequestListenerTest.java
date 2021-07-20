@@ -7,11 +7,13 @@ import it.gov.pagopa.bpd.payment_instrument.command.FilterPaymentInstrumentComma
 import it.gov.pagopa.bpd.payment_instrument.command.UpsertPaymentInstrumentTokensCommand;
 import it.gov.pagopa.bpd.payment_instrument.listener.factory.SaveCitizenCommandModelFactory;
 import it.gov.pagopa.bpd.payment_instrument.listener.factory.SaveTokenManagerCommandModelFactory;
+import it.gov.pagopa.bpd.payment_instrument.listener.factory.TokenPaymentInstrumentErrorModelFactory;
 import it.gov.pagopa.bpd.payment_instrument.model.TokenManagerCommandModel;
 import it.gov.pagopa.bpd.payment_instrument.model.TokenManagerData;
 import it.gov.pagopa.bpd.payment_instrument.model.TokenManagerDataCard;
 import it.gov.pagopa.bpd.payment_instrument.model.TokenManagerDataToken;
 import it.gov.pagopa.bpd.payment_instrument.publisher.model.PaymentInstrumentUpdate;
+import it.gov.pagopa.bpd.payment_instrument.service.PaymentInstrumentService;
 import org.junit.Assert;
 import org.junit.Before;
 import org.mockito.BDDMockito;
@@ -41,9 +43,13 @@ public class OnTokenManagerRequestListenerTest extends BaseEventListenerTest {
     @SpyBean
     OnTokenManagerRequestListener onTokenManagerRequestListenerSpy;
     @SpyBean
+    TokenPaymentInstrumentErrorModelFactory tokenPaymentInstrumentErrorModelFactory;
+    @SpyBean
     SaveTokenManagerCommandModelFactory saveTokenManagerCommandModelFactorySpy;
     @MockBean
     UpsertPaymentInstrumentTokensCommand upsertPaymentInstrumentTokensCommandMock;
+    @MockBean
+    PaymentInstrumentService paymentInstrumentService;
 
     @Value("${listeners.eventConfigurations.items.OnTokenManagerRequestListener.topic}")
     private String topic;
@@ -54,8 +60,10 @@ public class OnTokenManagerRequestListenerTest extends BaseEventListenerTest {
         Mockito.reset(
                 onTokenManagerRequestListenerSpy,
                 saveTokenManagerCommandModelFactorySpy,
-                upsertPaymentInstrumentTokensCommandMock);
-        Mockito.doReturn(true).when(upsertPaymentInstrumentTokensCommandMock).execute();
+                upsertPaymentInstrumentTokensCommandMock,
+                paymentInstrumentService,
+                tokenPaymentInstrumentErrorModelFactory);
+        Mockito.doReturn(false).when(upsertPaymentInstrumentTokensCommandMock).execute();
 
     }
 

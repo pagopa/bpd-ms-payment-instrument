@@ -1,10 +1,7 @@
 package it.gov.pagopa.bpd.payment_instrument.service;
 
 import it.gov.pagopa.bpd.payment_instrument.assembler.PaymentInstrumentAssembler;
-import it.gov.pagopa.bpd.payment_instrument.connector.jpa.PaymentInstrumentConverter;
-import it.gov.pagopa.bpd.payment_instrument.connector.jpa.PaymentInstrumentDAO;
-import it.gov.pagopa.bpd.payment_instrument.connector.jpa.PaymentInstrumentErrorDeleteDAO;
-import it.gov.pagopa.bpd.payment_instrument.connector.jpa.PaymentInstrumentHistoryReplicaDAO;
+import it.gov.pagopa.bpd.payment_instrument.connector.jpa.*;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.model.PaymentInstrument;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.model.PaymentInstrumentErrorDelete;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.model.PaymentInstrumentHistory;
@@ -58,6 +55,8 @@ public class PaymentInstrumentServiceImplTest {
 
     @MockBean
     private PaymentInstrumentDAO paymentInstrumentDAOMock;
+    @MockBean
+    private PaymentInstrumentErrorTokenDAO paymentInstrumentErrorTokenDAO;
     @MockBean
     private PaymentInstrumentErrorDeleteDAO paymentInstrumentErrorDeleteDAOMock;
     @MockBean
@@ -592,7 +591,7 @@ public class PaymentInstrumentServiceImplTest {
         tokenToUpdatePI.setActivationDate(OffsetDateTime.now());
         tokenToUpdatePI.setFiscalCode(EXISTING_FISCAL_CODE);
         BDDMockito.doReturn(Optional.of(tokenToUpdatePI)).when(paymentInstrumentDAOMock)
-                .findToken("token2",EXISTING_PAR,EXISTING_FISCAL_CODE);
+                .findToken("token2");
 
         PaymentInstrument tokenToRemovePI = new PaymentInstrument();
         tokenToRemovePI.setHpan("token3");
@@ -600,7 +599,7 @@ public class PaymentInstrumentServiceImplTest {
         tokenToRemovePI.setActivationDate(OffsetDateTime.now());
         tokenToRemovePI.setFiscalCode(EXISTING_FISCAL_CODE);
         BDDMockito.doReturn(Optional.of(tokenToRemovePI)).when(paymentInstrumentDAOMock)
-                .findToken("token3",EXISTING_PAR,EXISTING_FISCAL_CODE);
+                .findToken("token3");
 
         Boolean result = paymentInstrumentService.manageTokenData(tokenManagerData);
 
