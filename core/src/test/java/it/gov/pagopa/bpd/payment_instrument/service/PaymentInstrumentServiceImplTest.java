@@ -427,15 +427,15 @@ public class PaymentInstrumentServiceImplTest {
         PaymentInstrumentErrorDelete paymentInstrumentErrorDelete = new PaymentInstrumentErrorDelete();
         paymentInstrumentErrorDelete.setId("ID1");
         paymentInstrumentErrorDelete.setExceptionMessage("ExceptionMessage");
-        paymentInstrumentErrorDelete.setCancellationDate(OffsetDateTime.now().toString());
+        paymentInstrumentErrorDelete.setTimestamp(OffsetDateTime.now().toString());
         paymentInstrumentErrorDelete.setHpan("hpan");
-        paymentInstrumentErrorDelete.setFiscalCode("testFiscalCode");
+        paymentInstrumentErrorDelete.setTaxCode("testFiscalCode");
 
 
         PaymentInstrumentErrorDelete result = paymentInstrumentService
                 .createDeleteErrorRecord(paymentInstrumentErrorDelete);
         assertNotNull(result);
-        assertEquals("testFiscalCode", result.getFiscalCode());
+        assertEquals("testFiscalCode", result.getTaxCode());
         verify(paymentInstrumentErrorDeleteDAOMock, times(1)).save(any());
     }
 
