@@ -50,4 +50,18 @@ public interface PaymentInstrumentDAO extends CrudJpaDAO<PaymentInstrument, Stri
             @Param("channel") String channel);
 
     List<PaymentInstrument> findByHpanMasterOrHpan(String hpanMaster, String hpan);
+
+    @Modifying
+    @Query("update PaymentInstrument pi " +
+            "set pi.enabled = false," +
+            "pi.updateDate = :updateDate, " +
+            "pi.updateUser = :fiscalCode " +
+            " where pi.fiscalCode = :fiscalCode " +
+            " and pi.enabled = true and" +
+            " pi.insertDate <= :checkDate and " +
+            " (pi.updateDate IS NULL OR pi.updateDate <= :checkDate)")
+    void deactivateCitizenTransactionsIfNotUpdated(@Param("fiscalCode") String fiscalCode,
+                                                   @Param("checkDate") OffsetDateTime checkDate,
+                                                   @Param("updateDate") OffsetDateTime updateDate);
+
 }

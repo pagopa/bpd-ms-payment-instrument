@@ -11,6 +11,7 @@ import it.gov.pagopa.bpd.payment_instrument.exception.PaymentInstrumentDifferent
 import it.gov.pagopa.bpd.payment_instrument.exception.PaymentInstrumentNotFoundException;
 import it.gov.pagopa.bpd.payment_instrument.exception.PaymentInstrumentOnDifferentUserException;
 import it.gov.pagopa.bpd.payment_instrument.model.PaymentInstrumentServiceModel;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,6 +26,7 @@ import java.util.stream.Collectors;
  * @See PaymentInstrumentService
  */
 @Service
+@Slf4j
 class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrumentService {
 
     private final PaymentInstrumentDAO paymentInstrumentDAO;
@@ -268,5 +270,15 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
     public List<PaymentInstrumentHistory> findHistory(String fiscalCode, String hpan) {
         return paymentInstrumentHistoryReplicaDAO.find(fiscalCode, hpan);
     }
+
+    @Override
+    public void deleteByFiscalCodeIfNotUpdated(String fiscalCode, OffsetDateTime updateTime) {
+        if (log.isDebugEnabled()) {
+            log.debug("PaymentInstrumentServiceImpl.deleteByFiscalCodeIfNotUpdated");
+            log.debug("fiscalCode = [" + fiscalCode + "]");
+        }
+        paymentInstrumentDAO.deactivateCitizenTransactionsIfNotUpdated(fiscalCode, updateTime, OffsetDateTime.now());
+    }
+
 
 }
