@@ -1,9 +1,7 @@
 package it.gov.pagopa.bpd.payment_instrument.connector.jpa.model;
 
 import it.gov.pagopa.bpd.common.connector.jpa.model.BaseEntity;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.data.domain.Persistable;
 
 import javax.persistence.*;
@@ -15,13 +13,12 @@ import java.time.OffsetDateTime;
 @NoArgsConstructor
 @EqualsAndHashCode(of = {"hpan"}, callSuper = false)
 @Table(name = "bpd_payment_instrument")
-public class PaymentInstrument extends BaseEntity implements Serializable,Persistable<String> {
+public class PaymentInstrument extends BaseEntity implements Serializable, Persistable<String> {
 
     @Transient
+    @Getter(value = AccessLevel.NONE)
+    @Setter(value = AccessLevel.NONE)
     private boolean isNew = true;
-
-    @Transient
-    private boolean updatable = false;
 
     @Id
     @Column(name = "hpan_s")
@@ -70,21 +67,13 @@ public class PaymentInstrument extends BaseEntity implements Serializable,Persis
 
     @Override
     public boolean isNew() {
-        if (!updatable) {
-            return true;
-        } else {
-            return isNew;
-        }
+        return isNew;
     }
 
     @PrePersist
     @PostLoad
     void markNotNew() {
         this.isNew = false;
-    }
-
-    public void setUpdatable(boolean updatable) {
-        this.updatable = updatable;
     }
 
 }

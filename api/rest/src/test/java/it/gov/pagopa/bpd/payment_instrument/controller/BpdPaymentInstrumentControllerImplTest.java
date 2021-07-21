@@ -18,9 +18,11 @@ import it.gov.pagopa.bpd.payment_instrument.controller.model.PaymentInstrumentDT
 import it.gov.pagopa.bpd.payment_instrument.controller.model.PaymentInstrumentHistoryResource;
 import it.gov.pagopa.bpd.payment_instrument.controller.model.PaymentInstrumentResource;
 import it.gov.pagopa.bpd.payment_instrument.service.PaymentInstrumentService;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentMatcher;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
@@ -41,8 +43,7 @@ import javax.annotation.PostConstruct;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
@@ -66,6 +67,39 @@ public class BpdPaymentInstrumentControllerImplTest {
 
     public static final OffsetDateTime CURRENT_DATE_TIME = OffsetDateTime.now(ZoneOffset.UTC);
 
+    private static class PaymentInstrumentDTOMatcher implements ArgumentMatcher<PaymentInstrumentDTO> {
+        private final PaymentInstrumentDTO expected;
+
+        public PaymentInstrumentDTOMatcher(PaymentInstrumentDTO expected) {
+            this.expected = expected;
+        }
+
+        @Override
+        public boolean matches(PaymentInstrumentDTO obj) {
+            if (obj == null) {
+                return false;
+            }
+
+            Set<String> expectedTokenPanList = expected.getTokenPanList() != null
+                    ? new HashSet<>(expected.getTokenPanList())
+                    : Collections.emptySet();
+            Set<String> actualTokenPanList = obj.getTokenPanList() != null
+                    ? new HashSet<>(obj.getTokenPanList())
+                    : Collections.emptySet();
+
+            return StringUtils.equals(expected.getFiscalCode(), obj.getFiscalCode())
+                    && expected.getActivationDate().isEqual(obj.getActivationDate())
+                    && StringUtils.equals(expected.getChannel(), obj.getChannel())
+                    && expectedTokenPanList.equals(actualTokenPanList);
+        }
+
+        @Override
+        public String toString() {
+            return "PaymentInstrumentDTOMatcher{" +
+                    "expected=" + expected +
+                    '}';
+        }
+    }
 
     @Autowired
     protected MockMvc mvc;
@@ -169,7 +203,7 @@ public class BpdPaymentInstrumentControllerImplTest {
                 PaymentInstrumentResource.class);
         assertNotNull(pageResult);
         verify(paymentInstrumentServiceMock).createOrUpdate(eq("hpan"), (PaymentInstrument) any());
-        verify(paymentInstrumentFactoryMock).createModel(eq(paymentInstrument));
+        verify(paymentInstrumentFactoryMock).createModel(argThat(new PaymentInstrumentDTOMatcher(paymentInstrument)));
         verify(paymentInstrumentResourceAssemblerMock).toResource(any(PaymentInstrument.class));
     }
 
