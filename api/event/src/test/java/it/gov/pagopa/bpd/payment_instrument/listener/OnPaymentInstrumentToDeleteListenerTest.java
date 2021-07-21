@@ -17,6 +17,7 @@ import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.TestPropertySource;
 
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 
 /**
@@ -60,7 +61,7 @@ public class OnPaymentInstrumentToDeleteListenerTest extends BaseEventListenerTe
     @Override
     protected Object getRequestObject() {
         return DeletePaymentInstrument.builder()
-                .cancellationDate(OffsetDateTime.parse("2020-04-09T16:22:45.304Z"))
+                .cancellationDate(LocalDateTime.parse("2020-04-09T16:22:45"))
                 .fiscalCode("AAAAA11A11A111A")
                 .hpan("hpan")
                 .build();

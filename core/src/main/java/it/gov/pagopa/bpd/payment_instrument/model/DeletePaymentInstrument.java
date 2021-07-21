@@ -1,6 +1,9 @@
 package it.gov.pagopa.bpd.payment_instrument.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 import it.gov.pagopa.bpd.common.util.Constants;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -13,6 +16,7 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 
 @Data
@@ -32,6 +36,7 @@ public class DeletePaymentInstrument {
     String fiscalCode;
 
     @JsonProperty("timestamp")
-    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-    OffsetDateTime cancellationDate;
+    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss:SSSS")
+    LocalDateTime cancellationDate;
 }

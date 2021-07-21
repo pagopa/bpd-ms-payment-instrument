@@ -15,6 +15,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
 
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 
 /**
@@ -57,7 +58,7 @@ public class DeletePaymentInstrumentCommandTest extends BaseTest {
 
     protected DeletePaymentInstrument getRequestObject() {
         return DeletePaymentInstrument.builder()
-                .cancellationDate(OffsetDateTime.parse("2020-04-09T16:22:45.304Z"))
+                .cancellationDate(LocalDateTime.parse("2020-04-09T16:22:45"))
                 .hpan("hpan")
                 .fiscalCode("AAAAAA00A00A000A")
                 .build();
