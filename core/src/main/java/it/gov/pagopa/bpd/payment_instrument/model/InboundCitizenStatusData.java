@@ -9,7 +9,7 @@ import java.time.OffsetDateTime;
 
 
 /**
- * Resource model for the data published through {@link it.gov.pagopa.bpd.payment_instrument.command.SaveCitizenStatusData}
+ * Resource model for the data published through {@link it.gov.pagopa.bpd.payment_instrument.command.ProcessCitizenUpdateEventCommand}
  */
 
 
