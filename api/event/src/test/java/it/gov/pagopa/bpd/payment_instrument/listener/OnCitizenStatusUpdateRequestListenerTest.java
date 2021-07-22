@@ -21,7 +21,7 @@ import org.springframework.test.context.TestPropertySource;
 
 import java.time.OffsetDateTime;
 
-import static it.gov.pagopa.bpd.payment_instrument.listener.constants.CItizenStatusEventConstants.ALL_ORIGIN;
+import static it.gov.pagopa.bpd.payment_instrument.listener.constants.CitizenStatusEventConstants.ALL_ORIGIN;
 
 @Import({OnCitizenStatusUpdateRequestListener.class})
 @TestPropertySource(

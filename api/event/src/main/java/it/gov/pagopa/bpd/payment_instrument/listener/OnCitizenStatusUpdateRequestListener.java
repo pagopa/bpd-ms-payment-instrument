@@ -18,8 +18,8 @@ import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
 
-import static it.gov.pagopa.bpd.payment_instrument.listener.constants.CItizenStatusEventConstants.ALL_ORIGIN;
-import static it.gov.pagopa.bpd.payment_instrument.listener.constants.CItizenStatusEventConstants.PAYMENT_INSTRUMENT_ORIGIN;
+import static it.gov.pagopa.bpd.payment_instrument.listener.constants.CitizenStatusEventConstants.ALL_ORIGIN;
+import static it.gov.pagopa.bpd.payment_instrument.listener.constants.CitizenStatusEventConstants.PAYMENT_INSTRUMENT_ORIGIN;
 
 /**
  * Class Extending the {@link BaseEventListener}, manages the inbound requests, and calls on the appropriate
