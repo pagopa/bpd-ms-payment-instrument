@@ -84,6 +84,10 @@ public class OnPaymentInstrumentToDeleteListener extends BaseConsumerAwareEventL
 
         } catch (Exception e) {
 
+            if (logger.isErrorEnabled()) {
+                logger.error("Something gone wrong deleting payment instrument", e);
+            }
+
             String payloadString = "null";
             String error = "Unexpected error during message processing";
 
