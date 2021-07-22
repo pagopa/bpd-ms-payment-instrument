@@ -4,18 +4,17 @@ import eu.sia.meda.core.controller.StatelessController;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.PaymentInstrumentConverter;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.model.PaymentInstrument;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.model.PaymentInstrumentHistory;
+import it.gov.pagopa.bpd.payment_instrument.controller.assembler.ChannelValidationResourceAssembler;
 import it.gov.pagopa.bpd.payment_instrument.controller.assembler.PaymentInstrumentConverterResourceAssembler;
 import it.gov.pagopa.bpd.payment_instrument.controller.assembler.PaymentInstrumentHistoryResourceAssembler;
 import it.gov.pagopa.bpd.payment_instrument.controller.assembler.PaymentInstrumentResourceAssembler;
 import it.gov.pagopa.bpd.payment_instrument.controller.factory.ModelFactory;
-import it.gov.pagopa.bpd.payment_instrument.controller.model.PaymentInstrumentConverterResource;
-import it.gov.pagopa.bpd.payment_instrument.controller.model.PaymentInstrumentDTO;
-import it.gov.pagopa.bpd.payment_instrument.controller.model.PaymentInstrumentHistoryResource;
-import it.gov.pagopa.bpd.payment_instrument.controller.model.PaymentInstrumentResource;
+import it.gov.pagopa.bpd.payment_instrument.controller.model.*;
 import it.gov.pagopa.bpd.payment_instrument.service.PaymentInstrumentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.validation.constraints.NotBlank;
 import java.time.OffsetDateTime;
 import java.util.List;
 
@@ -26,6 +25,7 @@ import java.util.List;
 class BpdPaymentInstrumentControllerImpl extends StatelessController implements BpdPaymentInstrumentController {
 
     private final PaymentInstrumentService paymentInstrumentService;
+    private final ChannelValidationResourceAssembler channelValidationResourceAssembler;
     private final PaymentInstrumentResourceAssembler paymentInstrumentResourceAssembler;
     private final PaymentInstrumentConverterResourceAssembler paymentInstrumentConverterResourceAssembler;
     private final PaymentInstrumentHistoryResourceAssembler paymentInstrumentHistoryResourceAssembler;
@@ -34,6 +34,7 @@ class BpdPaymentInstrumentControllerImpl extends StatelessController implements 
 
     @Autowired
     public BpdPaymentInstrumentControllerImpl(PaymentInstrumentService paymentInstrumentService,
+                                              ChannelValidationResourceAssembler channelValidationResourceAssembler,
                                               PaymentInstrumentResourceAssembler paymentInstrumentResourceAssembler,
                                               PaymentInstrumentConverterResourceAssembler paymentInstrumentConverterResourceAssembler,
                                               PaymentInstrumentHistoryResourceAssembler paymentInstrumentHistoryResourceAssembler,
@@ -43,6 +44,7 @@ class BpdPaymentInstrumentControllerImpl extends StatelessController implements 
         this.paymentInstrumentConverterResourceAssembler = paymentInstrumentConverterResourceAssembler;
         this.paymentInstrumentHistoryResourceAssembler = paymentInstrumentHistoryResourceAssembler;
         this.paymentInstrumentFactory = paymentInstrumentFactory;
+        this.channelValidationResourceAssembler = channelValidationResourceAssembler;
     }
 
 
@@ -136,6 +138,12 @@ class BpdPaymentInstrumentControllerImpl extends StatelessController implements 
     public List<PaymentInstrumentHistoryResource> getPaymentInstrumentHistoryDetails(String fiscalCode, String hpan) {
         List<PaymentInstrumentHistory> pih = paymentInstrumentService.findHistory(fiscalCode, hpan);
         return paymentInstrumentHistoryResourceAssembler.toResource(pih);
+    }
+
+    @Override
+    public ChannelValidationResource validateChannelByFiscalCode(@NotBlank String fiscalCode, @NotBlank String channel) {
+        Boolean result = paymentInstrumentService.validateChannel(fiscalCode, channel);
+        return channelValidationResourceAssembler.toResource(result);
     }
 
 }

@@ -1,6 +1,7 @@
 package it.gov.pagopa.bpd.payment_instrument.service;
 
 import eu.sia.meda.service.BaseService;
+import it.gov.pagopa.bpd.common.connector.jpa.model.BaseEntity;
 import it.gov.pagopa.bpd.payment_instrument.assembler.PaymentInstrumentAssembler;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.PaymentInstrumentConverter;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.PaymentInstrumentDAO;
@@ -209,7 +210,8 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
         if (paymentInstrumentList != null && !paymentInstrumentList.isEmpty()) {
             if (!appIOChannel.equals(channel)) {
                 Set<String> channelSet = new HashSet<>();
-                paymentInstrumentList.stream().filter(pi -> pi.isEnabled()).forEach(pi -> channelSet.add(pi.getChannel()));
+                paymentInstrumentList.stream().filter(
+                        BaseEntity::isEnabled).forEach(pi -> channelSet.add(pi.getChannel()));
 
                 if (channelSet.size() != 0 && (channelSet.size() > 1 || !channelSet.contains(channel))) {
                     throw new PaymentInstrumentDifferentChannelException(fiscalCode);
@@ -218,6 +220,25 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
             paymentInstrumentList.forEach(
                     paymentInstrument -> checkAndDelete(paymentInstrument, fiscalCode, null));
         }
+    }
+
+    @Override
+    public boolean validateChannel(String fiscalCode, String channel) {
+        List<PaymentInstrument> paymentInstrumentList = paymentInstrumentDAO.findByFiscalCode(fiscalCode);
+
+        if (paymentInstrumentList != null && !paymentInstrumentList.isEmpty()) {
+            if (!appIOChannel.equals(channel)) {
+                Set<String> channelSet = new HashSet<>();
+                paymentInstrumentList.stream().filter(
+                        BaseEntity::isEnabled).forEach(pi -> channelSet.add(pi.getChannel()));
+
+                if (channelSet.size() != 0 && (channelSet.size() > 1 || !channelSet.contains(channel))) {
+                    throw new PaymentInstrumentDifferentChannelException(fiscalCode);
+                }
+            }
+        }
+
+        return true;
     }
 
     private void checkAndDelete(PaymentInstrument paymentInstrument,

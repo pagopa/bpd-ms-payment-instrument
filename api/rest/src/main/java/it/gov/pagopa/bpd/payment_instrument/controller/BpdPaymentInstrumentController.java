@@ -6,10 +6,7 @@ import io.swagger.annotations.ApiParam;
 import it.gov.pagopa.bpd.common.annotation.UpperCase;
 import it.gov.pagopa.bpd.common.converter.UpperCaseConverter;
 import it.gov.pagopa.bpd.common.util.Constants;
-import it.gov.pagopa.bpd.payment_instrument.controller.model.PaymentInstrumentConverterResource;
-import it.gov.pagopa.bpd.payment_instrument.controller.model.PaymentInstrumentDTO;
-import it.gov.pagopa.bpd.payment_instrument.controller.model.PaymentInstrumentHistoryResource;
-import it.gov.pagopa.bpd.payment_instrument.controller.model.PaymentInstrumentResource;
+import it.gov.pagopa.bpd.payment_instrument.controller.model.*;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -28,7 +25,6 @@ import java.util.List;
 @Api(tags = "Bonus Pagamenti Digitali payment-instrument Controller")
 @RequestMapping("/bpd/payment-instruments")
 public interface BpdPaymentInstrumentController {
-
 
     @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseStatus(HttpStatus.OK)
@@ -128,5 +124,15 @@ public interface BpdPaymentInstrumentController {
                     String hpan
     );
 
+    @PostMapping(value = "/fiscal-code/{id}/{channel}/validate", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseStatus(HttpStatus.OK)
+    ChannelValidationResource validateChannelByFiscalCode(
+            @ApiParam(value = "${swagger.paymentInstrument.fiscalCode}", required = true)
+            @PathVariable("id")
+            @NotBlank String fiscalCode,
+            @ApiParam(value = "${swagger.paymentInstrument.channel}", required = true)
+            @PathVariable("channel")
+            @NotBlank String channel
+    );
 
 }

@@ -27,6 +27,8 @@ public interface PaymentInstrumentService {
 
     void deleteByFiscalCode(String fiscalCode, String channel);
 
+    boolean validateChannel(String fiscalCode, String channel);
+
     PaymentInstrumentHistory checkActive(String hpan, OffsetDateTime accountingDate);
 
     void reactivateForRollback(String fiscalCode, OffsetDateTime requestTimestamp);

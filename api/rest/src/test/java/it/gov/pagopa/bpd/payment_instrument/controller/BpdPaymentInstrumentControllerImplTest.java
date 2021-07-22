@@ -6,6 +6,7 @@ import eu.sia.meda.config.ArchConfiguration;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.PaymentInstrumentConverter;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.model.PaymentInstrument;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.model.PaymentInstrumentHistory;
+import it.gov.pagopa.bpd.payment_instrument.controller.assembler.ChannelValidationResourceAssembler;
 import it.gov.pagopa.bpd.payment_instrument.controller.assembler.PaymentInstrumentConverterResourceAssembler;
 import it.gov.pagopa.bpd.payment_instrument.controller.assembler.PaymentInstrumentHistoryResourceAssembler;
 import it.gov.pagopa.bpd.payment_instrument.controller.assembler.PaymentInstrumentResourceAssembler;
@@ -66,6 +67,8 @@ public class BpdPaymentInstrumentControllerImplTest {
     private PaymentInstrumentHistoryResourceAssembler paymentInstrumentHistoryResourceAssemblerMock;
     @SpyBean
     private PaymentInstrumentFactory paymentInstrumentFactoryMock;
+    @SpyBean
+    private ChannelValidationResourceAssembler channelValidationResourceAssemblerSpy;
 
     @PostConstruct
     public void configureTest() {
