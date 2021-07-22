@@ -18,6 +18,9 @@ import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
 
+import static it.gov.pagopa.bpd.payment_instrument.listener.constants.CItizenStatusEventConstants.ALL_ORIGIN;
+import static it.gov.pagopa.bpd.payment_instrument.listener.constants.CItizenStatusEventConstants.PAYMENT_INSTRUMENT_ORIGIN;
+
 /**
  * Class Extending the {@link BaseEventListener}, manages the inbound requests, and calls on the appropriate
  * command for the processing logic, associated to the {@link it.gov.pagopa.bpd.payment_instrument.model.InboundCitizenStatusData} payload
@@ -71,9 +74,9 @@ public class OnCitizenStatusUpdateRequestListener extends BaseConsumerAwareEvent
             ProcessCitizenUpdateEventCommand command = beanFactory.getBean(
                     ProcessCitizenUpdateEventCommand.class, processCitizenUpdateEventCommandModel);
 
-            if (!processCitizenUpdateEventCommandModel.getPayload().getApplyTo().equals("all") &&
-                !processCitizenUpdateEventCommandModel.getPayload().getApplyTo().equals("bpd_payment_instrument")) {
-                logger.debug("Processed request refers to an update event not to be applied in bpd_payment_instrument");
+            if (!processCitizenUpdateEventCommandModel.getPayload().getApplyTo().equals(ALL_ORIGIN) &&
+                !processCitizenUpdateEventCommandModel.getPayload().getApplyTo().equals(PAYMENT_INSTRUMENT_ORIGIN)) {
+                logger.debug("Processed request refers to an update event not to be applied in payment_instrument");
                 return;
             }
 
@@ -112,7 +115,7 @@ public class OnCitizenStatusUpdateRequestListener extends BaseConsumerAwareEvent
                                         .updateDateTime(inboundCitizenStatusData.getUpdateDateTime())
                                         .enabled(inboundCitizenStatusData.getEnabled())
                                         .exceptionMessage(error)
-                                        .origin("bpd_payment_instrument")
+                                        .origin(PAYMENT_INSTRUMENT_ORIGIN)
                                         .build()), headers, error)) {
                     log.error("Could not publish transaction processing error");
                     throw e;

@@ -21,6 +21,8 @@ import org.springframework.test.context.TestPropertySource;
 
 import java.time.OffsetDateTime;
 
+import static it.gov.pagopa.bpd.payment_instrument.listener.constants.CItizenStatusEventConstants.ALL_ORIGIN;
+
 @Import({OnCitizenStatusUpdateRequestListener.class})
 @TestPropertySource(
         locations = "classpath:config/testCitizenEventRequestListener.properties",
@@ -73,7 +75,7 @@ public class OnCitizenStatusUpdateRequestListenerTest extends BaseEventListenerT
           InboundCitizenStatusData citizenStatusData = InboundCitizenStatusData.builder()
                     .fiscalCode("fiscalCode")
                     .updateDateTime(OffsetDateTime.parse("2020-04-09T16:22:45.304Z"))
-                    .applyTo("all")
+                    .applyTo(ALL_ORIGIN)
                     .build();
           citizenStatusData.setEnabled(false);
           return citizenStatusData;
