@@ -413,4 +413,14 @@ public class PaymentInstrumentServiceImplTest {
         verify(paymentInstrumentHistoryReplicaDAOMock, times(1)).find(Mockito.any(), Mockito.any());
         BDDMockito.verifyZeroInteractions(paymentInstrumentHistoryReplicaDAOMock);
     }
+
+    @Test
+    public void deleteByFiscalCodeIfNotUpdated_OK() {
+        final String fiscalCode = EXISTING_FISCAL_CODE;
+        paymentInstrumentService.deleteByFiscalCodeIfNotUpdated(fiscalCode, OffsetDateTime.now());
+        verify(paymentInstrumentDAOMock, times(1))
+                .deactivateCitizenTransactionsIfNotUpdated(eq(fiscalCode),any(),any());
+    }
+
+
 }

@@ -55,6 +55,8 @@ public class ProcessCitizenUpdateEventCommandImplTest extends BaseTest {
         Boolean executed = saveTransactionCommand.doExecute();
         Mockito.verify(citizenStatusDataMapperSpy).map(Mockito.eq(inboundCitizenStatusData));
         Mockito.verify(citizenStatusUpdateService).checkAndCreate(Mockito.eq(citizenStatusData));
+        Mockito.verify(paymentInstrumentService).deleteByFiscalCodeIfNotUpdated(
+                Mockito.eq(getRequestModel().getFiscalCode()), Mockito.eq(getRequestModel().getUpdateDateTime()));
         Assert.assertTrue(executed);
 
     }
@@ -75,6 +77,7 @@ public class ProcessCitizenUpdateEventCommandImplTest extends BaseTest {
         Boolean executed = saveTransactionCommand.doExecute();
         Mockito.verify(citizenStatusDataMapperSpy).map(Mockito.eq(inboundCitizenStatusData));
         Mockito.verify(citizenStatusUpdateService).checkAndCreate(Mockito.eq(citizenStatusData));
+        Mockito.verifyNoMoreInteractions(paymentInstrumentService);
         Assert.assertTrue(executed);
 
     }
