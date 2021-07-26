@@ -36,7 +36,6 @@ public class PaymentInstrumentDAOTest extends BaseCrudJpaDAOTest<PaymentInstrume
     @Override
     protected void setId(PaymentInstrument entity, String id) {
         entity.setHpan(id);
-        entity.setUpdatable(true);
     }
 
     @Override
@@ -47,7 +46,6 @@ public class PaymentInstrumentDAOTest extends BaseCrudJpaDAOTest<PaymentInstrume
     @Override
     protected void alterEntityToUpdate(PaymentInstrument entity) {
         entity.setStatus(PaymentInstrument.Status.INACTIVE);
-        entity.setUpdatable(true);
     }
 
     @Override

@@ -4,7 +4,6 @@ import it.gov.pagopa.bpd.common.connector.jpa.CustomJpaRepository;
 import it.gov.pagopa.bpd.common.connector.jpa.ReadOnlyRepository;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
@@ -26,10 +25,6 @@ import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Properties;
 
 @Configuration
 @PropertySource("classpath:config/PaymentInstrumentSecondaryJpaConnectionConfig.properties")
@@ -77,8 +72,12 @@ public class PaymentInstrumentSecondaryJpaConfig {
             ObjectProvider<EntityManagerFactoryBuilderCustomizer> customizers) {
         AbstractJpaVendorAdapter adapter = new HibernateJpaVendorAdapter();
         adapter.setShowSql(properties.isShowSql());
-        adapter.setDatabase(properties.determineDatabase(dataSource));
-        adapter.setDatabasePlatform(properties.getDatabasePlatform());
+        if (properties.getDatabase() != null) {
+            adapter.setDatabase(properties.getDatabase());
+        }
+        if (properties.getDatabasePlatform() != null) {
+            adapter.setDatabasePlatform(properties.getDatabasePlatform());
+        }
         adapter.setGenerateDdl(properties.isGenerateDdl());
 
         EntityManagerFactoryBuilder builder = new EntityManagerFactoryBuilder(
