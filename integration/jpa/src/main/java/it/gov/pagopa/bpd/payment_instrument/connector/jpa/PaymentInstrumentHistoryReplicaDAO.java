@@ -39,7 +39,7 @@ public interface PaymentInstrumentHistoryReplicaDAO extends CrudJpaDAO<PaymentIn
                     "where pih.par_s = :par " +
                     "and date_trunc('day',pih.par_activation_t) < :accountingDate " +
                     "and (:accountingDate <= date_trunc('day',pih.par_deactivation_t) " +
-                    "or pih.par_deactivation_t is null)"
+                    "or pih.par_deactivation_t is null) limit 1"
     )
     PaymentInstrumentHistory findActivePar(@Param("par") String par, @Param("accountingDate") LocalDate accountingDate);
 
