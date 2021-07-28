@@ -98,8 +98,10 @@ class FilterTransactionCommandImpl extends BaseCommand<Boolean> implements Filte
                 log.debug("FilterTransactionCommandImpl - Payment instrument with master hpan: {} not present",
                         transaction.getHpan());
 
+                String par = transaction.getPar() == null || transaction.getPar().equals("") ? paymentInstrument.get().getPar() : transaction.getPar();
+
                 PaymentInstrumentHistory checkActivePar = paymentInstrumentService.checkActivePar(
-                        transaction.getPar(), transaction.getTrxDate());
+                       par, transaction.getTrxDate());
 
                 if (checkActivePar != null) {
 
