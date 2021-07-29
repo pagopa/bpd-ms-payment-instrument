@@ -2,7 +2,10 @@ package it.gov.pagopa.bpd.payment_instrument.controller;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import eu.sia.meda.config.ArchConfiguration;
+import eu.sia.meda.DummyConfiguration;
+import eu.sia.meda.error.config.LocalErrorConfig;
+import eu.sia.meda.error.handler.MedaExceptionHandler;
+import eu.sia.meda.error.service.impl.LocalErrorManagerServiceImpl;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.PaymentInstrumentConverter;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.model.PaymentInstrument;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.model.PaymentInstrumentHistory;
@@ -15,29 +18,32 @@ import it.gov.pagopa.bpd.payment_instrument.controller.model.PaymentInstrumentDT
 import it.gov.pagopa.bpd.payment_instrument.controller.model.PaymentInstrumentHistoryResource;
 import it.gov.pagopa.bpd.payment_instrument.controller.model.PaymentInstrumentResource;
 import it.gov.pagopa.bpd.payment_instrument.service.PaymentInstrumentService;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentMatcher;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 import javax.annotation.PostConstruct;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
@@ -45,17 +51,60 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = {BpdPaymentInstrumentControllerImpl.class})
-@AutoConfigureMockMvc(secure = false)
-@EnableWebMvc
+@WebMvcTest(value = {BpdPaymentInstrumentControllerImpl.class}, excludeAutoConfiguration = SecurityAutoConfiguration.class)
+@ContextConfiguration(classes = {
+        BpdPaymentInstrumentControllerImpl.class,
+        DummyConfiguration.class,
+        MedaExceptionHandler.class,
+        LocalErrorManagerServiceImpl.class
+})
+@Import(LocalErrorConfig.class)
+@TestPropertySource(properties = {
+        "error-manager.enabled=true",
+        "spring.application.name=bpd-ms-payment-instrument-api-rest"
+})
 public class BpdPaymentInstrumentControllerImplTest {
 
     public static final OffsetDateTime CURRENT_DATE_TIME = OffsetDateTime.now(ZoneOffset.UTC);
 
+    private static class PaymentInstrumentDTOMatcher implements ArgumentMatcher<PaymentInstrumentDTO> {
+        private final PaymentInstrumentDTO expected;
+
+        public PaymentInstrumentDTOMatcher(PaymentInstrumentDTO expected) {
+            this.expected = expected;
+        }
+
+        @Override
+        public boolean matches(PaymentInstrumentDTO obj) {
+            if (obj == null) {
+                return false;
+            }
+
+            Set<String> expectedTokenPanList = expected.getTokenPanList() != null
+                    ? new HashSet<>(expected.getTokenPanList())
+                    : Collections.emptySet();
+            Set<String> actualTokenPanList = obj.getTokenPanList() != null
+                    ? new HashSet<>(obj.getTokenPanList())
+                    : Collections.emptySet();
+
+            return StringUtils.equals(expected.getFiscalCode(), obj.getFiscalCode())
+                    && expected.getActivationDate().isEqual(obj.getActivationDate())
+                    && StringUtils.equals(expected.getChannel(), obj.getChannel())
+                    && expectedTokenPanList.equals(actualTokenPanList);
+        }
+
+        @Override
+        public String toString() {
+            return "PaymentInstrumentDTOMatcher{" +
+                    "expected=" + expected +
+                    '}';
+        }
+    }
 
     @Autowired
     protected MockMvc mvc;
-    protected ObjectMapper objectMapper = new ArchConfiguration().objectMapper();
+    @Autowired
+    protected ObjectMapper objectMapper;
     @MockBean
     private PaymentInstrumentService paymentInstrumentServiceMock;
     @SpyBean
@@ -128,8 +177,8 @@ public class BpdPaymentInstrumentControllerImplTest {
     public void find() throws Exception {
         MvcResult result = mvc.perform(MockMvcRequestBuilders
                 .get("/bpd/payment-instruments/hpan?fiscalCode=DHFIVD85M84D048L")
-                .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)
-                .accept(MediaType.APPLICATION_JSON_UTF8_VALUE))
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .accept(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(MockMvcResultMatchers.status().is2xxSuccessful())
                 .andReturn();
         PaymentInstrumentResource pageResult = objectMapper.readValue(result.getResponse().getContentAsString(),
@@ -145,8 +194,8 @@ public class BpdPaymentInstrumentControllerImplTest {
         paymentInstrument.setFiscalCode("DHFIVD85M84D048L");
         paymentInstrument.setActivationDate(CURRENT_DATE_TIME);
         MvcResult result = mvc.perform(MockMvcRequestBuilders.put("/bpd/payment-instruments/hpan")
-                .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)
-                .accept(MediaType.APPLICATION_JSON_UTF8_VALUE)
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .accept(MediaType.APPLICATION_JSON_VALUE)
                 .content(objectMapper.writeValueAsString(paymentInstrument)))
                 .andExpect(MockMvcResultMatchers.status().is2xxSuccessful())
                 .andReturn();
@@ -154,7 +203,7 @@ public class BpdPaymentInstrumentControllerImplTest {
                 PaymentInstrumentResource.class);
         assertNotNull(pageResult);
         verify(paymentInstrumentServiceMock).createOrUpdate(eq("hpan"), (PaymentInstrument) any());
-        verify(paymentInstrumentFactoryMock).createModel(eq(paymentInstrument));
+        verify(paymentInstrumentFactoryMock).createModel(argThat(new PaymentInstrumentDTOMatcher(paymentInstrument)));
         verify(paymentInstrumentResourceAssemblerMock).toResource(any(PaymentInstrument.class));
     }
 
@@ -202,8 +251,8 @@ public class BpdPaymentInstrumentControllerImplTest {
         converter.setCount(1L);
         MvcResult result = mvc.perform(MockMvcRequestBuilders
                 .get("/bpd/payment-instruments/number/fiscalCode?channel=channel")
-                .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)
-                .accept(MediaType.APPLICATION_JSON_UTF8_VALUE))
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .accept(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(MockMvcResultMatchers.status().is2xxSuccessful())
                 .andReturn();
 
@@ -224,8 +273,8 @@ public class BpdPaymentInstrumentControllerImplTest {
         instrumentHistoryResource.setActivationDate(OffsetDateTime.now());
         MvcResult result = mvc.perform(MockMvcRequestBuilders
                 .get("/bpd/payment-instruments/DHFIVD85M84D048L/history?hpan=hpan")
-                .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)
-                .accept(MediaType.APPLICATION_JSON_UTF8_VALUE))
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .accept(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(MockMvcResultMatchers.status().is2xxSuccessful())
                 .andReturn();
 

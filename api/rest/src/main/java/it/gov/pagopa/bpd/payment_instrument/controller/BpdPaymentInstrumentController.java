@@ -30,7 +30,7 @@ import java.util.List;
 public interface BpdPaymentInstrumentController {
 
 
-    @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
     PaymentInstrumentResource find(
             @ApiParam(value = "${swagger.paymentInstrument.hpan}", required = true)
@@ -45,7 +45,7 @@ public interface BpdPaymentInstrumentController {
                     String fiscalCode
     );
 
-    @PutMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @PutMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
     PaymentInstrumentResource update(
             @ApiParam(value = "${swagger.paymentInstrument.hpan}", required = true)
@@ -54,7 +54,7 @@ public interface BpdPaymentInstrumentController {
                     String hpan,
             @RequestBody @Valid PaymentInstrumentDTO paymentInstrument);
 
-    @DeleteMapping(value = "/fiscal-code/{id}/{channel}", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @DeleteMapping(value = "/fiscal-code/{id}/{channel}", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.NO_CONTENT)
     void deleteByFiscalCode(
             @ApiParam(value = "${swagger.paymentInstrument.fiscalCode}", required = true)
@@ -65,7 +65,7 @@ public interface BpdPaymentInstrumentController {
             @NotBlank String channel
     );
 
-    @DeleteMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @DeleteMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.NO_CONTENT)
     void delete(
             @ApiParam(value = "${swagger.paymentInstrument.hpan}", required = true)
@@ -80,7 +80,7 @@ public interface BpdPaymentInstrumentController {
                     OffsetDateTime cancellationDate
     );
 
-    @PutMapping(value = "/rollback/{fiscalCode}", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @PutMapping(value = "/rollback/{fiscalCode}", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.NO_CONTENT)
     void rollback(
             @ApiParam(required = true)
@@ -91,7 +91,7 @@ public interface BpdPaymentInstrumentController {
                     OffsetDateTime requestTimestamp
     );
 
-    @GetMapping(value = "/{id}/history/active", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @GetMapping(value = "/{id}/history/active", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
     boolean checkActive(
             @ApiParam(value = "${swagger.paymentInstrument.hpan}", required = true)
@@ -101,7 +101,7 @@ public interface BpdPaymentInstrumentController {
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime accountingDate
     );
 
-    @GetMapping(value = "/number/{fiscalCode}", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @GetMapping(value = "/number/{fiscalCode}", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
     @Deprecated
     List<PaymentInstrumentConverterResource> getPaymentInstrumentNumber(
@@ -115,7 +115,7 @@ public interface BpdPaymentInstrumentController {
                     String channel
     );
 
-    @GetMapping(value = "/{fiscalCode}/history", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @GetMapping(value = "/{fiscalCode}/history", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
     List<PaymentInstrumentHistoryResource> getPaymentInstrumentHistoryDetails(
             @ApiParam(value = "${swagger.paymentInstrument.fiscalCode}", required = true)
