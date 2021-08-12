@@ -78,14 +78,10 @@ public interface PaymentInstrumentDAO extends CrudJpaDAO<PaymentInstrument, Stri
     );
 
     @Query("select bpi from PaymentInstrument bpi" +
-            " where bpi.hpan = :htoken and" +
-            " bpi.par = :par and" +
-            " bpi.fiscalCode = :taxCode"
+            " where bpi.hpan = :htoken"
     )
     Optional<PaymentInstrument> findToken(
-            @Param("htoken") String htoken,
-            @Param("par") String par,
-            @Param("taxCode") String taxCode
+            @Param("htoken") String htoken
     );
 
 }

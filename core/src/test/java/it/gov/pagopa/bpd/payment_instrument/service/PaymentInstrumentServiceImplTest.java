@@ -1,10 +1,7 @@
 package it.gov.pagopa.bpd.payment_instrument.service;
 
 import it.gov.pagopa.bpd.payment_instrument.assembler.PaymentInstrumentAssembler;
-import it.gov.pagopa.bpd.payment_instrument.connector.jpa.PaymentInstrumentConverter;
-import it.gov.pagopa.bpd.payment_instrument.connector.jpa.PaymentInstrumentDAO;
-import it.gov.pagopa.bpd.payment_instrument.connector.jpa.PaymentInstrumentErrorDeleteDAO;
-import it.gov.pagopa.bpd.payment_instrument.connector.jpa.PaymentInstrumentHistoryReplicaDAO;
+import it.gov.pagopa.bpd.payment_instrument.connector.jpa.*;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.model.PaymentInstrument;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.model.PaymentInstrumentErrorDelete;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.model.PaymentInstrumentHistory;
@@ -31,7 +28,7 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import javax.annotation.PostConstruct;
-import java.time.OffsetDateTime;
+import java.time.*;
 import java.util.*;
 
 import static org.junit.Assert.*;
@@ -58,6 +55,10 @@ public class PaymentInstrumentServiceImplTest {
 
     @MockBean
     private PaymentInstrumentDAO paymentInstrumentDAOMock;
+    @MockBean
+    private PaymentInstrumentErrorDeleteDAO paymentInstrumentErrorDeleteDAOMock;
+    @MockBean
+    private PaymentInstrumentErrorTokenDAO paymentInstrumentErrorTokenDAO;
     @MockBean
     private PaymentInstrumentErrorDeleteDAO paymentInstrumentErrorDeleteDAOMock;
     @MockBean
@@ -476,13 +477,13 @@ public class PaymentInstrumentServiceImplTest {
         paymentInstrumentErrorDelete.setHpan("hpan");
         paymentInstrumentErrorDelete.setFiscalCode("testFiscalCode");
 
+
         PaymentInstrumentErrorDelete result = paymentInstrumentService
                 .createDeleteErrorRecord(paymentInstrumentErrorDelete);
         assertNotNull(result);
         assertEquals("testFiscalCode", result.getFiscalCode());
         verify(paymentInstrumentErrorDeleteDAOMock, times(1)).save(any());
     }
-
 
     @Test
     public void manageTokenData_OK_PersistedDataWithNoPar() {
@@ -515,7 +516,7 @@ public class PaymentInstrumentServiceImplTest {
 
         TokenManagerData tokenManagerData = TokenManagerData.builder()
                 .taxCode(EXISTING_FISCAL_CODE)
-                .timestamp(OffsetDateTime.now())
+                .timestamp(LocalDateTime.now())
                 .cards(Collections.singletonList(tokenManagerDataCard))
                 .build();
 
@@ -574,7 +575,7 @@ public class PaymentInstrumentServiceImplTest {
 
         TokenManagerData tokenManagerData = TokenManagerData.builder()
                 .taxCode(EXISTING_FISCAL_CODE)
-                .timestamp(OffsetDateTime.now())
+                .timestamp(LocalDateTime.now())
                 .cards(Collections.singletonList(tokenManagerDataCard))
                 .build();
 
@@ -592,7 +593,7 @@ public class PaymentInstrumentServiceImplTest {
         tokenToUpdatePI.setActivationDate(OffsetDateTime.now());
         tokenToUpdatePI.setFiscalCode(EXISTING_FISCAL_CODE);
         BDDMockito.doReturn(Optional.of(tokenToUpdatePI)).when(paymentInstrumentDAOMock)
-                .findToken("token2",EXISTING_PAR,EXISTING_FISCAL_CODE);
+                .findToken("token2");
 
         PaymentInstrument tokenToRemovePI = new PaymentInstrument();
         tokenToRemovePI.setHpan("token3");
@@ -600,7 +601,7 @@ public class PaymentInstrumentServiceImplTest {
         tokenToRemovePI.setActivationDate(OffsetDateTime.now());
         tokenToRemovePI.setFiscalCode(EXISTING_FISCAL_CODE);
         BDDMockito.doReturn(Optional.of(tokenToRemovePI)).when(paymentInstrumentDAOMock)
-                .findToken("token3",EXISTING_PAR,EXISTING_FISCAL_CODE);
+                .findToken("token3");
 
         Boolean result = paymentInstrumentService.manageTokenData(tokenManagerData);
 
@@ -654,7 +655,7 @@ public class PaymentInstrumentServiceImplTest {
 
         TokenManagerData tokenManagerData = TokenManagerData.builder()
                 .taxCode(EXISTING_FISCAL_CODE)
-                .timestamp(OffsetDateTime.now())
+                .timestamp(LocalDateTime.now())
                 .cards(Collections.singletonList(tokenManagerDataCard))
                 .build();
 
@@ -720,14 +721,16 @@ public class PaymentInstrumentServiceImplTest {
                 PaymentInstrument.Status.ACTIVE :
                 PaymentInstrument.Status.INACTIVE);
         tokenToInsert.setHpanMaster(paymentInstrument.getHpan());
-        tokenToInsert.setActivationDate(tokenManagerData.getTimestamp());
+        tokenToInsert.setActivationDate(tokenManagerData.getTimestamp().atOffset(
+                ZoneId.systemDefault().getRules().getOffset(Instant.now())));
         tokenToInsert.setDeactivationDate(!htokenData.getHaction().equals("DELETE") ?
-                null : tokenManagerData.getTimestamp());
+                null : tokenManagerData.getTimestamp().atOffset(
+                ZoneId.systemDefault().getRules().getOffset(Instant.now())));
         tokenToInsert.setLastTkmUpdate(paymentInstrument.getLastTkmUpdate());
+        tokenToInsert.setNew(true);
+        tokenToInsert.setUpdatable(false);
         return tokenToInsert;
     }
-
-
 
 
 }

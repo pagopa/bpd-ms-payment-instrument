@@ -9,8 +9,8 @@ import org.springframework.context.annotation.PropertySource;
 
 @Configuration
 @PropertySource({"classpath:config/transactionRequestListener.properties",
-        "classpath:config/paymentInstrumentToDeleteListener.properties",
         "classpath:config/citizenRequestListener.properties",
-        "classpath:config/tokenManagementRequestListener.properties"
-})
-public class EventRequestConfig {}
+        "classpath:config/paymentInstrumentToDeleteListener.properties",
+        "classpath:config/tokenManagementRequestListener.properties"})
+public class EventRequestConfig {
+}

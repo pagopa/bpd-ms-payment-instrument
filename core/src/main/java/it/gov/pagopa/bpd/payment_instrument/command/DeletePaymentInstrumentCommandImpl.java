@@ -13,6 +13,8 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import javax.validation.*;
+import java.time.Instant;
+import java.time.ZoneId;
 import java.util.Set;
 
 /**
@@ -65,8 +67,11 @@ class DeletePaymentInstrumentCommandImpl extends BaseCommand<Boolean> implements
                         deletePaymentInstrument.getFiscalCode() + ", " +
                         deletePaymentInstrument.getCancellationDate());
             }
-            paymentInstrumentService.delete(deletePaymentInstrument.getHpan()
-                    ,deletePaymentInstrument.getFiscalCode(),deletePaymentInstrument.getCancellationDate());
+            paymentInstrumentService.delete(
+                    deletePaymentInstrument.getHpan(),
+                    deletePaymentInstrument.getFiscalCode(),
+                    deletePaymentInstrument.getCancellationDate().atOffset(
+                            ZoneId.systemDefault().getRules().getOffset(Instant.now())));
 
             if (logger.isDebugEnabled()) {
                 logger.debug("Deleted payment instrument: " +
