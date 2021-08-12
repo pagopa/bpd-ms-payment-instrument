@@ -9,7 +9,6 @@ import it.gov.pagopa.bpd.payment_instrument.connector.jpa.PaymentInstrumentHisto
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.*;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.model.PaymentInstrument;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.model.PaymentInstrumentErrorDelete;
-import it.gov.pagopa.bpd.payment_instrument.connector.jpa.model.PaymentInstrumentErrorDelete;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.model.PaymentInstrumentErrorToken;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.model.PaymentInstrumentHistory;
 import it.gov.pagopa.bpd.payment_instrument.exception.PaymentInstrumentDifferentChannelException;
@@ -25,7 +24,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.*;
@@ -43,7 +41,6 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
     private final PaymentInstrumentHistoryReplicaDAO paymentInstrumentHistoryReplicaDAO;
     private final PaymentInstrumentErrorDeleteDAO paymentInstrumentErrorDeleteDAO;
     private final PaymentInstrumentErrorTokenDAO paymentInstrumentErrorTokenDAO;
-    private final PaymentInstrumentErrorDeleteDAO paymentInstrumentErrorDeleteDAO;
     private final PaymentInstrumentAssembler paymentInstrumentAssembler;
 
     @Value(value = "${numMaxPaymentInstr}")
@@ -55,7 +52,6 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
     public PaymentInstrumentServiceImpl(ObjectProvider<PaymentInstrumentDAO> paymentInstrumentDAO,
                                         ObjectProvider<PaymentInstrumentHistoryReplicaDAO> paymentInstrumentHistoryDAO,
                                         PaymentInstrumentErrorTokenDAO paymentInstrumentErrorTokenDAO,
-                                        PaymentInstrumentErrorDeleteDAO paymentInstrumentErrorDeleteDAO, PaymentInstrumentAssembler paymentInstrumentAssembler,
                                         PaymentInstrumentErrorDeleteDAO paymentInstrumentErrorDeleteDAO, PaymentInstrumentAssembler paymentInstrumentAssembler,
                                         @Value("${core.PaymentInstrumentService.appIOChannel}") String appIOChannel) {
         this.paymentInstrumentDAO = paymentInstrumentDAO.getIfAvailable();
@@ -280,16 +276,6 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
     }
 
     @Override
-    public Optional<PaymentInstrument> findByhpan(String hpan) {
-        return paymentInstrumentDAO.findById(hpan);
-    }
-
-    @Override
-    public PaymentInstrumentHistory checkActivePar(String par, OffsetDateTime accountingDate) {
-        return paymentInstrumentHistoryReplicaDAO.findActivePar(par, accountingDate.toLocalDate());
-    }
-
-    @Override
     public void reactivateForRollback(String fiscalCode, OffsetDateTime requestTimestamp) {
         OffsetDateTime updateDateTime = OffsetDateTime.now();
         paymentInstrumentDAO.reactivateForRollback(fiscalCode, requestTimestamp, updateDateTime);
@@ -390,8 +376,6 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
         if (paymentInstrument.getLastTkmUpdate() == null || paymentInstrument
                 .getLastTkmUpdate().compareTo(timestamp) < 0) {
             paymentInstrument.setLastTkmUpdate(timestamp);
-            paymentInstrument.setNew(false);
-            paymentInstrument.setUpdatable(true);
             paymentInstrumentDAO.update(paymentInstrument);
         }
 
@@ -411,8 +395,6 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
                     tokenInstrument.setDeactivationDate(OffsetDateTime.now());
                     tokenInstrument.setParDeactivationDate(
                             paymentInstrument.getParDeactivationDate());
-                    tokenInstrument.setUpdatable(true);
-                    tokenInstrument.setNew(false);
                     tokensToUpdate.add(tokenInstrument);
                 }
             });
@@ -452,9 +434,6 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
 
                             tokenToUpdate.setParActivationDate(paymentInstrument.getParActivationDate());
                             tokenToUpdate.setParDeactivationDate(paymentInstrument.getParDeactivationDate());
-
-                            tokenToUpdate.setNew(false);
-                            tokenToUpdate.setUpdatable(true);
                             tokenToUpdate.setLastTkmUpdate(timestamp);
                             tokensToUpdate.add(tokenToUpdate);
                         }
@@ -473,9 +452,6 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
 
                             tokenToUpdate.setParActivationDate(paymentInstrument.getParActivationDate());
                             tokenToUpdate.setParDeactivationDate(paymentInstrument.getParDeactivationDate());
-
-                            tokenToUpdate.setNew(false);
-                            tokenToUpdate.setUpdatable(true);
                             tokenToUpdate.setLastTkmUpdate(timestamp);
                             tokensToUpdate.add(tokenToUpdate);
                         }
@@ -497,8 +473,6 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
                     tokenToInsert.setDeactivationDate(!htokenData.getHaction().equals("DELETE") ?
                             null : OffsetDateTime.now());
                     tokenToInsert.setLastTkmUpdate(paymentInstrument.getLastTkmUpdate());
-                    tokenToInsert.setNew(true);
-                    tokenToInsert.setUpdatable(false);
                     tokenToInsert.setLastTkmUpdate(timestamp);
                     tokensToInsert.add(tokenToInsert);
                 }

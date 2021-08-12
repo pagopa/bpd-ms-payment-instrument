@@ -60,8 +60,6 @@ public class PaymentInstrumentServiceImplTest {
     @MockBean
     private PaymentInstrumentErrorTokenDAO paymentInstrumentErrorTokenDAO;
     @MockBean
-    private PaymentInstrumentErrorDeleteDAO paymentInstrumentErrorDeleteDAOMock;
-    @MockBean
     private PaymentInstrumentHistoryReplicaDAO paymentInstrumentHistoryReplicaDAOMock;
     @Autowired
     private PaymentInstrumentService paymentInstrumentService;
@@ -727,8 +725,6 @@ public class PaymentInstrumentServiceImplTest {
                 null : tokenManagerData.getTimestamp().atOffset(
                 ZoneId.systemDefault().getRules().getOffset(Instant.now())));
         tokenToInsert.setLastTkmUpdate(paymentInstrument.getLastTkmUpdate());
-        tokenToInsert.setNew(true);
-        tokenToInsert.setUpdatable(false);
         return tokenToInsert;
     }
 

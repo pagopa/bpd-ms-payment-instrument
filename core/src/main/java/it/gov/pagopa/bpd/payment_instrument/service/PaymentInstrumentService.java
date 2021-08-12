@@ -3,7 +3,6 @@ package it.gov.pagopa.bpd.payment_instrument.service;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.PaymentInstrumentConverter;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.model.PaymentInstrument;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.model.PaymentInstrumentErrorDelete;
-import it.gov.pagopa.bpd.payment_instrument.connector.jpa.model.PaymentInstrumentErrorDelete;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.model.PaymentInstrumentErrorToken;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.model.PaymentInstrumentHistory;
 import it.gov.pagopa.bpd.payment_instrument.model.PaymentInstrumentServiceModel;
@@ -38,8 +37,6 @@ public interface PaymentInstrumentService {
 
     PaymentInstrumentHistory checkActivePar(String par, OffsetDateTime accountingDate);
 
-    PaymentInstrumentHistory checkActivePar(String par, OffsetDateTime accountingDate);
-
     PaymentInstrumentHistory checkActiveHpanPar(String par, OffsetDateTime accountingDate, String hpan);
 
     void reactivateForRollback(String fiscalCode, OffsetDateTime requestTimestamp);
@@ -55,12 +52,6 @@ public interface PaymentInstrumentService {
 
     PaymentInstrumentErrorDelete createDeleteErrorRecord(PaymentInstrumentErrorDelete errorRecord);
 
-
-
-    PaymentInstrumentErrorDelete createDeleteErrorRecord(PaymentInstrumentErrorDelete errorRecord);
-
     PaymentInstrumentErrorToken createTokenErrorRecord(PaymentInstrumentErrorToken errorRecord);
-
-    Boolean manageTokenData(TokenManagerData tokenManagerData);
 
 }
