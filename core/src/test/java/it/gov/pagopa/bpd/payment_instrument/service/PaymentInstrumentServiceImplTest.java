@@ -28,7 +28,10 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import javax.annotation.PostConstruct;
-import java.time.*;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.util.*;
 
 import static org.junit.Assert.*;
@@ -471,15 +474,15 @@ public class PaymentInstrumentServiceImplTest {
         PaymentInstrumentErrorDelete paymentInstrumentErrorDelete = new PaymentInstrumentErrorDelete();
         paymentInstrumentErrorDelete.setId("ID1");
         paymentInstrumentErrorDelete.setExceptionMessage("ExceptionMessage");
-        paymentInstrumentErrorDelete.setCancellationDate(OffsetDateTime.now().toString());
+        paymentInstrumentErrorDelete.setTimestamp(OffsetDateTime.now().toString());
         paymentInstrumentErrorDelete.setHpan("hpan");
-        paymentInstrumentErrorDelete.setFiscalCode("testFiscalCode");
+        paymentInstrumentErrorDelete.setTaxCode("testFiscalCode");
 
 
         PaymentInstrumentErrorDelete result = paymentInstrumentService
                 .createDeleteErrorRecord(paymentInstrumentErrorDelete);
         assertNotNull(result);
-        assertEquals("testFiscalCode", result.getFiscalCode());
+        assertEquals("testFiscalCode", result.getTaxCode());
         verify(paymentInstrumentErrorDeleteDAOMock, times(1)).save(any());
     }
 

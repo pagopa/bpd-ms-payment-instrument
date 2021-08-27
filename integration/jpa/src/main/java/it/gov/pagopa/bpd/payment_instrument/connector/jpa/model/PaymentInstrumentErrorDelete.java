@@ -7,7 +7,6 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import java.time.OffsetDateTime;
 
 @Entity
 @Data
@@ -26,10 +25,10 @@ public class PaymentInstrumentErrorDelete extends BaseEntity {
     String hpan;
 
     @Column(name = "fiscal_code_s")
-    String fiscalCode;
+    String taxCode;
 
     @Column(name = "cancellation_date_s")
-    String cancellationDate;
+    String timestamp;
 
     @Column(name = "exception_message_s")
     String exceptionMessage;

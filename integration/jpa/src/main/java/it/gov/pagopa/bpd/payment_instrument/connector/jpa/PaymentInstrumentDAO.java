@@ -2,15 +2,11 @@ package it.gov.pagopa.bpd.payment_instrument.connector.jpa;
 
 import it.gov.pagopa.bpd.common.connector.jpa.CrudJpaDAO;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.model.PaymentInstrument;
-import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.jpa.repository.QueryHints;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import javax.persistence.LockModeType;
-import javax.persistence.QueryHint;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -54,7 +50,11 @@ public interface PaymentInstrumentDAO extends CrudJpaDAO<PaymentInstrument, Stri
             @Param("fiscalCode") String fiscalCode,
             @Param("channel") String channel);
 
-    List<PaymentInstrument> findByHpanMasterOrHpan(String hpanMaster, String hpan);
+    @Query(nativeQuery = true, value = "SELECT * " +
+            "FROM bpd_payment_instrument p " +
+            "WHERE (hpan_s = :hpan OR hpan_master_s = :hpanMaster) " +
+            "AND enabled_b IS TRUE")
+    List<PaymentInstrument> findByHpanMasterOrHpan(@Param("hpanMaster") String hpanMaster, @Param("hpan") String hpan);
 
     @Query("select bpi from PaymentInstrument bpi " +
             "where bpi.par = :par "
@@ -83,5 +83,4 @@ public interface PaymentInstrumentDAO extends CrudJpaDAO<PaymentInstrument, Stri
     Optional<PaymentInstrument> findToken(
             @Param("htoken") String htoken
     );
-
 }

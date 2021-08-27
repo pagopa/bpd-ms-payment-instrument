@@ -2,10 +2,6 @@ package it.gov.pagopa.bpd.payment_instrument.service;
 
 import eu.sia.meda.service.BaseService;
 import it.gov.pagopa.bpd.payment_instrument.assembler.PaymentInstrumentAssembler;
-import it.gov.pagopa.bpd.payment_instrument.connector.jpa.PaymentInstrumentConverter;
-import it.gov.pagopa.bpd.payment_instrument.connector.jpa.PaymentInstrumentDAO;
-import it.gov.pagopa.bpd.payment_instrument.connector.jpa.PaymentInstrumentErrorDeleteDAO;
-import it.gov.pagopa.bpd.payment_instrument.connector.jpa.PaymentInstrumentHistoryReplicaDAO;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.*;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.model.PaymentInstrument;
 import it.gov.pagopa.bpd.payment_instrument.connector.jpa.model.PaymentInstrumentErrorDelete;
@@ -26,7 +22,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.*;
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -199,7 +197,7 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
     }
 
 //    @Override
-//    public void delete(String hpan, String fiscalCode, OffsetDateTime cancellationDate) {
+//    public void delete(String hpan, String fiscalCode, OffsetDateTime timestamp) {
 //
 //        List<PaymentInstrument> piList = paymentInstrumentDAO.findByHpanMasterOrHpan(hpan, hpan);
 //        if (piList == null || piList.isEmpty()) {
@@ -214,7 +212,19 @@ class PaymentInstrumentServiceImpl extends BaseService implements PaymentInstrum
     public void delete(String hpan, String fiscalCode, OffsetDateTime cancellationDate) {
         PaymentInstrument paymentInstrument = paymentInstrumentDAO.findById(hpan).orElseThrow(
                 () -> new PaymentInstrumentNotFoundException(hpan));
-        checkAndDelete(paymentInstrument, fiscalCode, cancellationDate);
+
+        if(paymentInstrument!=null
+                && (paymentInstrument.getHpanMaster() == null
+                    || !paymentInstrument.getHpan().equals(paymentInstrument.getHpanMaster()))){
+            checkAndDelete(paymentInstrument, fiscalCode, cancellationDate);
+
+        }else{
+            List<PaymentInstrument> paymentInstrumentList = paymentInstrumentDAO.findByHpanMasterOrHpan(hpan,hpan);
+
+            if(paymentInstrumentList!=null && !paymentInstrumentList.isEmpty()){
+                paymentInstrumentList.stream().forEach(p -> checkAndDelete(p, fiscalCode, cancellationDate));
+            }
+        }
     }
 
     @Override

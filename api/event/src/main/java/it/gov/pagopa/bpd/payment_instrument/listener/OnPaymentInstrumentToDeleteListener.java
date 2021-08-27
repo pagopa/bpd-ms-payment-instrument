@@ -2,7 +2,6 @@ package it.gov.pagopa.bpd.payment_instrument.listener;
 
 import eu.sia.meda.eventlistener.BaseConsumerAwareEventListener;
 import it.gov.pagopa.bpd.payment_instrument.command.DeletePaymentInstrumentCommand;
-import it.gov.pagopa.bpd.payment_instrument.command.FilterTransactionCommand;
 import it.gov.pagopa.bpd.payment_instrument.listener.factory.DeletePaymentInstrumentErrorModelFactory;
 import it.gov.pagopa.bpd.payment_instrument.listener.factory.DeletePaymentInstrumentModelFactory;
 import it.gov.pagopa.bpd.payment_instrument.model.DeletePaymentInstrumentCommandModel;
@@ -83,6 +82,10 @@ public class OnPaymentInstrumentToDeleteListener extends BaseConsumerAwareEventL
             }
 
         } catch (Exception e) {
+
+            if (logger.isErrorEnabled()) {
+                logger.error("Something gone wrong deleting payment instrument", e);
+            }
 
             String payloadString = "null";
             String error = "Unexpected error during message processing";
